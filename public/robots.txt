@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Block crawlers from demo data endpoints
+Disallow: /data/

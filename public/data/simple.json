@@ -1,0 +1,47 @@
+{
+    "name": "Simple linear history",
+    "exportedAt": "2024-01-01T00:00:00Z",
+    "version": "1.0.0",
+    "defaultBranch": "main",
+    "refs": {
+        "main": "000004"
+    },
+    "commits": [
+        {
+            "sha": "000001",
+            "parents": [],
+            "author": "Alice",
+            "date": "2024-01-01T10:00:00Z",
+            "subject": "Initial commit",
+            "additions": 50,
+            "deletions": 0
+        },
+        {
+            "sha": "000002",
+            "parents": ["000001"],
+            "author": "Bob",
+            "date": "2024-01-02T11:00:00Z",
+            "subject": "Add project structure",
+            "additions": 120,
+            "deletions": 10
+        },
+        {
+            "sha": "000003",
+            "parents": ["000002"],
+            "author": "Alice",
+            "date": "2024-01-03T12:00:00Z",
+            "subject": "Add README",
+            "additions": 30,
+            "deletions": 0
+        },
+        {
+            "sha": "000004",
+            "parents": ["000003"],
+            "author": "Bob",
+            "date": "2024-01-04T13:00:00Z",
+            "subject": "Add LICENSE",
+            "additions": 25,
+            "deletions": 0
+        }
+    ]
+}

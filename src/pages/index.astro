@@ -1,0 +1,1221 @@
+---
+import "@styles/global.css";
+
+const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
+const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<meta
+			name="description"
+			content="Visualize your Git commit history as a beautiful interactive graph. Understand branches, merges, and project evolution at a glance."
+		/>
+		<link rel="canonical" href="https://gitsonar.jonathanrreed.com/" />
+		<title>Git Sonar - Visualize Git History</title>
+		{analyticsDomain && (
+			<script defer data-domain={analyticsDomain} src={analyticsSrc}></script>
+		)}
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://gitsonar.jonathanrreed.com/" />
+		<meta property="og:title" content="Git Sonar - Visualize Git History" />
+		<meta
+			property="og:description"
+			content="See your commits, branches, and merges as a beautiful interactive graph. 100% private, runs in your browser."
+		/>
+		<meta property="og:image" content="/og-image.svg" />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://gitsonar.jonathanrreed.com/" />
+		<meta
+			property="twitter:title"
+			content="Git Sonar - Visualize Git History"
+		/>
+		<meta
+			property="twitter:description"
+			content="See your commits, branches, and merges as a beautiful interactive graph. 100% private, runs in your browser."
+		/>
+		<meta property="twitter:image" content="/og-image.svg" />
+
+		<!-- JSON-LD Structured Data -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "SoftwareApplication",
+				"name": "Git Sonar",
+				"applicationCategory": "DeveloperApplication",
+				"operatingSystem": "Web Browser",
+				"description": "Visualize your Git commit history as a beautiful interactive graph. Understand branches, merges, and project evolution at a glance.",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "USD"
+				},
+				"featureList": [
+					"Interactive 2D graph visualization",
+					"100% browser-based, no server required",
+					"Keyboard-first navigation",
+					"Screen reader accessible",
+					"Import from GitHub, GitLab, Bitbucket, or ZIP",
+					"Poster-ready SVG/PDF exports"
+				]
+			}
+		</script>
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<div class="landing">
+			<!-- Animated background -->
+			<div class="bg-effects">
+				<div class="bg-gradient"></div>
+				<div class="bg-grid"></div>
+				<div class="bg-glow bg-glow--1"></div>
+				<div class="bg-glow bg-glow--2"></div>
+			</div>
+
+			<!-- Navigation -->
+			<nav class="nav">
+				<a href="/" class="nav__logo">
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<circle cx="12" cy="6" r="3"></circle>
+						<circle cx="6" cy="18" r="3"></circle>
+						<circle cx="18" cy="18" r="3"></circle>
+						<path d="M12 9v3m-3 3l3-3m3 3l-3-3"></path>
+					</svg>
+					<span>Git Sonar</span>
+				</a>
+				<div class="nav__links">
+					<a
+						href="https://github.com/git-sonar/git-sonar"
+						target="_blank"
+						rel="noopener"
+						class="nav__link nav__link--github"
+					>
+						<svg
+							viewBox="0 0 24 24"
+							fill="currentColor"
+							width="18"
+							height="18"
+						>
+							<path
+								d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+							></path>
+						</svg>
+						GitHub
+					</a>
+					<a href="/app" class="nav__cta">Open App</a>
+				</div>
+			</nav>
+
+			<!-- Hero -->
+			<main class="hero">
+				<div class="hero__content">
+					<div class="hero__badge">
+						<span class="pulse"></span>
+						100% Private • Runs in Browser
+					</div>
+					<h1 class="hero__title">
+						Visualize your
+						<span class="hero__title--accent">Git history</span>
+					</h1>
+					<p class="hero__subtitle">
+						See commits, branches, and merges as a beautiful
+						interactive graph. Understand your project's evolution
+						at a glance.
+					</p>
+					<div class="hero__actions">
+						<a href="/app" class="btn btn--primary btn--lg">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M5 12h14m-7-7l7 7-7 7"></path>
+							</svg>
+							Launch App
+						</a>
+						<a href="#features" class="btn btn--ghost btn--lg">
+							Learn More
+						</a>
+					</div>
+					<div class="hero__tech">
+						<span class="tech-badge">Astro</span>
+						<span class="tech-badge">React</span>
+						<span class="tech-badge">Canvas 2D</span>
+					</div>
+				</div>
+
+				<!-- Animated hero graphic -->
+				<div class="hero__graphic">
+					<div class="graph-container">
+						<svg
+							class="graph-demo"
+							viewBox="0 0 400 320"
+							fill="none"
+							id="hero-graph"
+						>
+							<!-- Glow filters -->
+							<defs>
+								<filter
+									id="glow-foam"
+									x="-50%"
+									y="-50%"
+									width="200%"
+									height="200%"
+								>
+									<feGaussianBlur
+										stdDeviation="4"
+										result="coloredBlur"></feGaussianBlur>
+									<feMerge>
+										<feMergeNode in="coloredBlur"
+										></feMergeNode>
+										<feMergeNode in="SourceGraphic"
+										></feMergeNode>
+									</feMerge>
+								</filter>
+								<filter
+									id="glow-iris"
+									x="-50%"
+									y="-50%"
+									width="200%"
+									height="200%"
+								>
+									<feGaussianBlur
+										stdDeviation="4"
+										result="coloredBlur"></feGaussianBlur>
+									<feMerge>
+										<feMergeNode in="coloredBlur"
+										></feMergeNode>
+										<feMergeNode in="SourceGraphic"
+										></feMergeNode>
+									</feMerge>
+								</filter>
+								<filter
+									id="glow-gold"
+									x="-50%"
+									y="-50%"
+									width="200%"
+									height="200%"
+								>
+									<feGaussianBlur
+										stdDeviation="4"
+										result="coloredBlur"></feGaussianBlur>
+									<feMerge>
+										<feMergeNode in="coloredBlur"
+										></feMergeNode>
+										<feMergeNode in="SourceGraphic"
+										></feMergeNode>
+									</feMerge>
+								</filter>
+							</defs>
+
+							<!-- Animated edges with dasharray -->
+							<g class="edges">
+								<path
+									class="edge edge--foam"
+									d="M200 52 L200 88"
+									stroke="#9ccfd8"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--foam"
+									d="M200 112 L200 148"
+									stroke="#9ccfd8"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--iris"
+									d="M200 112 C200 136 120 136 120 148"
+									stroke="#c4a7e7"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--gold"
+									d="M200 112 C200 136 280 136 280 148"
+									stroke="#f6c177"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--foam"
+									d="M200 172 L200 208"
+									stroke="#9ccfd8"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--iris"
+									d="M120 172 C120 196 200 196 200 208"
+									stroke="#c4a7e7"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--gold"
+									d="M280 172 C280 196 200 196 200 208"
+									stroke="#f6c177"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--iris"
+									d="M120 172 L120 248"
+									stroke="#c4a7e7"
+									stroke-width="2.5"></path>
+								<path
+									class="edge edge--gold"
+									d="M280 172 L280 248"
+									stroke="#f6c177"
+									stroke-width="2.5"></path>
+							</g>
+
+							<!-- Animated nodes -->
+							<g class="nodes">
+								<circle
+									class="node node--1"
+									cx="200"
+									cy="40"
+									r="12"
+									fill="#9ccfd8"
+									filter="url(#glow-foam)"></circle>
+								<circle
+									class="node node--2"
+									cx="200"
+									cy="100"
+									r="12"
+									fill="#9ccfd8"
+									filter="url(#glow-foam)"></circle>
+								<circle
+									class="node node--3"
+									cx="120"
+									cy="160"
+									r="12"
+									fill="#c4a7e7"
+									filter="url(#glow-iris)"></circle>
+								<circle
+									class="node node--4"
+									cx="200"
+									cy="160"
+									r="12"
+									fill="#9ccfd8"
+									filter="url(#glow-foam)"></circle>
+								<circle
+									class="node node--5"
+									cx="280"
+									cy="160"
+									r="12"
+									fill="#f6c177"
+									filter="url(#glow-gold)"></circle>
+								<polygon
+									class="node node--6 node--merge"
+									points="200,208 215,220 200,232 185,220"
+									fill="#9ccfd8"
+									filter="url(#glow-foam)"></polygon>
+								<circle
+									class="node node--7"
+									cx="120"
+									cy="260"
+									r="10"
+									fill="#c4a7e7"
+									filter="url(#glow-iris)"></circle>
+								<circle
+									class="node node--8"
+									cx="280"
+									cy="260"
+									r="10"
+									fill="#f6c177"
+									filter="url(#glow-gold)"></circle>
+							</g>
+
+							<!-- Branch labels -->
+							<g class="labels">
+								<rect
+									x="176"
+									y="6"
+									width="48"
+									height="18"
+									rx="4"
+									fill="#26233a"
+									stroke="#9ccfd8"
+									stroke-width="1"></rect>
+								<text
+									x="200"
+									y="18"
+									text-anchor="middle"
+									fill="#9ccfd8"
+									font-size="10"
+									font-weight="600">main</text
+								>
+
+								<rect
+									x="83"
+									y="128"
+									width="75"
+									height="16"
+									rx="4"
+									fill="#26233a"
+									stroke="#c4a7e7"
+									stroke-width="1"></rect>
+								<text
+									x="120"
+									y="140"
+									text-anchor="middle"
+									fill="#c4a7e7"
+									font-size="9">feature-auth</text
+								>
+
+								<rect
+									x="240"
+									y="128"
+									width="80"
+									height="16"
+									rx="4"
+									fill="#26233a"
+									stroke="#f6c177"
+									stroke-width="1"></rect>
+								<text
+									x="280"
+									y="140"
+									text-anchor="middle"
+									fill="#f6c177"
+									font-size="9">feature-api</text
+								>
+							</g>
+						</svg>
+					</div>
+				</div>
+			</main>
+
+			<!-- Features -->
+			<section id="features" class="features">
+				<h2 class="section-title">Why Git Sonar?</h2>
+				<div class="feature-grid">
+					<div class="feature glass-card">
+						<div class="feature__icon feature__icon--foam">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M12 3v18m9-9H3"></path>
+							</svg>
+						</div>
+						<h3>No Setup Required</h3>
+						<p>
+							Import from GitHub or drop a .git.zip file.
+							No CLI tools, no configuration.
+						</p>
+					</div>
+
+					<div class="feature glass-card">
+						<div class="feature__icon feature__icon--iris">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<circle cx="11" cy="11" r="8"></circle>
+								<path d="M21 21l-4.35-4.35"></path>
+							</svg>
+						</div>
+						<h3>Search & Filter</h3>
+						<p>
+							Find any commit by message, author, or SHA. Filter
+							your history to focus on what matters.
+						</p>
+					</div>
+
+					<div class="feature glass-card">
+						<div class="feature__icon feature__icon--gold">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<rect x="3" y="3" width="18" height="18" rx="2"
+								></rect>
+								<path d="M9 9h6v6H9z"></path>
+							</svg>
+						</div>
+						<h3>Beautiful Visualization</h3>
+						<p>
+							Clean vertical layout with smooth animations.
+							Distinct shapes for merges and branch points.
+						</p>
+					</div>
+
+					<div class="feature glass-card">
+						<div class="feature__icon feature__icon--love">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path
+									d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+								></path>
+							</svg>
+						</div>
+						<h3>100% Private</h3>
+						<p>
+							Everything runs in your browser. Your code never
+							touches our servers.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<!-- How it works -->
+			<section class="how-it-works">
+				<h2 class="section-title">Get Started in Seconds</h2>
+				<div class="steps">
+					<div class="step glass-card">
+						<div class="step__number">1</div>
+						<div class="step__content">
+							<h3>Open the app</h3>
+							<p>Click "Launch App" above or go to /app</p>
+						</div>
+					</div>
+					<div class="step glass-card">
+						<div class="step__number">2</div>
+						<div class="step__content">
+							<h3>Import your repo</h3>
+							<p>
+								Enter a GitHub URL or drop a .git.zip file
+							</p>
+						</div>
+					</div>
+					<div class="step glass-card">
+						<div class="step__number">3</div>
+						<div class="step__content">
+							<h3>Explore history</h3>
+							<p>
+								Pan, zoom, click commits, and search your
+								history
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="cta-section">
+					<a href="/app" class="btn btn--primary btn--lg">
+						Try It Now
+					</a>
+				</div>
+			</section>
+
+			<!-- Footer -->
+			<footer class="footer">
+				<p>
+					Built with
+					<a href="https://astro.build" target="_blank" rel="noopener"
+						>Astro</a
+					>,
+					<a href="https://react.dev" target="_blank" rel="noopener"
+						>React</a
+					>, and Canvas. Open source.
+				</p>
+				<p class="footer__copyright">© 2026 Git Sonar</p>
+			</footer>
+		</div>
+
+		<style>
+			/* Base */
+			.landing {
+				min-height: 100vh;
+				background: var(--rp-base);
+				color: var(--rp-text);
+				position: relative;
+				overflow-x: hidden;
+			}
+
+			/* Animated background effects */
+			.bg-effects {
+				position: fixed;
+				inset: 0;
+				pointer-events: none;
+				z-index: 0;
+				overflow: hidden;
+			}
+
+			.bg-gradient {
+				position: absolute;
+				inset: 0;
+				background: radial-gradient(
+					ellipse 80% 50% at 50% -20%,
+					rgba(156, 207, 216, 0.1),
+					transparent
+				);
+			}
+
+			.bg-grid {
+				position: absolute;
+				inset: 0;
+				background-image:
+					linear-gradient(
+						rgba(156, 207, 216, 0.03) 1px,
+						transparent 1px
+					),
+					linear-gradient(
+						90deg,
+						rgba(156, 207, 216, 0.03) 1px,
+						transparent 1px
+					);
+				background-size: 60px 60px;
+				mask: linear-gradient(
+					to bottom,
+					transparent,
+					black 20%,
+					black 80%,
+					transparent
+				);
+			}
+
+			.bg-glow {
+				position: absolute;
+				width: 600px;
+				height: 600px;
+				border-radius: 50%;
+				filter: blur(120px);
+				opacity: 0.4;
+				animation: float-glow 15s ease-in-out infinite;
+			}
+
+			.bg-glow--1 {
+				top: -200px;
+				right: -100px;
+				background: var(--rp-foam);
+				opacity: 0.15;
+			}
+
+			.bg-glow--2 {
+				bottom: -200px;
+				left: -100px;
+				background: var(--rp-iris);
+				opacity: 0.1;
+				animation-delay: -7s;
+			}
+
+			@keyframes float-glow {
+				0%,
+				100% {
+					transform: translate(0, 0) scale(1);
+				}
+				50% {
+					transform: translate(30px, -30px) scale(1.1);
+				}
+			}
+
+			/* Navigation */
+			.nav {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 1rem 2rem;
+				max-width: 1200px;
+				margin: 0 auto;
+				position: relative;
+				z-index: 10;
+			}
+
+			.nav__logo {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				text-decoration: none;
+				color: var(--rp-text);
+				font-weight: 600;
+				font-size: 1.1rem;
+				transition: transform 0.2s;
+			}
+
+			.nav__logo:hover {
+				transform: translateY(-1px);
+			}
+
+			.nav__logo svg {
+				width: 24px;
+				height: 24px;
+				color: var(--rp-foam);
+			}
+
+			.nav__links {
+				display: flex;
+				align-items: center;
+				gap: 1.5rem;
+			}
+
+			.nav__link {
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+				color: var(--rp-subtle);
+				text-decoration: none;
+				font-size: 0.9rem;
+				transition: all 0.15s;
+			}
+
+			.nav__link svg {
+				width: 18px;
+				height: 18px;
+			}
+
+			.nav__link:hover {
+				color: var(--rp-text);
+			}
+
+			.nav__cta {
+				padding: 0.5rem 1rem;
+				background: var(--rp-surface);
+				color: var(--rp-text);
+				text-decoration: none;
+				border-radius: 6px;
+				font-size: 0.9rem;
+				font-weight: 500;
+				border: 1px solid var(--rp-highlight-med);
+				transition: all 0.15s;
+			}
+
+			.nav__cta:hover {
+				background: var(--rp-overlay);
+				border-color: var(--rp-foam);
+			}
+
+			/* Hero */
+			.hero {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 4rem;
+				align-items: center;
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 4rem 2rem 6rem;
+				position: relative;
+				z-index: 1;
+			}
+
+			.hero__badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.4rem 0.9rem;
+				background: rgba(156, 207, 216, 0.1);
+				border: 1px solid rgba(156, 207, 216, 0.2);
+				border-radius: 100px;
+				font-size: 0.8rem;
+				color: var(--rp-foam);
+				margin-bottom: 1.5rem;
+				animation: fadeInUp 0.6s ease-out;
+			}
+
+			.pulse {
+				width: 8px;
+				height: 8px;
+				background: var(--rp-foam);
+				border-radius: 50%;
+				animation: pulse 2s ease-in-out infinite;
+			}
+
+			@keyframes pulse {
+				0%,
+				100% {
+					opacity: 1;
+					transform: scale(1);
+				}
+				50% {
+					opacity: 0.5;
+					transform: scale(1.2);
+				}
+			}
+
+			.hero__title {
+				font-size: 3.5rem;
+				font-weight: 700;
+				line-height: 1.1;
+				margin: 0 0 1.5rem;
+				animation: fadeInUp 0.6s ease-out 0.1s both;
+			}
+
+			.hero__title--accent {
+				display: block;
+				background: linear-gradient(
+					135deg,
+					var(--rp-foam),
+					var(--rp-iris)
+				);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.hero__subtitle {
+				font-size: 1.2rem;
+				color: var(--rp-subtle);
+				line-height: 1.6;
+				margin: 0 0 2rem;
+				max-width: 480px;
+				animation: fadeInUp 0.6s ease-out 0.2s both;
+			}
+
+			.hero__actions {
+				display: flex;
+				gap: 1rem;
+				animation: fadeInUp 0.6s ease-out 0.3s both;
+			}
+
+			.hero__tech {
+				display: flex;
+				gap: 0.5rem;
+				margin-top: 2rem;
+				animation: fadeInUp 0.6s ease-out 0.4s both;
+			}
+
+			.tech-badge {
+				padding: 0.3rem 0.7rem;
+				background: var(--rp-surface);
+				border: 1px solid var(--rp-highlight-low);
+				border-radius: 4px;
+				font-size: 0.75rem;
+				color: var(--rp-muted);
+				font-family: var(--font-mono);
+			}
+
+			@keyframes fadeInUp {
+				from {
+					opacity: 0;
+					transform: translateY(20px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.hero__graphic {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				animation: fadeInUp 0.8s ease-out 0.2s both;
+			}
+
+			.graph-container {
+				position: relative;
+				padding: 1.5rem;
+				background: rgba(31, 29, 46, 0.6);
+				border: 1px solid var(--rp-highlight-low);
+				border-radius: 16px;
+				backdrop-filter: blur(20px);
+				box-shadow:
+					0 0 0 1px rgba(156, 207, 216, 0.05),
+					0 20px 50px -10px rgba(0, 0, 0, 0.4);
+			}
+
+			.graph-demo {
+				width: 100%;
+				max-width: 400px;
+				display: block;
+			}
+
+			/* Animated nodes */
+			.nodes .node {
+				animation: nodeAppear 0.5s ease-out both;
+			}
+
+			.node--1 {
+				animation-delay: 0.2s;
+			}
+			.node--2 {
+				animation-delay: 0.4s;
+			}
+			.node--3 {
+				animation-delay: 0.6s;
+			}
+			.node--4 {
+				animation-delay: 0.6s;
+			}
+			.node--5 {
+				animation-delay: 0.6s;
+			}
+			.node--6 {
+				animation-delay: 0.8s;
+			}
+			.node--7 {
+				animation-delay: 1s;
+			}
+			.node--8 {
+				animation-delay: 1s;
+			}
+
+			@keyframes nodeAppear {
+				from {
+					opacity: 0;
+					transform: scale(0);
+				}
+				to {
+					opacity: 1;
+					transform: scale(1);
+				}
+			}
+
+			/* Animated edges */
+			.edges .edge {
+				stroke-dasharray: 200;
+				stroke-dashoffset: 200;
+				animation: edgeDraw 1s ease-out forwards;
+			}
+
+			.edge--foam {
+				animation-delay: 0.3s;
+			}
+			.edge--iris {
+				animation-delay: 0.5s;
+			}
+			.edge--gold {
+				animation-delay: 0.5s;
+			}
+
+			@keyframes edgeDraw {
+				to {
+					stroke-dashoffset: 0;
+				}
+			}
+
+			/* Labels animation */
+			.labels rect,
+			.labels text {
+				animation: fadeIn 0.4s ease-out both;
+				animation-delay: 1.2s;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+
+			/* Buttons */
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.75rem 1.25rem;
+				border: none;
+				border-radius: 8px;
+				font-size: 0.95rem;
+				font-weight: 500;
+				text-decoration: none;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+
+			.btn svg {
+				width: 18px;
+				height: 18px;
+			}
+
+			.btn--lg {
+				padding: 1rem 1.75rem;
+				font-size: 1rem;
+			}
+
+			.btn--primary {
+				background: linear-gradient(
+					135deg,
+					var(--rp-foam),
+					var(--rp-iris)
+				);
+				color: var(--rp-base);
+				box-shadow: 0 4px 15px rgba(156, 207, 216, 0.3);
+			}
+
+			.btn--primary:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 8px 25px rgba(156, 207, 216, 0.4);
+			}
+
+			.btn--ghost {
+				background: transparent;
+				color: var(--rp-subtle);
+				border: 1px solid var(--rp-highlight-med);
+			}
+
+			.btn--ghost:hover {
+				border-color: var(--rp-subtle);
+				color: var(--rp-text);
+				background: rgba(255, 255, 255, 0.03);
+			}
+
+			/* Glass card effect */
+			.glass-card {
+				background: rgba(31, 29, 46, 0.5);
+				border: 1px solid var(--rp-highlight-low);
+				backdrop-filter: blur(10px);
+				transition: all 0.3s ease;
+			}
+
+			.glass-card:hover {
+				background: rgba(38, 35, 58, 0.6);
+				border-color: var(--rp-highlight-med);
+				transform: translateY(-4px);
+				box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.3);
+			}
+
+			/* Sections */
+			.section-title {
+				text-align: center;
+				font-size: 2rem;
+				font-weight: 600;
+				margin: 0 0 3rem;
+			}
+
+			/* Features */
+			.features {
+				padding: 6rem 2rem;
+				position: relative;
+				z-index: 1;
+			}
+
+			.feature-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+				gap: 1.5rem;
+				max-width: 1000px;
+				margin: 0 auto;
+			}
+
+			.feature {
+				padding: 1.75rem;
+				border-radius: 16px;
+				text-align: center;
+			}
+
+			.feature__icon {
+				width: 56px;
+				height: 56px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: 0 auto 1.25rem;
+				border-radius: 14px;
+			}
+
+			.feature__icon svg {
+				width: 26px;
+				height: 26px;
+			}
+
+			.feature__icon--foam {
+				background: rgba(156, 207, 216, 0.15);
+				color: var(--rp-foam);
+			}
+
+			.feature__icon--iris {
+				background: rgba(196, 167, 231, 0.15);
+				color: var(--rp-iris);
+			}
+
+			.feature__icon--gold {
+				background: rgba(246, 193, 119, 0.15);
+				color: var(--rp-gold);
+			}
+
+			.feature__icon--love {
+				background: rgba(235, 111, 146, 0.15);
+				color: var(--rp-love);
+			}
+
+			.feature h3 {
+				margin: 0 0 0.5rem;
+				font-size: 1.1rem;
+				font-weight: 600;
+			}
+
+			.feature p {
+				margin: 0;
+				color: var(--rp-subtle);
+				font-size: 0.9rem;
+				line-height: 1.6;
+			}
+
+			/* How it works */
+			.how-it-works {
+				padding: 6rem 2rem;
+				max-width: 800px;
+				margin: 0 auto;
+				position: relative;
+				z-index: 1;
+			}
+
+			.steps {
+				display: flex;
+				flex-direction: column;
+				gap: 1.25rem;
+				margin-bottom: 3rem;
+			}
+
+			.step {
+				display: flex;
+				align-items: flex-start;
+				gap: 1.5rem;
+				padding: 1.25rem 1.5rem;
+				border-radius: 12px;
+			}
+
+			.step__number {
+				width: 44px;
+				height: 44px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: linear-gradient(
+					135deg,
+					var(--rp-foam),
+					var(--rp-iris)
+				);
+				color: var(--rp-base);
+				border-radius: 12px;
+				font-weight: 700;
+				font-size: 1.1rem;
+				flex-shrink: 0;
+			}
+
+			.step__content h3 {
+				margin: 0 0 0.25rem;
+				font-size: 1.1rem;
+				font-weight: 600;
+			}
+
+			.step__content p {
+				margin: 0;
+				color: var(--rp-subtle);
+				font-size: 0.95rem;
+			}
+
+			.cta-section {
+				text-align: center;
+			}
+
+			/* Footer */
+			.footer {
+				padding: 3rem 2rem;
+				text-align: center;
+				border-top: 1px solid var(--rp-highlight-low);
+				position: relative;
+				z-index: 1;
+			}
+
+			.footer p {
+				margin: 0;
+				color: var(--rp-muted);
+				font-size: 0.9rem;
+			}
+
+			.footer a {
+				color: var(--rp-subtle);
+				text-decoration: none;
+				transition: color 0.15s;
+			}
+
+			.footer a:hover {
+				color: var(--rp-foam);
+			}
+
+			.footer__copyright {
+				margin-top: 0.5rem !important;
+				font-size: 0.8rem !important;
+			}
+
+			/* Responsive */
+			@media (max-width: 768px) {
+				.hero {
+					grid-template-columns: 1fr;
+					text-align: center;
+					padding: 2rem;
+					gap: 3rem;
+				}
+
+				.hero__title {
+					font-size: 2.5rem;
+				}
+
+				.hero__subtitle {
+					margin-left: auto;
+					margin-right: auto;
+				}
+
+				.hero__actions {
+					justify-content: center;
+					flex-wrap: wrap;
+				}
+
+				.hero__tech {
+					justify-content: center;
+				}
+
+				.hero__graphic {
+					order: -1;
+				}
+
+				.graph-container {
+					padding: 1rem;
+				}
+
+				.graph-demo {
+					max-width: 280px;
+				}
+
+				.nav {
+					padding: 1rem;
+				}
+
+				.nav__links {
+					gap: 0.75rem;
+				}
+
+				.hero__badge {
+					font-size: 0.75rem;
+				}
+
+				.feature-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* Smooth scroll */
+			html {
+				scroll-behavior: smooth;
+			}
+
+			/* Respect reduced motion */
+			@media (prefers-reduced-motion: reduce) {
+				.bg-glow,
+				.pulse,
+				.nodes .node,
+				.edges .edge,
+				.labels rect,
+				.labels text {
+					animation: none !important;
+				}
+
+				.edges .edge {
+					stroke-dasharray: none;
+					stroke-dashoffset: 0;
+				}
+			}
+		</style>
+	</body>
+</html>

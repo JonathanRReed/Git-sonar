@@ -1,0 +1,82 @@
+{
+    "name": "Branching history",
+    "exportedAt": "2024-01-01T00:00:00Z",
+    "version": "1.0.0",
+    "defaultBranch": "main",
+    "refs": {
+        "main": "000009",
+        "feature-auth": "000007",
+        "feature-ui": "000008"
+    },
+    "commits": [
+        {
+            "sha": "000001",
+            "parents": [],
+            "author": "Alice",
+            "date": "2024-01-01T10:00:00Z",
+            "subject": "Initial commit"
+        },
+        {
+            "sha": "000002",
+            "parents": ["000001"],
+            "author": "Bob",
+            "date": "2024-01-02T11:00:00Z",
+            "subject": "Add project structure"
+        },
+        {
+            "sha": "000003",
+            "parents": ["000002"],
+            "author": "Alice",
+            "date": "2024-01-03T12:00:00Z",
+            "subject": "Setup database"
+        },
+        {
+            "sha": "000004",
+            "parents": ["000003"],
+            "author": "Charlie",
+            "date": "2024-01-04T13:00:00Z",
+            "subject": "Start feature-auth",
+            "branchHints": ["feature-auth"]
+        },
+        {
+            "sha": "000005",
+            "parents": ["000004"],
+            "author": "Charlie",
+            "date": "2024-01-05T14:00:00Z",
+            "subject": "Add login form",
+            "branchHints": ["feature-auth"]
+        },
+        {
+            "sha": "000006",
+            "parents": ["000003"],
+            "author": "Diana",
+            "date": "2024-01-05T15:00:00Z",
+            "subject": "Start feature-ui",
+            "branchHints": ["feature-ui"]
+        },
+        {
+            "sha": "000007",
+            "parents": ["000005"],
+            "author": "Charlie",
+            "date": "2024-01-06T16:00:00Z",
+            "subject": "Complete auth flow",
+            "branchHints": ["feature-auth"]
+        },
+        {
+            "sha": "000008",
+            "parents": ["000006"],
+            "author": "Diana",
+            "date": "2024-01-07T17:00:00Z",
+            "subject": "Add button styles",
+            "branchHints": ["feature-ui"]
+        },
+        {
+            "sha": "000009",
+            "parents": ["000008", "000007"],
+            "author": "Alice",
+            "date": "2024-01-08T18:00:00Z",
+            "subject": "Merge feature branches",
+            "branchHints": ["main"]
+        }
+    ]
+}

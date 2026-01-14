@@ -1,0 +1,113 @@
+.timeline-scrubber {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(to top, var(--rp-base) 80%, transparent);
+    z-index: 5;
+}
+
+.timeline-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--rp-subtle);
+}
+
+.timeline-time {
+    font-weight: 500;
+    color: var(--rp-text);
+}
+
+.timeline-progress {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--rp-foam);
+}
+
+.timeline-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--rp-highlight-med);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.timeline-slider:hover {
+    background: var(--rp-iris);
+}
+
+.timeline-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--rp-foam);
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(156, 207, 216, 0.4);
+    transition: all 0.2s;
+}
+
+.timeline-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(156, 207, 216, 0.5);
+}
+
+.timeline-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.15);
+}
+
+.timeline-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--rp-foam);
+    border: none;
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(156, 207, 216, 0.4);
+    transition: all 0.2s;
+}
+
+.timeline-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+}
+
+.timeline-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--rp-muted);
+}
+
+@media (max-width: 768px) {
+    .timeline-scrubber {
+        padding: 0.75rem 1rem;
+    }
+
+    .timeline-info {
+        font-size: 0.8rem;
+    }
+
+    .timeline-slider {
+        height: 5px;
+    }
+
+    .timeline-slider::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+    }
+
+    .timeline-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+    }
+}

@@ -1,0 +1,222 @@
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--rp-highlight-low) 0%,
+        var(--rp-overlay) 50%,
+        var(--rp-highlight-low) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.commit-item.skeleton-item {
+    opacity: 0.7;
+}
+
+.skeleton-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--rp-highlight-med);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-message {
+    height: 14px;
+    border-radius: 4px;
+    width: 70%;
+}
+
+.skeleton-meta {
+    height: 12px;
+    border-radius: 4px;
+    width: 40%;
+}
+
+.skeleton-value {
+    display: block;
+    height: 22px;
+    border-radius: 4px;
+    width: 40px;
+}
+
+.skeleton-label {
+    display: block;
+    height: 14px;
+    border-radius: 4px;
+    width: 50px;
+}
+
+.graph-skeleton {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.graph-skeleton__lane {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.lane-1 {
+    margin-left: 0;
+}
+
+.lane-2 {
+    margin-left: 3rem;
+}
+
+.lane-3 {
+    margin-left: 6rem;
+}
+
+.skeleton-node {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--rp-highlight-med);
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-node--merge {
+    transform: rotate(45deg);
+    border-radius: 4px;
+}
+
+.skeleton-edge {
+    position: absolute;
+    height: 2px;
+    background: var(--rp-highlight-low);
+}
+
+.skeleton-edge--diagonal {
+    width: 100px;
+    transform: rotate(-15deg);
+    top: 50%;
+    left: -20px;
+}
+
+@keyframes skeleton-pulse {
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.error-boundary {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rp-base);
+    padding: 2rem;
+    z-index: 9999;
+}
+
+.error-boundary__content {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    padding: 2.5rem;
+    background: var(--rp-surface);
+    border: 2px solid var(--rp-love);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(235, 111, 146, 0.3);
+}
+
+.error-boundary__icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.error-boundary__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--rp-text);
+    margin: 0 0 1rem;
+}
+
+.error-boundary__message {
+    color: var(--rp-subtle);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
+}
+
+.error-boundary__details {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+.error-boundary__details summary {
+    cursor: pointer;
+    color: var(--rp-muted);
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    background: var(--rp-overlay);
+    border-radius: 6px;
+}
+
+.error-boundary__details summary:hover {
+    color: var(--rp-subtle);
+}
+
+.error-boundary__stack {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--rp-base);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--rp-love);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.error-boundary__button {
+    padding: 0.75rem 2rem;
+    background: var(--rp-love);
+    color: var(--rp-base);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.error-boundary__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(235, 111, 146, 0.4);
+}
