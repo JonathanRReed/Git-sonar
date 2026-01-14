@@ -1,0 +1,140 @@
+{
+    "name": "Complex branching history",
+    "exportedAt": "2024-01-01T00:00:00Z",
+    "version": "1.0.0",
+    "defaultBranch": "main",
+    "refs": {
+        "main": "000016",
+        "feature-api": "000012",
+        "feature-auth": "000014",
+        "feature-dashboard": "000015",
+        "bugfix/login": "000013"
+    },
+    "commits": [
+        {
+            "sha": "000001",
+            "parents": [],
+            "author": "Alice",
+            "date": "2024-01-01T10:00:00Z",
+            "subject": "Initial commit"
+        },
+        {
+            "sha": "000002",
+            "parents": ["000001"],
+            "author": "Bob",
+            "date": "2024-01-02T11:00:00Z",
+            "subject": "Add project structure"
+        },
+        {
+            "sha": "000003",
+            "parents": ["000002"],
+            "author": "Alice",
+            "date": "2024-01-03T12:00:00Z",
+            "subject": "Setup database"
+        },
+        {
+            "sha": "000004",
+            "parents": ["000003"],
+            "author": "Charlie",
+            "date": "2024-01-04T13:00:00Z",
+            "subject": "Start feature-api",
+            "branchHints": ["feature-api"]
+        },
+        {
+            "sha": "000005",
+            "parents": ["000004"],
+            "author": "Charlie",
+            "date": "2024-01-05T14:00:00Z",
+            "subject": "Add API endpoints",
+            "branchHints": ["feature-api"]
+        },
+        {
+            "sha": "000006",
+            "parents": ["000004"],
+            "author": "Diana",
+            "date": "2024-01-05T15:00:00Z",
+            "subject": "Fix database connection",
+            "branchHints": ["bugfix/login"]
+        },
+        {
+            "sha": "000007",
+            "parents": ["000003"],
+            "author": "Bob",
+            "date": "2024-01-06T16:00:00Z",
+            "subject": "Start feature-auth",
+            "branchHints": ["feature-auth"]
+        },
+        {
+            "sha": "000008",
+            "parents": ["000007"],
+            "author": "Bob",
+            "date": "2024-01-07T17:00:00Z",
+            "subject": "Add JWT authentication",
+            "branchHints": ["feature-auth"]
+        },
+        {
+            "sha": "000009",
+            "parents": ["000003"],
+            "author": "Eve",
+            "date": "2024-01-08T18:00:00Z",
+            "subject": "Start feature-dashboard",
+            "branchHints": ["feature-dashboard"]
+        },
+        {
+            "sha": "000010",
+            "parents": ["000009"],
+            "author": "Eve",
+            "date": "2024-01-09T19:00:00Z",
+            "subject": "Create dashboard layout",
+            "branchHints": ["feature-dashboard"]
+        },
+        {
+            "sha": "000011",
+            "parents": ["000010"],
+            "author": "Eve",
+            "date": "2024-01-10T20:00:00Z",
+            "subject": "Add charts",
+            "branchHints": ["feature-dashboard"]
+        },
+        {
+            "sha": "000012",
+            "parents": ["000005"],
+            "author": "Charlie",
+            "date": "2024-01-11T21:00:00Z",
+            "subject": "Complete API feature",
+            "branchHints": ["feature-api"]
+        },
+        {
+            "sha": "000013",
+            "parents": ["000006"],
+            "author": "Diana",
+            "date": "2024-01-12T22:00:00Z",
+            "subject": "Test database fixes",
+            "branchHints": ["bugfix/login"]
+        },
+        {
+            "sha": "000014",
+            "parents": ["000008"],
+            "author": "Bob",
+            "date": "2024-01-13T23:00:00Z",
+            "subject": "Complete auth feature",
+            "branchHints": ["feature-auth"]
+        },
+        {
+            "sha": "000015",
+            "parents": ["000011"],
+            "author": "Eve",
+            "date": "2024-01-14T00:00:00Z",
+            "subject": "Complete dashboard",
+            "branchHints": ["feature-dashboard"]
+        },
+        {
+            "sha": "000016",
+            "parents": ["000015", "000014", "000012"],
+            "author": "Alice",
+            "date": "2024-01-15T01:00:00Z",
+            "subject": "Merge all features into main",
+            "branchHints": ["main"]
+        }
+    ]
+}

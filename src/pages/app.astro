@@ -1,0 +1,748 @@
+---
+import "@styles/global.css";
+import "@styles/LoadingSkeleton.module.css";
+import "@styles/TimelineScrubber.module.css";
+import { ImportPanel } from "@components/ImportPanel";
+import { GraphCanvas } from "@components/GraphCanvas";
+import { CommitDetailsDialog } from "@components/CommitDetailsDialog";
+import { ControlsOverlay } from "@components/ControlsOverlay";
+import { LiveRegion } from "@components/LiveRegion";
+import { TimelineScrubber } from "@components/TimelineScrubber";
+import { LoadingSkeleton, CommitListSkeleton, StatsSkeleton } from "@components/LoadingSkeleton";
+import { ErrorBoundary } from "@components/ErrorBoundary";
+import { CommitSidebar } from "@components/CommitSidebar";
+
+const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
+const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content={Astro.generator} />
+        <meta
+            name="description"
+            content="Visualize Git history as a beautiful interactive graph. Import your repository and explore commits, branches, and merges."
+        />
+        <link rel="canonical" href="https://gitsonar.jonathanrreed.com/app" />
+        <title>Git Sonar</title>
+        {analyticsDomain && (
+            <script defer data-domain={analyticsDomain} src={analyticsSrc}></script>
+        )}
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://gitsonar.jonathanrreed.com/app" />
+        <meta
+            property="og:title"
+            content="Git Sonar - Interactive Graph View"
+        />
+        <meta
+            property="og:description"
+            content="Explore your Git history as a beautiful interactive graph. Import your repository and understand your project's evolution."
+        />
+        <meta property="og:image" content="/og-image.svg" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://gitsonar.jonathanrreed.com/app" />
+        <meta
+            property="twitter:title"
+            content="Git Sonar - Interactive Graph View"
+        />
+        <meta
+            property="twitter:description"
+            content="Explore your Git history as a beautiful interactive graph."
+        />
+        <meta property="twitter:image" content="/og-image.svg" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+
+            <body>
+                <a href="#main-content" class="skip-link">Skip to main content</a>
+                <ErrorBoundary>
+                    <div class="app" id="app">
+                        <!-- Mobile menu button -->
+                        <button
+                            type="button"
+                            class="mobile-menu-btn"
+                            id="mobile-menu-toggle"
+                            aria-label="Toggle menu"
+                            aria-controls="sidebar"
+                            aria-expanded="false"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12h18M3 6h18M3 18h18"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Header -->
+                        <header class="app-header">
+                <a href="/" class="app-logo">
+                    <svg
+                        class="app-logo__icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="12" cy="6" r="3"></circle>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="18" r="3"></circle>
+                        <path d="M12 9v3m-3 3l3-3m3 3l-3-3"></path>
+                    </svg>
+                    <span class="app-logo__text">Git Sonar</span>
+                </a>
+
+                <div class="app-stats" id="app-stats">
+                    <!-- Stats populated by JS -->
+                </div>
+
+                <div class="app-actions">
+                    <button
+                        type="button"
+                        class="btn btn--ghost"
+                        id="btn-help"
+                        title="Keyboard shortcuts (?)"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3m0 4h.01"
+                            ></path>
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn--primary"
+                        id="btn-new"
+                        title="New repository"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M12 5v14m-7-7h14"></path>
+                        </svg>
+                        <span>Import</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Mobile sidebar toggle -->
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+            <!-- Main content -->
+            <main class="app-main" id="main-content" role="main" aria-label="Git visualization">
+                <!-- Import panel (shown when no graph) -->
+                <div class="import-container" id="import-container">
+                    <div class="import-header">
+                        <h1>Visualize Your Git History</h1>
+                        <p>
+                            See your commits, branches, and merges as an
+                            interactive graph
+                        </p>
+                    </div>
+                    <ImportPanel client:load />
+                </div>
+
+                <!-- Graph view (shown when graph loaded) -->
+                <div
+                    class="graph-container"
+                    id="graph-container"
+                    style="display: none;"
+                >
+                    <!-- Sidebar with commit list -->
+                    <aside class="sidebar" id="sidebar">
+                        <CommitSidebar client:load />
+                    </aside>
+
+                    <!-- Main graph canvas -->
+                    <div class="graph-main">
+                        <GraphCanvas client:load />
+                        <ControlsOverlay client:load />
+                        <TimelineScrubber client:load />
+                        <LiveRegion client:load />
+                    </div>
+                </div>
+            </main>
+
+            <!-- Commit details modal -->
+            <CommitDetailsDialog client:load />
+        </div>
+                </ErrorBoundary>
+
+
+		<script>
+			import { useGraphStore } from "@lib/store/graph-store";
+
+            // Update stats display
+            function clearStats(statsEl: HTMLElement) {
+                while (statsEl.firstChild) {
+                    statsEl.removeChild(statsEl.firstChild);
+                }
+            }
+
+            function appendStat(statsEl: HTMLElement, value: string, label: string) {
+                const stat = document.createElement("div");
+                stat.className = "stat";
+
+                const valueSpan = document.createElement("span");
+                valueSpan.className = "stat__value";
+                valueSpan.textContent = value;
+
+                const labelSpan = document.createElement("span");
+                labelSpan.className = "stat__label";
+                labelSpan.textContent = label;
+
+                stat.appendChild(valueSpan);
+                stat.appendChild(labelSpan);
+                statsEl.appendChild(stat);
+            }
+
+            function setStatsLoading(statsEl: HTMLElement) {
+                clearStats(statsEl);
+                const loading = document.createElement("div");
+                loading.className = "loading-indicator";
+                loading.textContent = "Loading...";
+                statsEl.appendChild(loading);
+            }
+
+            function updateStats() {
+                const state = useGraphStore.getState();
+                const statsEl = document.getElementById("app-stats");
+                if (!statsEl) return;
+
+                if (!state.graph) {
+                    clearStats(statsEl);
+                    return;
+                }
+
+                clearStats(statsEl);
+                const m = state.graph.metrics;
+                appendStat(statsEl, m.commitCount.toLocaleString(), "commits");
+                appendStat(statsEl, m.authorCount.toLocaleString(), "authors");
+                appendStat(statsEl, m.mergeCount.toLocaleString(), "merges");
+            }
+
+			// Toggle views based on graph state
+			function updateView() {
+				const state = useGraphStore.getState();
+				const importEl = document.getElementById("import-container");
+				const graphEl = document.getElementById("graph-container");
+				const btnNew = document.getElementById("btn-new");
+				const statsEl = document.getElementById("app-stats");
+
+				document.body.dataset.viewMode = state.viewMode;
+
+                if (state.isLoading) {
+                    if (importEl) importEl.style.display = "flex";
+                    if (graphEl) graphEl.style.display = "none";
+                    // Show loading state in stats
+                    if (statsEl) {
+                        setStatsLoading(statsEl);
+                    }
+                    return;
+                }
+
+
+                if (state.graph) {
+                    if (importEl) importEl.style.display = "none";
+                    if (graphEl) graphEl.style.display = "flex";
+                    if (btnNew) btnNew.style.display = "flex";
+                } else {
+                    if (importEl) importEl.style.display = "flex";
+                    if (graphEl) graphEl.style.display = "none";
+                    if (btnNew) btnNew.style.display = "none";
+                    document.getElementById("sidebar")?.classList.remove("open");
+                    document.getElementById("sidebar-overlay")?.classList.remove("open");
+                    document
+                        .getElementById("mobile-menu-toggle")
+                        ?.setAttribute("aria-expanded", "false");
+                }
+
+                updateStats();
+            }
+
+            const DEFAULT_MAX_COMMITS = 1000;
+
+            async function handleQueryImport() {
+                const params = new URLSearchParams(window.location.search);
+                const githubRepo = params.get('github');
+                const gitlabRepo = params.get('gitlab');
+                const bitbucketRepo = params.get('bitbucket');
+
+                const repoPath = githubRepo || gitlabRepo || bitbucketRepo;
+                if (!repoPath) return;
+
+                const provider = githubRepo ? 'github' : gitlabRepo ? 'gitlab' : 'bitbucket';
+                const state = useGraphStore.getState() as any;
+
+                state.setLoading(true);
+                state.setError(null);
+
+                try {
+                    const imports = (await import("@lib/git/import-git")) as any;
+                    let graph;
+
+                    if (provider === 'gitlab') {
+                        graph = await imports.parseGitLabRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
+                    } else if (provider === 'bitbucket') {
+                        graph = await imports.parseBitbucketRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
+                    } else {
+                        graph = await imports.parseGitHubRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
+                    }
+
+                    state.setGraph(graph);
+                    state.setRepoPath(repoPath, provider, graph.commits.size >= DEFAULT_MAX_COMMITS);
+                } catch (err) {
+                    state.setError(err instanceof Error ? err.message : 'Failed to import repository');
+                }
+            }
+
+            // Subscribe to store changes
+            useGraphStore.subscribe((state, prevState) => {
+                if (state.graph !== prevState.graph || state.isLoading !== prevState.isLoading) {
+                    updateView();
+                }
+                if (state.viewMode !== prevState.viewMode) {
+                    document.body.dataset.viewMode = state.viewMode;
+                }
+            });
+
+            // Initialize
+            updateView();
+            handleQueryImport();
+
+            // New/Import button handler
+            document
+                .getElementById("btn-new")
+                ?.addEventListener("click", () => {
+                    useGraphStore.getState().clearGraph();
+                });
+
+            // Help button
+            document
+                .getElementById("btn-help")
+                ?.addEventListener("click", () => {
+                    useGraphStore.getState().toggleHelp();
+                });
+
+            // Mobile sidebar toggle
+            const sidebarEl = document.getElementById("sidebar");
+            const sidebarOverlay = document.getElementById("sidebar-overlay");
+            const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+
+            const setSidebarOpen = (open: boolean) => {
+                if (!sidebarEl || !sidebarOverlay || !mobileMenuToggle) return;
+                sidebarEl.classList.toggle("open", open);
+                sidebarOverlay.classList.toggle("open", open);
+                mobileMenuToggle.setAttribute("aria-expanded", String(open));
+            };
+
+            mobileMenuToggle?.addEventListener("click", () => {
+                const isOpen = sidebarEl?.classList.contains("open") ?? false;
+                setSidebarOpen(!isOpen);
+            });
+
+            sidebarOverlay?.addEventListener("click", () => {
+                setSidebarOpen(false);
+            });
+
+            // Check reduced motion
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                useGraphStore.getState().setReducedMotion(true);
+            }
+        </script>
+
+        <style>
+            .app {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            /* Header */
+            .app-header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.75rem 1.25rem;
+                background: var(--rp-surface);
+                border-bottom: 1px solid var(--rp-highlight-low);
+                flex-shrink: 0;
+                z-index: 100;
+            }
+
+            .app-logo {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                text-decoration: none;
+                color: var(--rp-text);
+                font-weight: 600;
+                font-size: 1rem;
+            }
+
+            .app-logo__icon {
+                width: 22px;
+                height: 22px;
+                color: var(--rp-foam);
+            }
+
+            .app-stats {
+                display: flex;
+                gap: 1.5rem;
+                margin-left: auto;
+            }
+
+            .stat {
+                display: flex;
+                align-items: baseline;
+                gap: 0.35rem;
+            }
+
+            .stat__value {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--rp-text);
+            }
+
+            .stat__label {
+                font-size: 0.8rem;
+                color: var(--rp-muted);
+            }
+
+            .app-actions {
+                display: flex;
+                gap: 0.5rem;
+                margin-left: 1rem;
+            }
+
+            .btn {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.5rem 0.75rem;
+                border: none;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+
+            .btn svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .btn--ghost {
+                background: transparent;
+                color: var(--rp-subtle);
+                padding: 0.5rem;
+            }
+
+            .btn--ghost:hover {
+                background: var(--rp-overlay);
+                color: var(--rp-text);
+            }
+
+            .btn--primary {
+                background: var(--rp-foam);
+                color: var(--rp-base);
+            }
+
+            .btn--primary:hover {
+                background: var(--rp-iris);
+            }
+
+            /* Main layout */
+            .app-main {
+                flex: 1;
+                overflow: hidden;
+            }
+
+            /* Import view */
+            .import-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                padding: 2rem;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .import-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .import-header h1 {
+                margin: 0 0 0.5rem;
+                font-size: 1.75rem;
+                font-weight: 600;
+                color: var(--rp-text);
+            }
+
+            .import-header p {
+                margin: 0;
+                color: var(--rp-subtle);
+                font-size: 1rem;
+            }
+
+            /* Graph view */
+            .graph-container {
+                display: flex;
+                height: 100%;
+            }
+
+            body[data-view-mode="poster"] .app-header,
+            body[data-view-mode="poster"] .sidebar,
+            body[data-view-mode="poster"] .sidebar-overlay,
+            body[data-view-mode="poster"] .mobile-menu-btn {
+                display: none;
+            }
+
+            body[data-view-mode="poster"] .graph-container {
+                display: block;
+            }
+
+            body[data-view-mode="poster"] .graph-main {
+                width: 100%;
+                height: 100%;
+            }
+
+            body[data-view-mode="poster"] .timeline-scrubber {
+                display: none;
+            }
+
+            /* Sidebar */
+            .sidebar {
+                width: 320px;
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                background: var(--rp-surface);
+                border-right: 1px solid var(--rp-highlight-low);
+            }
+
+            .sidebar__header {
+                padding: 1rem;
+                border-bottom: 1px solid var(--rp-highlight-low);
+            }
+
+            .sidebar__header h2 {
+                margin: 0 0 0.75rem;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: var(--rp-subtle);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 0.5rem 0.75rem;
+                background: var(--rp-overlay);
+                border: 1px solid var(--rp-highlight-med);
+                border-radius: 6px;
+                color: var(--rp-text);
+                font-size: 0.85rem;
+            }
+
+            .search-input::placeholder {
+                color: var(--rp-muted);
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: var(--rp-foam);
+            }
+
+            .commit-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 0.5rem;
+            }
+
+            .commit-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                padding: 0.6rem 0.75rem;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background 0.1s ease;
+            }
+
+            .commit-item:hover {
+                background: var(--rp-overlay);
+            }
+
+            .commit-item--selected {
+                background: var(--rp-highlight-low);
+            }
+
+            .commit-item__dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--rp-foam);
+                margin-top: 0.25rem;
+                flex-shrink: 0;
+            }
+
+            .commit-item__dot--merge {
+                background: var(--rp-iris);
+                border-radius: 2px;
+            }
+
+            .commit-item__content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .commit-item__message {
+                font-size: 0.85rem;
+                color: var(--rp-text);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 0.25rem;
+            }
+
+            .commit-item__meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                row-gap: 0.2rem;
+                font-size: 0.75rem;
+                color: var(--rp-muted);
+                min-width: 0;
+            }
+
+            .commit-item__sha {
+                font-family: "JetBrains Mono", monospace;
+                color: var(--rp-subtle);
+                white-space: nowrap;
+            }
+
+            .commit-item__author {
+                min-width: 0;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .commit-item__time {
+                white-space: nowrap;
+            }
+
+            /* Graph main area */
+            .graph-main {
+                flex: 1;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* Mobile menu button */
+            .mobile-menu-btn {
+                display: none;
+                width: 44px;
+                height: 44px;
+                background: transparent;
+                border: 1px solid var(--rp-highlight-med);
+                border-radius: 8px;
+                color: var(--rp-subtle);
+                cursor: pointer;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-menu-btn:hover {
+                background: var(--rp-overlay);
+                color: var(--rp-text);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 150;
+            }
+
+            @media (max-width: 768px) {
+                .mobile-menu-btn {
+                    display: flex;
+                }
+
+                .sidebar {
+                    position: fixed;
+                    left: -100%;
+                    top: 60px;
+                    bottom: 0;
+                    z-index: 200;
+                    transition: left 0.3s ease;
+                }
+
+                .sidebar.open {
+                    left: 0;
+                }
+
+                .sidebar-overlay.open {
+                    display: block;
+                }
+
+                .app-header {
+                    padding: 0.75rem 1rem;
+                }
+
+                .app-logo__text {
+                    display: none;
+                }
+
+                .app-stats {
+                    display: none;
+                }
+
+                .app-actions {
+                    margin-left: auto;
+                }
+
+                .app-actions .btn span {
+                    display: none;
+                }
+            }
+        </style>
+    </body>
+</html>

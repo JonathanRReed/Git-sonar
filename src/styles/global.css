@@ -1,0 +1,289 @@
+/* Tailwind v4 import */
+@import "tailwindcss";
+
+/* Rosé Pine color palette - https://rosepinetheme.com */
+@theme {
+  /* Base */
+  --color-base: #191724;
+  --color-surface: #1f1d2e;
+  --color-overlay: #26233a;
+
+  /* Text */
+  --color-muted: #6e6a86;
+  --color-subtle: #908caa;
+  --color-text: #e0def4;
+
+  /* Accents */
+  --color-love: #eb6f92;
+  --color-gold: #f6c177;
+  --color-rose: #ebbcba;
+  --color-pine: #31748f;
+  --color-foam: #9ccfd8;
+  --color-iris: #c4a7e7;
+
+  /* Highlights */
+  --color-highlight-low: #21202e;
+  --color-highlight-med: #403d52;
+  --color-highlight-high: #524f67;
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* CSS custom properties for components */
+:root {
+  --rp-base: #191724;
+  --rp-surface: #1f1d2e;
+  --rp-overlay: #26233a;
+  --rp-muted: #6e6a86;
+  --rp-subtle: #908caa;
+  --rp-text: #e0def4;
+  --rp-love: #eb6f92;
+  --rp-gold: #f6c177;
+  --rp-rose: #ebbcba;
+  --rp-pine: #31748f;
+  --rp-foam: #9ccfd8;
+  --rp-iris: #c4a7e7;
+  --rp-highlight-low: #21202e;
+  --rp-highlight-med: #403d52;
+  --rp-highlight-high: #524f67;
+  --rp-base-rgb: 25, 23, 36;
+  --rp-surface-rgb: 31, 29, 46;
+  --rp-overlay-rgb: 38, 35, 58;
+  --rp-text-rgb: 224, 222, 244;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(var(--rp-surface-rgb), 0.8);
+  --glass-border: rgba(var(--rp-text-rgb), 0.08);
+  --glass-blur: 20px;
+
+  /* Modern gradients */
+  --gradient-foam: linear-gradient(135deg, #9ccfd8, #7cc1d4);
+  --gradient-iris: linear-gradient(135deg, #c4a7e7, #a487d7);
+  --gradient-gold: linear-gradient(135deg, #f6c177, #d4a057);
+  --gradient-love: linear-gradient(135deg, #eb6f92, #c8466d);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.2);
+  --shadow-glow-foam: 0 0 30px rgba(156, 207, 216, 0.3);
+  --shadow-glow-iris: 0 0 30px rgba(196, 167, 231, 0.3);
+}
+
+/* Modern animated background */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--rp-base);
+  color: var(--rp-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+
+/* Base resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modern focus styles */
+:focus-visible {
+  outline: 2px solid var(--rp-foam);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(156, 207, 216, 0.2);
+}
+
+/* Modern button styles */
+button {
+  font-family: var(--font-sans);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Modern input styles */
+input,
+textarea {
+  font-family: var(--font-sans);
+}
+
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  body::before {
+    animation: none;
+  }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip to main content link - visible on focus for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--rp-foam);
+  color: var(--rp-base);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  z-index: 10000;
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid var(--rp-iris);
+  outline-offset: 2px;
+}
+
+/* Modern scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--rp-highlight-low);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rp-highlight-med);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rp-muted);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--rp-subtle);
+  font-size: 0.9rem;
+}
+
+.loading-indicator::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--rp-foam);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Glass card utility */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+}
+
+/* Modern badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  background: var(--gradient-foam);
+  color: var(--rp-base);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 100px;
+  box-shadow: var(--shadow-glow-foam);
+}
+
+/* Modern pulse animation */
+@keyframes pulse-modern {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Modern fade in */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modern shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--rp-highlight-low) 0%,
+    var(--rp-highlight-med) 50%,
+    var(--rp-highlight-low) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
