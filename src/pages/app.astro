@@ -11,6 +11,7 @@ import { TimelineScrubber } from "@components/TimelineScrubber";
 import { LoadingSkeleton, CommitListSkeleton, StatsSkeleton } from "@components/LoadingSkeleton";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 import { CommitSidebar } from "@components/CommitSidebar";
+import { CalendarView } from "@components/CalendarView";
 
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
@@ -67,7 +68,11 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
     </head>
 
             <body>
-                <a href="#main-content" class="skip-link">Skip to main content</a>
+                <noscript>
+                    <div class="noscript">
+                        Git Sonar requires JavaScript to load repositories and render the graph. Please enable JavaScript to continue.
+                    </div>
+                </noscript>
                 <ErrorBoundary>
                     <div class="app" id="app">
                         <!-- Mobile menu button -->
@@ -176,6 +181,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                         <GraphCanvas client:load />
                         <ControlsOverlay client:load />
                         <TimelineScrubber client:load />
+                        <CalendarView client:load />
                         <LiveRegion client:load />
                     </div>
                 </div>
@@ -672,6 +678,12 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 flex: 1;
                 position: relative;
                 overflow: hidden;
+            }
+
+            body[data-view-mode="calendar"] .graph-canvas,
+            body[data-view-mode="calendar"] .timeline-scrubber,
+            body[data-view-mode="calendar"] .controls-bar {
+                display: none;
             }
 
             /* Mobile menu button */

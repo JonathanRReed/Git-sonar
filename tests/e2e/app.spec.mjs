@@ -73,6 +73,6 @@ test.describe('Git Sonar app', () => {
         
         // Verify CSS variable changed (GitHub Dark uses #0d1117 as base)
         const body = page.locator('body');
-        await expect(body).toHaveCSS('--rp-base', 'rgb(13, 17, 23)');
+        await expect(body).toHaveCSS('--rp-base', '#0d1117');
     });
 });
