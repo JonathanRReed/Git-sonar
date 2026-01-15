@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
 import type { PositionedNode } from '@lib/git/types';
-import { getRelativeTime as getRelativeTimeUtil } from '@lib/utils/formatting';
+import { getRelativeTime as getRelativeTimeUtil, formatTimelineDate } from '@lib/utils/formatting';
 import { hexToRgba, lightenColor as lightenColorUtil } from '@lib/utils/color';
 import { useSpatialIndex } from '@lib/utils/use-spatial-index';
 import { batchEdgesByLane } from '@lib/utils/edge-batching';
@@ -52,7 +52,7 @@ export function GraphCanvas() {
     const hoverRafRef = useRef<number | null>(null);
     const lastHoverIdRef = useRef<string | null>(null);
 
-    const { nodes, edges, selectedId, selectCommit, graph, toggleDetails, viewMode, reducedMotion, layoutMode, backgroundStyle, theme } = useGraphStore();
+    const { nodes, edges, selectedId, selectCommit, graph, toggleDetails, viewMode, reducedMotion, layoutMode, backgroundStyle, theme, showDatelines } = useGraphStore();
     const colors = theme.colors;
     const laneColors = useMemo(() => ([
         colors.foam,
@@ -376,6 +376,60 @@ export function GraphCanvas() {
             ctx.setLineDash([]);
         }
 
+        // Draw dateline guides based on commit authoredAt
+        if (showDatelines && layoutMode !== 'radial') {
+            const authoredTimes = nodes
+                .map((node) => node.commit.authoredAt)
+                .filter((time) => Number.isFinite(time));
+
+            if (authoredTimes.length > 1) {
+                const newestDate = Math.max(...authoredTimes);
+                const oldestDate = Math.min(...authoredTimes);
+                const timeSpan = newestDate - oldestDate;
+                const month = 1000 * 60 * 60 * 24 * 30;
+                const numTicks = timeSpan <= 0
+                    ? 0
+                    : Math.min(6, Math.max(3, Math.floor(timeSpan / month)));
+
+                const positions = nodes.map((node) => positionsMap.get(node.id) ?? getNodeWorldPos(node));
+                const minX = Math.min(...positions.map((pos) => pos.x));
+                const maxX = Math.max(...positions.map((pos) => pos.x));
+                const minY = Math.min(...positions.map((pos) => pos.y));
+                const maxY = Math.max(...positions.map((pos) => pos.y));
+
+                ctx.strokeStyle = hexToRgba(colors.highlightMed, 0.25);
+                ctx.fillStyle = colors.muted;
+                ctx.lineWidth = 1;
+                ctx.font = `${10 * scale}px Inter, system-ui, sans-serif`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+
+                for (let i = 0; i <= numTicks; i++) {
+                    const ratio = numTicks === 0 ? 0 : i / numTicks;
+                    const date = oldestDate + timeSpan * ratio;
+                    const label = formatTimelineDate(date, timeSpan);
+
+                    if (layoutMode === 'horizontal') {
+                        const worldX = minX + (maxX - minX) * ratio;
+                        const { x } = worldToScreen(worldX, 0);
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, canvasHeight);
+                        ctx.stroke();
+                        ctx.fillText(label, x + 6 * scale, 6 * scale);
+                    } else {
+                        const worldY = minY + (maxY - minY) * ratio;
+                        const { y } = worldToScreen(0, worldY);
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(canvasWidth, y);
+                        ctx.stroke();
+                        ctx.fillText(label, 8 * scale, y + 6 * scale);
+                    }
+                }
+            }
+        }
+
         // Calculate viewport bounds in world coordinates for spatial queries
         const viewportWorld = {
             x: viewState.offsetX,
@@ -690,7 +744,7 @@ export function GraphCanvas() {
             }
         }
 
-    }, [nodes, nodeById, edges, selectedId, hoverNodeId, viewState, graph, getNodeWorldPos, positionsMap, worldToScreen, lodLevel, showHint, isPosterMode, layout, layoutMode, backgroundStyle, colors, laneColors, laneAccents, queryViewport, getLabelPos]);
+    }, [nodes, nodeById, edges, selectedId, hoverNodeId, viewState, graph, getNodeWorldPos, positionsMap, worldToScreen, lodLevel, showHint, isPosterMode, layout, layoutMode, backgroundStyle, colors, laneColors, laneAccents, queryViewport, getLabelPos, showDatelines]);
 
     // Canvas resize handler
     useEffect(() => {

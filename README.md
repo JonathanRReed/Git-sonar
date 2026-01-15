@@ -1,47 +1,41 @@
-<p align="center">
-  <img src="public/favicon.svg" alt="Git Sonar Logo" width="80" height="80">
-</p>
+# Git Sonar
 
-<h1 align="center">Git Sonar</h1>
+![Git Sonar logo](public/favicon.svg)
 
-<p align="center">
-  <strong>Visualize your Git history as a beautiful interactive graph</strong>
-</p>
+Visualize your Git history as a clean, interactive graph.
 
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#keyboard-shortcuts">Keyboard Shortcuts</a>
-</p>
+[Features](#features) | [Quick Start](#quick-start) | [Usage](#usage) | [Tech Stack](#tech-stack) | [Keyboard Shortcuts](#keyboard-shortcuts)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Astro-5.x-purple?logo=astro" alt="Astro">
-  <img src="https://img.shields.io/badge/React-19-blue?logo=react" alt="React">
-  <img src="https://img.shields.io/badge/Canvas-2D-orange" alt="Canvas 2D">
-  <img src="https://img.shields.io/badge/ESLint-9.0-blue" alt="ESLint">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
-</p>
+![Astro](https://img.shields.io/badge/Astro-5.x-purple?logo=astro)
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Canvas 2D](https://img.shields.io/badge/Canvas-2D-orange)
+![ESLint](https://img.shields.io/badge/ESLint-9.0-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
-## ✨ Features
+## Features
 
-- **🎨 Beautiful Visualization** — See commits, branches, and merges as an interactive 2D canvas graph with smooth animations
-- **🔒 100% Private** — Everything runs in your browser. Your code never leaves your machine
-- **⌨️ Keyboard-First** — Navigate with arrow keys, search with `/`, zoom with `+`/`-`, get help with `?`
-- **♿ Accessible** — Screen reader friendly with ARIA live regions, focus management, and ErrorBoundary
-- **📦 No Setup Required** — Import directly from your `.git` folder or drop a ZIP file
-- **🎯 Smart Layout** — Automatic lane-based positioning keeps branches visually distinct
-- **⚡ Optimized Performance** — LOD rendering, debounced search, efficient canvas updates
-- **📱 Mobile Responsive** — Collapsible sidebar, touch-friendly controls, responsive design
-- **🎬 Export Options** — Export as PNG or SVG for sharing and presentations
-- **⏱️ Timeline Scrubber** — Navigate through commit history chronologically
-- **📚 Multiple Demo Datasets** — Simple, branching, and complex histories to explore
-- **🎨 Enhanced Styling** — Improved branch labels, tooltips, loading skeletons
+- Interactive canvas view of commits, branches, and merges
+- Runs entirely in the browser; repositories stay local
+- Keyboard-first navigation with search, zoom, and shortcuts
+- Screen reader friendly with live region updates and focus management
+- Import from GitHub, GitLab, Bitbucket, or a local ZIP
+- Lane-based layout keeps branches visually distinct
+- LOD rendering and debounced search for large repositories
+- Responsive layout with a collapsible sidebar
+- Export the graph as PNG or SVG
+- Timeline scrubber for chronological navigation
+- Multiple demo datasets for quick exploration
 
-## 🚀 Quick Start
+## Performance
+
+- Spatial indexing and viewport culling keep rendering fast on large repositories
+- Level-of-detail rendering simplifies visuals at low zoom
+- Batched edge rendering minimizes canvas state changes
+- Debounced search and incremental loading reduce UI stalls
+
+## Quick Start
 
 ```bash
 # Clone repository
@@ -49,15 +43,15 @@ git clone https://github.com/git-sonar/git-sonar.git
 cd git-sonar
 
 # Install dependencies
-npm install
+bun install
 
 # Start development server
-npm run dev
+bun run dev
 ```
 
 Then open [http://localhost:4321](http://localhost:4321) in your browser.
 
-## 📖 Usage
+## Usage
 
 ### Import Methods
 
@@ -81,10 +75,10 @@ cd your-repo && zip -r git-export.zip .git
 - **Timeline** — Use timeline scrubber at bottom to navigate chronologically
 - **Export** — Click camera icon for PNG or document icon for SVG
 
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `↑` `↓` | Navigate between commits in same lane |
 | `←` `→` | Navigate to previous/next commit |
 | `Enter` | Open commit details dialog |
@@ -95,10 +89,10 @@ cd your-repo && zip -r git-export.zip .git
 | `-` `_` | Zoom out |
 | `0` | Reset zoom to 100% |
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Technology | Purpose |
-|------------|---------|
+| --- | --- |
 | [Astro](https://astro.build) | Static site framework |
 | [React](https://react.dev) | Interactive UI islands |
 | [Canvas 2D](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) | High-performance graph rendering with LOD |
@@ -107,9 +101,9 @@ cd your-repo && zip -r git-export.zip .git
 | [isomorphic-git](https://isomorphic-git.org/) | In-browser Git parsing |
 | [fflate](https://github.com/101arrowz/fflate) | Fast ZIP decompression |
 
-## 📁 Project Structure
+## Project Structure
 
-```
+```text
 git-sonar/
 ├── src/
 │   ├── components/       # React components
@@ -134,7 +128,7 @@ git-sonar/
 └── tests/                       # Unit tests (Vitest)
 ```
 
-## 🎨 Color Theme
+## Color Theme
 
 Git Sonar uses beautiful [Rosé Pine](https://rosepinetheme.com/) color palette:
 
@@ -145,50 +139,49 @@ Git Sonar uses beautiful [Rosé Pine](https://rosepinetheme.com/) color palette:
 - **Rose** `#ebbcba` — Tertiary elements
 - **Pine** `#31748f` — Additional lanes
 
-## 🔧 Development
+## Development
 
 ### Linting
+
 ```bash
 # Run ESLint
-npm run lint
+bun run lint
 
 # Auto-fix issues
-npm run lint:fix
+bun run lint:fix
 ```
 
 ### Building
+
 ```bash
 # Create production build
-npm run build
+bun run build
 
 # Preview production build
-npm run preview
+bun run preview
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork repository
 2. Create your feature branch (`git checkout -b feature/amazing`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Run linting (`npm run lint`)
+4. Run linting (`bun run lint`)
 5. Push to your branch (`git push origin feature/amazing`)
 6. Open a Pull Request
 
 ### Code Style
+
 - Use TypeScript for type safety
 - Follow existing code conventions
 - Add JSDoc comments for public APIs
 - Test new features when applicable
-- Run `npm run lint:fix` before committing
+- Run `bun run lint:fix` before committing
 
-## 📄 License
+## License
 
 MIT © 2026 Git Sonar
 
 ---
-
-<p align="center">
-  Made with ❤️ for developers who love understanding their Git history
-</p>

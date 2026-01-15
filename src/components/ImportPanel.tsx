@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, type DragEvent, type ChangeEvent, type KeyboardEvent, type FormEvent } from 'react';
+import { useCallback, useState, useRef, useEffect, type DragEvent, type ChangeEvent, type KeyboardEvent, type FormEvent } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
 import { parseGitZip, parseGitHubRepo, parseGitLabRepo, parseBitbucketRepo } from '@lib/git/import-git';
 import { getDemoDatasets, loadDemoDataset } from '@lib/demo-data';
@@ -6,6 +6,11 @@ import { debugError } from '@lib/utils/debug';
 import { FileText, GitBranch, Network, Package, AlertTriangle, Link } from 'lucide-react';
 
 const DEFAULT_MAX_COMMITS = 1000;
+const DEMO_SIZE_PRESETS = {
+  small: { label: 'Small', dataset: 'simple' },
+  medium: { label: 'Medium', dataset: 'branching' },
+  large: { label: 'Large', dataset: 'complex' },
+} as const;
 
 // Map icon names to components
 const ICON_MAP = {
@@ -18,6 +23,7 @@ export function ImportPanel() {
   const { setGraph, setLoading, setError, setRepoPath, setAuthToken, authToken, isLoading, error } = useGraphStore();
   const [isDragging, setIsDragging] = useState(false);
   const [selectedDemo, setSelectedDemo] = useState<string>('branching');
+  const [demoSize, setDemoSize] = useState<keyof typeof DEMO_SIZE_PRESETS>('medium');
   const [showDemoOptions, setShowDemoOptions] = useState(false);
   const [githubUrl, setGithubUrl] = useState('');
   const [tokenInput, setTokenInput] = useState(authToken ?? '');
@@ -44,6 +50,24 @@ export function ImportPanel() {
       setError(err instanceof Error ? err.message : 'Failed to load demo');
     }
   }, [setGraph, setLoading, setError]);
+
+  useEffect(() => {
+    const preset = DEMO_SIZE_PRESETS[demoSize];
+    if (!preset) return;
+    setSelectedDemo(preset.dataset);
+  }, [demoSize]);
+
+  const syncDemoSize = useCallback((key: string) => {
+    if (key === 'simple') {
+      setDemoSize('small');
+      return;
+    }
+    if (key === 'complex') {
+      setDemoSize('large');
+      return;
+    }
+    setDemoSize('medium');
+  }, []);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -153,11 +177,26 @@ export function ImportPanel() {
       <div className="import-options">
         {/* Demo button with dropdown */}
         <div className="demo-section">
+          <div className="demo-size" role="group" aria-label="Demo size">
+            {Object.entries(DEMO_SIZE_PRESETS).map(([key, preset]) => (
+              <button
+                key={key}
+                type="button"
+                className={`demo-size__btn ${demoSize === key ? 'demo-size__btn--active' : ''}`}
+                onClick={() => setDemoSize(key as keyof typeof DEMO_SIZE_PRESETS)}
+                disabled={isLoading}
+                aria-pressed={demoSize === key}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             onClick={() => setShowDemoOptions(!showDemoOptions)}
             disabled={isLoading}
             className="import-btn import-btn--demo"
+            aria-label="Load Demo"
           >
             <span className="import-btn__icon">
               {(() => {
@@ -165,8 +204,8 @@ export function ImportPanel() {
                 return <IconComponent size={32} />;
               })()}
             </span>
-            <span className="import-btn__label">Load Demo: {demoDatasets[selectedDemo]?.name || 'Branching'}</span>
-            <span className="import-btn__desc">{demoDatasets[selectedDemo]?.description || 'Sample Git history'}</span>
+            <span className="import-btn__label">Load Demo</span>
+            <span className="import-btn__desc">Choose a sample repository</span>
           </button>
 
           {showDemoOptions && (
@@ -179,6 +218,7 @@ export function ImportPanel() {
                     type="button"
                     onClick={() => {
                       setSelectedDemo(key);
+                      syncDemoSize(key);
                       setShowDemoOptions(false);
                       handleDemoClick(key);
                     }}
@@ -243,7 +283,7 @@ export function ImportPanel() {
               </button>
             </div>
             <span id="token-hint" className="github-form__token-hint">
-              Use GitHub/GitLab token or Bitbucket username:appPassword. Tokens are stored only in your browser.
+              Use a GitHub or GitLab token to avoid rate limits, or Bitbucket username:appPassword. Tokens stay in your browser.
             </span>
             <label className="github-form__remember">
               <input
@@ -367,6 +407,39 @@ export function ImportPanel() {
 
         .demo-section {
           position: relative;
+        }
+
+        .demo-size {
+          display: inline-flex;
+          gap: 0.35rem;
+          padding: 0.35rem;
+          background: rgba(38, 35, 58, 0.5);
+          border: 1px solid var(--rp-highlight-low);
+          border-radius: 10px;
+          margin-bottom: 0.5rem;
+        }
+
+        .demo-size__btn {
+          border: 1px solid transparent;
+          background: transparent;
+          color: var(--rp-subtle);
+          font-size: 0.7rem;
+          font-weight: 600;
+          padding: 0.35rem 0.6rem;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .demo-size__btn--active {
+          border-color: var(--rp-foam);
+          color: var(--rp-text);
+          background: rgba(156, 207, 216, 0.12);
+        }
+
+        .demo-size__btn:hover:not(:disabled) {
+          border-color: var(--rp-iris);
+          color: var(--rp-text);
         }
 
         .demo-dropdown {

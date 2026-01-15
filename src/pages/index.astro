@@ -121,6 +121,9 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 						</svg>
 						GitHub
 					</a>
+					<button type="button" class="nav__toggle" id="motion-toggle">
+						Motion On
+					</button>
 					<a href="/app" class="nav__cta">Open App</a>
 				</div>
 			</nav>
@@ -133,13 +136,12 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 						100% Private • Runs in Browser
 					</div>
 					<h1 class="hero__title">
-						Visualize your
+						Visualize
 						<span class="hero__title--accent">Git history</span>
 					</h1>
 					<p class="hero__subtitle">
-						See commits, branches, and merges as a beautiful
-						interactive graph. Understand your project's evolution
-						at a glance.
+						Explore Git history as a clean, interactive graph. See commits,
+						branches, and merges at a glance.
 					</p>
 					<div class="hero__actions">
 						<a href="/app" class="btn btn--primary btn--lg">
@@ -530,6 +532,35 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 			</footer>
 		</div>
 
+		<script>
+			const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			const savedMotion = localStorage.getItem('git-sonar-motion');
+			const initialMotion = savedMotion ?? (prefersReduced ? 'reduced' : 'full');
+			document.body.dataset.motion = initialMotion;
+
+			window.addEventListener('DOMContentLoaded', () => {
+				const landing = document.querySelector('.landing');
+				requestAnimationFrame(() => landing?.classList.add('is-ready'));
+
+				const toggle = document.getElementById('motion-toggle');
+				const updateLabel = () => {
+					const motion = document.body.dataset.motion === 'reduced' ? 'reduced' : 'full';
+					if (toggle) {
+						toggle.textContent = motion === 'reduced' ? 'Motion Off' : 'Motion On';
+					}
+				};
+
+				updateLabel();
+
+				toggle?.addEventListener('click', () => {
+					const next = document.body.dataset.motion === 'reduced' ? 'full' : 'reduced';
+					document.body.dataset.motion = next;
+					localStorage.setItem('git-sonar-motion', next);
+					updateLabel();
+				});
+			});
+		</script>
+
 		<style>
 			/* Base */
 			.landing {
@@ -589,7 +620,6 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				border-radius: 50%;
 				filter: blur(120px);
 				opacity: 0.4;
-				animation: float-glow 15s ease-in-out infinite;
 			}
 
 			.bg-glow--1 {
@@ -623,7 +653,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				align-items: center;
 				justify-content: space-between;
 				padding: 1rem 2rem;
-				max-width: 1200px;
+				max-width: 1320px;
 				margin: 0 auto;
 				position: relative;
 				z-index: 10;
@@ -692,17 +722,45 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				border-color: var(--rp-foam);
 			}
 
+			.nav__toggle {
+				padding: 0.45rem 0.8rem;
+				border-radius: 999px;
+				border: 1px solid var(--rp-highlight-med);
+				background: transparent;
+				color: var(--rp-subtle);
+				font-size: 0.75rem;
+				font-weight: 600;
+				letter-spacing: 0.02em;
+				transition: all 0.2s ease;
+			}
+
+			.nav__toggle:hover {
+				color: var(--rp-text);
+				border-color: var(--rp-foam);
+				background: rgba(156, 207, 216, 0.08);
+			}
+
 			/* Hero */
 			.hero {
 				display: grid;
 				grid-template-columns: 1fr 1fr;
 				gap: 4rem;
 				align-items: center;
-				max-width: 1200px;
+				max-width: 1320px;
 				margin: 0 auto;
 				padding: 4rem 2rem 6rem;
 				position: relative;
 				z-index: 1;
+			}
+
+			.hero::before {
+				content: '';
+				position: absolute;
+				inset: -2rem 0 auto 40%;
+				height: 65%;
+				background: radial-gradient(circle at top, rgba(156, 207, 216, 0.08), transparent 70%);
+				pointer-events: none;
+				z-index: 0;
 			}
 
 			.hero__badge {
@@ -716,7 +774,6 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				font-size: 0.8rem;
 				color: var(--rp-foam);
 				margin-bottom: 1.5rem;
-				animation: fadeInUp 0.6s ease-out;
 			}
 
 			.pulse {
@@ -724,7 +781,6 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				height: 8px;
 				background: var(--rp-foam);
 				border-radius: 50%;
-				animation: pulse 2s ease-in-out infinite;
 			}
 
 			@keyframes pulse {
@@ -744,7 +800,6 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				font-weight: 700;
 				line-height: 1.1;
 				margin: 0 0 1.5rem;
-				animation: fadeInUp 0.6s ease-out 0.1s both;
 			}
 
 			.hero__title--accent {
@@ -765,20 +820,17 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				line-height: 1.6;
 				margin: 0 0 2rem;
 				max-width: 480px;
-				animation: fadeInUp 0.6s ease-out 0.2s both;
 			}
 
 			.hero__actions {
 				display: flex;
 				gap: 1rem;
-				animation: fadeInUp 0.6s ease-out 0.3s both;
 			}
 
 			.hero__tech {
 				display: flex;
 				gap: 0.5rem;
 				margin-top: 2rem;
-				animation: fadeInUp 0.6s ease-out 0.4s both;
 			}
 
 			.tech-badge {
@@ -806,7 +858,6 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				animation: fadeInUp 0.8s ease-out 0.2s both;
 			}
 
 			.graph-container {
@@ -829,7 +880,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 
 			/* Animated nodes */
 			.nodes .node {
-				animation: nodeAppear 0.5s ease-out both;
+				animation: none;
 			}
 
 			.node--1 {
@@ -872,7 +923,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 			.edges .edge {
 				stroke-dasharray: 200;
 				stroke-dashoffset: 200;
-				animation: edgeDraw 1s ease-out forwards;
+				animation: none;
 			}
 
 			.edge--foam {
@@ -894,6 +945,51 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 			/* Labels animation */
 			.labels rect,
 			.labels text {
+				animation: none;
+			}
+
+			.landing.is-ready .bg-glow {
+				animation: float-glow 15s ease-in-out infinite;
+			}
+
+			.landing.is-ready .pulse {
+				animation: pulse 2s ease-in-out infinite;
+			}
+
+			.landing.is-ready .hero__badge {
+				animation: fadeInUp 0.6s ease-out;
+			}
+
+			.landing.is-ready .hero__title {
+				animation: fadeInUp 0.6s ease-out 0.1s both;
+			}
+
+			.landing.is-ready .hero__subtitle {
+				animation: fadeInUp 0.6s ease-out 0.2s both;
+			}
+
+			.landing.is-ready .hero__actions {
+				animation: fadeInUp 0.6s ease-out 0.3s both;
+			}
+
+			.landing.is-ready .hero__tech {
+				animation: fadeInUp 0.6s ease-out 0.4s both;
+			}
+
+			.landing.is-ready .hero__graphic {
+				animation: fadeInUp 0.8s ease-out 0.2s both;
+			}
+
+			.landing.is-ready .nodes .node {
+				animation: nodeAppear 0.5s ease-out both;
+			}
+
+			.landing.is-ready .edges .edge {
+				animation: edgeDraw 1s ease-out forwards;
+			}
+
+			.landing.is-ready .labels rect,
+			.landing.is-ready .labels text {
 				animation: fadeIn 0.4s ease-out both;
 				animation-delay: 1.2s;
 			}
@@ -993,7 +1089,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 				display: grid;
 				grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 				gap: 1.5rem;
-				max-width: 1000px;
+				max-width: 1100px;
 				margin: 0 auto;
 			}
 
@@ -1054,7 +1150,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 			/* How it works */
 			.how-it-works {
 				padding: 6rem 2rem;
-				max-width: 800px;
+				max-width: 900px;
 				margin: 0 auto;
 				position: relative;
 				z-index: 1;
@@ -1215,6 +1311,20 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 					stroke-dasharray: none;
 					stroke-dashoffset: 0;
 				}
+			}
+
+			body[data-motion="reduced"] .bg-glow,
+			body[data-motion="reduced"] .pulse,
+			body[data-motion="reduced"] .nodes .node,
+			body[data-motion="reduced"] .edges .edge,
+			body[data-motion="reduced"] .labels rect,
+			body[data-motion="reduced"] .labels text {
+				animation: none !important;
+			}
+
+			body[data-motion="reduced"] .edges .edge {
+				stroke-dasharray: none;
+				stroke-dashoffset: 0;
 			}
 		</style>
 	</body>

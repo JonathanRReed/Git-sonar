@@ -35,7 +35,7 @@ function saveAuthToken(token: string | null, remember: boolean): void {
 }
 
 /** View modes for visualization */
-export type ViewMode = 'inspect' | 'poster';
+export type ViewMode = 'inspect' | 'poster' | 'calendar';
 
 /** Layout modes for graph positioning */
 export type LayoutMode = 'vertical' | 'horizontal' | 'radial';
@@ -86,6 +86,8 @@ interface GraphState {
     posterTitle: string;
     /** Whether to show timeline ruler in poster mode */
     showTimeline: boolean;
+    /** Whether to show datelines on the canvas */
+    showDatelines: boolean;
 }
 
 /** Store actions */
@@ -130,6 +132,8 @@ interface GraphActions {
     setPosterTitle: (title: string) => void;
     /** Toggle timeline ruler */
     toggleTimeline: () => void;
+    /** Toggle date guide lines on the canvas */
+    toggleDatelines: () => void;
     /** Zoom control callbacks - set by GraphCanvas */
     zoomIn: () => void;
     zoomOut: () => void;
@@ -169,6 +173,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         loadedCommitCount: 0,
         posterTitle: '',
         showTimeline: false,
+        showDatelines: true,
         setGraph: (graph) => {
             const nodes = generatePositionedNodes(graph);
             const edges = generateEdges(graph);
@@ -198,6 +203,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
                 loadedCommitCount: 0,
                 posterTitle: '',
                 showTimeline: false,
+                showDatelines: true,
             });
         },
         selectCommit: (id) => {
@@ -315,6 +321,9 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         },
         toggleTimeline: () => {
             set((state) => ({ showTimeline: !state.showTimeline }));
+        },
+        toggleDatelines: () => {
+            set((state) => ({ showDatelines: !state.showDatelines }));
         },
         // Zoom control callbacks - initialized as no-ops, registered by GraphCanvas
         zoomIn: () => {},

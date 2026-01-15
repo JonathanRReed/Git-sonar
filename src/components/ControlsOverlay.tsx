@@ -57,6 +57,8 @@ export function ControlsOverlay() {
         setViewMode,
         layoutMode,
         setLayoutMode,
+        showDatelines,
+        toggleDatelines,
         graph,
         nodes,
         edges,
@@ -282,6 +284,14 @@ export function ControlsOverlay() {
                         >
                             Poster
                         </button>
+                        <button
+                            type="button"
+                            className={`mode-btn ${viewMode === 'calendar' ? 'mode-btn--active' : ''}`}
+                            onClick={() => setViewMode('calendar')}
+                            aria-pressed={viewMode === 'calendar'}
+                        >
+                            Calendar
+                        </button>
                     </div>
 
                     {/* Load All Commits button for poster mode */}
@@ -343,6 +353,16 @@ export function ControlsOverlay() {
                             <option value="radial">Radial</option>
                         </select>
                     </div>
+
+                    <button
+                        type="button"
+                        className={`control-btn control-btn--text ${showDatelines ? 'control-btn--active' : ''}`}
+                        onClick={toggleDatelines}
+                        aria-pressed={showDatelines}
+                        title={`Datelines ${showDatelines ? 'ON' : 'OFF'}`}
+                    >
+                        <span className="control-btn__label">Datelines</span>
+                    </button>
 
                     <div className="dpi-selector">
                         <label htmlFor="dpi-select">DPI</label>
@@ -825,6 +845,17 @@ export function ControlsOverlay() {
           width: auto;
           gap: 0.5rem;
           padding: 0 0.75rem;
+        }
+
+        .control-btn--text {
+          width: auto;
+          padding: 0 0.75rem;
+        }
+
+        .control-btn__label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          letter-spacing: 0.01em;
         }
 
         .control-btn--load-all .control-btn__text {
