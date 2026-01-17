@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
 import { getRelativeTime } from '@lib/utils/formatting';
+import type { FilterState } from './CommitSidebar';
 
 const ITEM_HEIGHT = 64; // Height of each commit item in pixels
 const OVERSCAN = 5; // Number of items to render outside viewport
 
-interface CommitListProps {
+export interface CommitListProps {
     searchQuery?: string;
+    filters?: FilterState;
 }
 
-export function VirtualCommitList({ searchQuery = '' }: CommitListProps) {
-    const { nodes, selectedId, selectCommit } = useGraphStore();
+export function VirtualCommitList({ searchQuery = '', filters }: CommitListProps) {
+    const { nodes, selectedId, selectCommit, graph } = useGraphStore();
     const containerRef = useRef<HTMLDivElement>(null);
     const [scrollTop, setScrollTop] = useState(0);
     const [containerHeight, setContainerHeight] = useState(0);
@@ -45,12 +47,62 @@ export function VirtualCommitList({ searchQuery = '' }: CommitListProps) {
         return qi === q.length ? score : null;
     }, []);
 
-    // Filter nodes based on fuzzy search query
+    // Filter nodes based on fuzzy search query and filters
     const filteredNodes = useMemo(() => {
+        let result = reversedNodes;
+        
+        // Apply author filter
+        if (filters?.authorFilter) {
+            result = result.filter(node => 
+                node.commit.authorName.toLowerCase() === filters.authorFilter!.toLowerCase()
+            );
+        }
+        
+        // Apply date range filter
+        if (filters?.dateRange.start) {
+            result = result.filter(node => node.commit.authoredAt >= filters.dateRange.start!);
+        }
+        if (filters?.dateRange.end) {
+            // Add one day to include the end date
+            const endOfDay = filters.dateRange.end + 24 * 60 * 60 * 1000;
+            result = result.filter(node => node.commit.authoredAt <= endOfDay);
+        }
+        
+        // Apply branch filter (show commits that are ancestors of the branch head)
+        if (filters?.branchFilter && graph) {
+            const branchHead = graph.heads.get(filters.branchFilter);
+            if (branchHead) {
+                // For simplicity, filter commits that have the branch in their hints
+                // In a full implementation, we'd traverse the ancestor graph
+                const branchCommitIds = new Set<string>();
+                const visited = new Set<string>();
+                const queue = [branchHead];
+                
+                while (queue.length > 0 && branchCommitIds.size < 10000) {
+                    const sha = queue.shift()!;
+                    if (visited.has(sha)) continue;
+                    visited.add(sha);
+                    branchCommitIds.add(sha);
+                    
+                    const commit = graph.commits.get(sha);
+                    if (commit) {
+                        for (const parent of commit.parents) {
+                            if (!visited.has(parent)) {
+                                queue.push(parent);
+                            }
+                        }
+                    }
+                }
+                
+                result = result.filter(node => branchCommitIds.has(node.id));
+            }
+        }
+        
+        // Apply text search
         const query = searchQuery.trim();
-        if (!query) return reversedNodes;
+        if (!query) return result;
 
-        const scored = reversedNodes
+        const scored = result
             .map((node) => {
                 const scores = [
                     fuzzyScore(query, node.commit.messageSubject),
@@ -61,11 +113,11 @@ export function VirtualCommitList({ searchQuery = '' }: CommitListProps) {
                 if (scores.length === 0) return null;
                 return { node, score: Math.min(...scores) };
             })
-            .filter((item): item is { node: typeof reversedNodes[number]; score: number } => item !== null)
+            .filter((item): item is { node: typeof result[number]; score: number } => item !== null)
             .sort((a, b) => a.score - b.score);
 
         return scored.map((item) => item.node);
-    }, [reversedNodes, searchQuery, fuzzyScore]);
+    }, [reversedNodes, searchQuery, fuzzyScore, filters, graph]);
 
     // Calculate visible range
     const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN);
