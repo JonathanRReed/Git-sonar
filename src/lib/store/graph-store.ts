@@ -88,6 +88,14 @@ interface GraphState {
     showTimeline: boolean;
     /** Whether to show datelines on the canvas */
     showDatelines: boolean;
+    /** Optional poster subtitle */
+    posterSubtitle: string;
+    /** Whether to show watermark */
+    showWatermark: boolean;
+    /** Whether to show signature with date */
+    showSignature: boolean;
+    /** Whether to show heatmap overlay */
+    showHeatmap: boolean;
 }
 
 /** Store actions */
@@ -130,6 +138,14 @@ interface GraphActions {
     setAuthToken: (token: string | null, remember?: boolean) => void;
     /** Set poster title */
     setPosterTitle: (title: string) => void;
+    /** Set poster subtitle */
+    setPosterSubtitle: (subtitle: string) => void;
+    /** Toggle watermark */
+    toggleWatermark: () => void;
+    /** Toggle signature */
+    toggleSignature: () => void;
+    /** Toggle heatmap overlay */
+    toggleHeatmap: () => void;
     /** Toggle timeline ruler */
     toggleTimeline: () => void;
     /** Toggle date guide lines on the canvas */
@@ -172,8 +188,12 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         authToken: savedAuthToken,
         loadedCommitCount: 0,
         posterTitle: '',
+        posterSubtitle: '',
         showTimeline: false,
         showDatelines: true,
+        showWatermark: true,
+        showSignature: true,
+        showHeatmap: false,
         setGraph: (graph) => {
             const nodes = generatePositionedNodes(graph);
             const edges = generateEdges(graph);
@@ -318,6 +338,18 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         },
         setPosterTitle: (title) => {
             set({ posterTitle: title });
+        },
+        setPosterSubtitle: (subtitle) => {
+            set({ posterSubtitle: subtitle });
+        },
+        toggleWatermark: () => {
+            set((state) => ({ showWatermark: !state.showWatermark }));
+        },
+        toggleSignature: () => {
+            set((state) => ({ showSignature: !state.showSignature }));
+        },
+        toggleHeatmap: () => {
+            set((state) => ({ showHeatmap: !state.showHeatmap }));
         },
         toggleTimeline: () => {
             set((state) => ({ showTimeline: !state.showTimeline }));

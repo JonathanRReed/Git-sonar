@@ -5,6 +5,7 @@ import { getRelativeTime as getRelativeTimeUtil, formatTimelineDate } from '@lib
 import { hexToRgba, lightenColor as lightenColorUtil } from '@lib/utils/color';
 import { useSpatialIndex } from '@lib/utils/use-spatial-index';
 import { batchEdgesByLane } from '@lib/utils/edge-batching';
+import { calculateHeatmapIntensities, getHeatmapColor } from '@lib/utils/heatmap';
 
 // Layout constants
 const NODE_RADIUS = 10;
@@ -34,6 +35,7 @@ export function GraphCanvas() {
     const [hoverNodeId, setHoverNodeId] = useState<string | null>(null);
     const [initialized, setInitialized] = useState(false);
     const [showHint, setShowHint] = useState(true);
+    const [animTime, setAnimTime] = useState(0);
 
     // Calculate LOD level based on scale
     const lodLevel = useMemo(() => {
@@ -52,7 +54,7 @@ export function GraphCanvas() {
     const hoverRafRef = useRef<number | null>(null);
     const lastHoverIdRef = useRef<string | null>(null);
 
-    const { nodes, edges, selectedId, selectCommit, graph, toggleDetails, viewMode, reducedMotion, layoutMode, backgroundStyle, theme, showDatelines } = useGraphStore();
+    const { nodes, edges, selectedId, selectCommit, graph, toggleDetails, viewMode, reducedMotion, layoutMode, backgroundStyle, theme, showDatelines, showHeatmap } = useGraphStore();
     const colors = theme.colors;
     const laneColors = useMemo(() => ([
         colors.foam,
@@ -67,6 +69,13 @@ export function GraphCanvas() {
         light: lightenColorUtil(color, 25),
     })), [laneColors]);
     const isPosterMode = viewMode === 'poster';
+
+    // Calculate heatmap intensities when enabled
+    const heatmapIntensities = useMemo(() => {
+        if (!showHeatmap || nodes.length === 0) return new Map<string, number>();
+        return calculateHeatmapIntensities(nodes);
+    }, [showHeatmap, nodes]);
+
     const layout = useMemo(() => ({
         laneWidth: isPosterMode ? POSTER_LANE_WIDTH : BASE_LANE_WIDTH,
         rowHeight: isPosterMode ? POSTER_ROW_HEIGHT : BASE_ROW_HEIGHT,
@@ -111,6 +120,28 @@ export function GraphCanvas() {
             return () => clearTimeout(timeout);
         }
     }, [nodes.length, showHint, reducedMotion, isPosterMode]);
+
+    // Animation loop for selection effects
+    useEffect(() => {
+        if (!selectedId || reducedMotion || isPosterMode) return;
+
+        let running = true;
+        let startTime: number | null = null;
+
+        const animate = (timestamp: number) => {
+            if (!running) return;
+            if (startTime === null) startTime = timestamp;
+            
+            // Update animation time (cycles every 2 seconds)
+            const elapsed = (timestamp - startTime) / 1000;
+            setAnimTime(elapsed);
+            
+            requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
+        return () => { running = false; };
+    }, [selectedId, reducedMotion, isPosterMode]);
 
     // Node lookup map for O(1) access
     const nodeById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
@@ -561,26 +592,42 @@ export function GraphCanvas() {
             const isRoot = node.commit.parents.length === 0;
             const isSelected = node.id === selectedId;
             const isHovered = node.id === hoverNodeId;
-            const color = laneColors[node.lane % laneColors.length];
+            
+            // Use heatmap color if enabled, otherwise lane color
+            const laneColor = laneColors[node.lane % laneColors.length];
+            const heatmapIntensity = heatmapIntensities.get(node.id) ?? 0;
+            const color = showHeatmap ? getHeatmapColor(heatmapIntensity) : laneColor;
 
             let radius = isMerge ? NODE_RADIUS_MERGE : NODE_RADIUS;
             if (isSelected) radius = NODE_RADIUS_SELECTED;
             radius *= scale;
 
-            // Draw outer ring only for selected/hovered
+            // Draw outer ring only for selected/hovered with subtle pulse animation
             if (!simplified && !isPosterMode && (isSelected || isHovered)) {
-                const glowRadius = radius * (isSelected ? 2.2 : 1.8);
+                // Animated pulse for selected node (subtle sine wave 0.9 to 1.1)
+                const pulse = isSelected && !reducedMotion
+                    ? 1 + Math.sin(animTime * 3) * 0.1
+                    : 1;
+                const baseGlowRadius = radius * (isSelected ? 2.2 : 1.8);
+                const glowRadius = baseGlowRadius * pulse;
+                
+                // Outer glow with gradient
+                const glowGradient = ctx.createRadialGradient(x, y, radius, x, y, glowRadius);
+                glowGradient.addColorStop(0, hexToRgba(color, isSelected ? 0.25 : 0.15));
+                glowGradient.addColorStop(1, hexToRgba(color, 0));
+                
                 ctx.beginPath();
                 ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
-                ctx.fillStyle = isSelected ? hexToRgba(color, 0.2) : hexToRgba(color, 0.15);
+                ctx.fillStyle = glowGradient;
                 ctx.fill();
 
-                // Additional ring for selected
+                // Additional ring for selected with pulse
                 if (isSelected) {
+                    const ringOpacity = 0.2 + Math.sin(animTime * 3 + Math.PI / 2) * 0.1;
                     ctx.beginPath();
-                    ctx.arc(x, y, radius * 1.6, 0, Math.PI * 2);
-                    ctx.strokeStyle = hexToRgba(color, 0.3);
-                    ctx.lineWidth = 2 * scale;
+                    ctx.arc(x, y, radius * 1.6 * pulse, 0, Math.PI * 2);
+                    ctx.strokeStyle = hexToRgba(color, ringOpacity);
+                    ctx.lineWidth = (2 + Math.sin(animTime * 3) * 0.5) * scale;
                     ctx.stroke();
                 }
             }
@@ -744,7 +791,7 @@ export function GraphCanvas() {
             }
         }
 
-    }, [nodes, nodeById, edges, selectedId, hoverNodeId, viewState, graph, getNodeWorldPos, positionsMap, worldToScreen, lodLevel, showHint, isPosterMode, layout, layoutMode, backgroundStyle, colors, laneColors, laneAccents, queryViewport, getLabelPos, showDatelines]);
+    }, [nodes, nodeById, edges, selectedId, hoverNodeId, viewState, graph, getNodeWorldPos, positionsMap, worldToScreen, lodLevel, showHint, isPosterMode, layout, layoutMode, backgroundStyle, colors, laneColors, laneAccents, queryViewport, getLabelPos, showDatelines, showHeatmap, heatmapIntensities, animTime, reducedMotion]);
 
     // Canvas resize handler
     useEffect(() => {
@@ -904,6 +951,101 @@ export function GraphCanvas() {
         canvas.addEventListener('wheel', handleWheel, { passive: false });
         return () => canvas.removeEventListener('wheel', handleWheel);
     }, [handleWheel]);
+
+    // Touch gesture support for mobile (pinch to zoom, drag to pan)
+    const touchRef = useRef<{
+        startTouches: { x: number; y: number }[];
+        startScale: number;
+        startOffset: { x: number; y: number };
+        lastPinchDist: number;
+    } | null>(null);
+
+    const handleTouchStart = useCallback((e: TouchEvent) => {
+        const touches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+        
+        touchRef.current = {
+            startTouches: touches,
+            startScale: viewState.scale,
+            startOffset: { x: viewState.offsetX, y: viewState.offsetY },
+            lastPinchDist: touches.length >= 2 
+                ? Math.hypot(touches[1].x - touches[0].x, touches[1].y - touches[0].y)
+                : 0,
+        };
+    }, [viewState.scale, viewState.offsetX, viewState.offsetY]);
+
+    const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (!touchRef.current) return;
+        e.preventDefault();
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const touches = Array.from(e.touches).map(t => ({ 
+            x: t.clientX - rect.left, 
+            y: t.clientY - rect.top 
+        }));
+        const startTouches = touchRef.current.startTouches.map(t => ({
+            x: t.x - rect.left,
+            y: t.y - rect.top,
+        }));
+
+        if (touches.length >= 2 && startTouches.length >= 2) {
+            // Pinch to zoom
+            const currentDist = Math.hypot(touches[1].x - touches[0].x, touches[1].y - touches[0].y);
+            const pinchScale = currentDist / touchRef.current.lastPinchDist;
+            
+            const centerX = (touches[0].x + touches[1].x) / 2;
+            const centerY = (touches[0].y + touches[1].y) / 2;
+            
+            const newScale = Math.max(0.25, Math.min(3, viewState.scale * pinchScale));
+            
+            // Zoom centered on pinch point
+            const worldBefore = screenToWorld(centerX, centerY);
+            const worldAfterX = centerX / newScale + viewState.offsetX;
+            const worldAfterY = centerY / newScale + viewState.offsetY;
+            
+            setViewState({
+                offsetX: viewState.offsetX + (worldBefore.x - worldAfterX),
+                offsetY: viewState.offsetY + (worldBefore.y - worldAfterY),
+                scale: newScale,
+            });
+            
+            touchRef.current.lastPinchDist = currentDist;
+        } else if (touches.length === 1 && startTouches.length >= 1) {
+            // Single finger pan
+            const dx = touches[0].x - startTouches[0].x;
+            const dy = touches[0].y - startTouches[0].y;
+            
+            setViewState(prev => ({
+                ...prev,
+                offsetX: touchRef.current!.startOffset.x - dx / prev.scale,
+                offsetY: touchRef.current!.startOffset.y - dy / prev.scale,
+            }));
+        }
+    }, [viewState.scale, viewState.offsetX, viewState.offsetY, screenToWorld]);
+
+    const handleTouchEnd = useCallback(() => {
+        touchRef.current = null;
+    }, []);
+
+    // Add touch listeners
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
+        return () => {
+            canvas.removeEventListener('touchstart', handleTouchStart);
+            canvas.removeEventListener('touchmove', handleTouchMove);
+            canvas.removeEventListener('touchend', handleTouchEnd);
+            canvas.removeEventListener('touchcancel', handleTouchEnd);
+        };
+    }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
     // Zoom controls
     const zoomIn = useCallback(() => {
@@ -1072,6 +1214,9 @@ export function GraphCanvas() {
         .graph-canvas canvas {
           display: block;
           cursor: grab;
+          touch-action: none;
+          -webkit-user-select: none;
+          user-select: none;
         }
         
         .zoom-controls {

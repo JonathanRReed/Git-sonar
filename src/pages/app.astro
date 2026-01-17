@@ -292,11 +292,30 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 const gitlabRepo = params.get('gitlab');
                 const bitbucketRepo = params.get('bitbucket');
 
+                // Apply URL state settings (theme, layout, view)
+                const state = useGraphStore.getState() as any;
+
+                const themeParam = params.get('theme');
+                if (themeParam && ['night', 'dawn', 'github', 'nord', 'dracula'].includes(themeParam)) {
+                    state.setTheme(themeParam);
+                }
+
+                const layoutParam = params.get('layout');
+                if (layoutParam && ['vertical', 'horizontal', 'radial'].includes(layoutParam)) {
+                    state.setLayoutMode(layoutParam);
+                }
+
+                const viewParam = params.get('view');
+                if (viewParam && ['inspect', 'poster', 'calendar'].includes(viewParam)) {
+                    state.setViewMode(viewParam);
+                }
+
+                const commitParam = params.get('commit');
+
                 const repoPath = githubRepo || gitlabRepo || bitbucketRepo;
                 if (!repoPath) return;
 
                 const provider = githubRepo ? 'github' : gitlabRepo ? 'gitlab' : 'bitbucket';
-                const state = useGraphStore.getState() as any;
 
                 state.setLoading(true);
                 state.setError(null);
@@ -315,6 +334,18 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 
                     state.setGraph(graph);
                     state.setRepoPath(repoPath, provider, graph.commits.size >= DEFAULT_MAX_COMMITS);
+
+                    // If a specific commit was requested in URL, select it
+                    if (commitParam) {
+                        const shortSha = commitParam.toLowerCase();
+                        // Find matching commit by prefix
+                        for (const [sha] of graph.commits) {
+                            if (sha.startsWith(shortSha) || sha === shortSha) {
+                                state.selectCommit(sha);
+                                break;
+                            }
+                        }
+                    }
                 } catch (err) {
                     state.setError(err instanceof Error ? err.message : 'Failed to import repository');
                 }
