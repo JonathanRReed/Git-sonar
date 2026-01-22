@@ -17,9 +17,9 @@
   "dependencies": {
     "@astrojs/react": "^4.4.2",
     "@tailwindcss/vite": "^4.1.18",
-    "@types/react": "^19.2.8",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
-    "astro": "^5.16.8",
+    "astro": "^5.16.13",
     "fflate": "^0.8.2",
     "isomorphic-git": "^1.36.1",
     "lucide-react": "^0.562.0",
@@ -27,20 +27,20 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwindcss": "^4.1.18",
-    "zustand": "^5.0.9"
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.1",
+    "@playwright/test": "^1.57.0",
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/react": "^16.3.1",
-    "@types/node": "^25.0.6",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.0.10",
     "@types/pako": "^2.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.52.0",
-    "@typescript-eslint/parser": "^8.52.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^27.4.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.17"
   }
 }
