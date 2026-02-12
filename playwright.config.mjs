@@ -9,8 +9,9 @@ export default defineConfig({
         trace: 'on-first-retry',
     },
     webServer: {
-        command: 'npm run dev -- --host 127.0.0.1 --port 4321',
-        port: 4321,
-        reuseExistingServer: !process.env.CI,
+        command: 'bun run dev --host 127.0.0.1 --port 4321',
+        url: 'http://127.0.0.1:4321',
+        timeout: 120_000,
+        reuseExistingServer: false,
     },
 });

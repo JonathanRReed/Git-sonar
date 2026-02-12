@@ -21,20 +21,40 @@ function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
 }
 
 /**
- * Parse a GitLab repository URL and return owner/repo.
+ * Parse a GitLab repository URL/path and return the full namespace path.
+ * Supports paths like `group/repo` and `group/subgroup/repo`.
  */
-function parseGitLabUrl(url: string): { owner: string; repo: string } | null {
-    const patterns = [
-        /gitlab\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:\/|$)/i,
-        /^([^/]+)\/([^/]+)$/,
-    ];
-    for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match) {
-            return { owner: match[1], repo: match[2].replace(/\.git$/, '') };
+export function parseGitLabProjectPath(urlOrPath: string): string | null {
+    const input = urlOrPath.trim();
+    if (!input) return null;
+
+    const sshPrefix = 'git@gitlab.com:';
+    let rawPath = input;
+
+    try {
+        if (/^https?:\/\//i.test(input)) {
+            const parsed = new URL(input);
+            if (parsed.hostname.toLowerCase() !== 'gitlab.com') return null;
+            rawPath = parsed.pathname;
+        } else if (input.toLowerCase().startsWith('gitlab.com/')) {
+            rawPath = input.slice('gitlab.com/'.length);
+        } else if (input.toLowerCase().startsWith(sshPrefix)) {
+            rawPath = input.slice(sshPrefix.length);
         }
+    } catch {
+        return null;
     }
-    return null;
+
+    const normalizedPath = rawPath
+        .replace(/^\/+|\/+$/g, '')
+        .replace(/\.git$/i, '');
+
+    if (!normalizedPath) return null;
+
+    const segments = normalizedPath.split('/').filter(Boolean);
+    if (segments.length < 2) return null;
+
+    return segments.join('/');
 }
 
 /**
@@ -345,19 +365,18 @@ export async function parseGitLabRepo(
     options: GitRepoImportOptions = {}
 ): Promise<RepoGraph> {
     const { maxCommits = 1000, onProgress, authToken } = options;
-    const parsed = parseGitLabUrl(urlOrPath);
-    if (!parsed) {
-        throw new Error('Invalid GitLab URL. Use format: https://gitlab.com/owner/repo or owner/repo');
+    const projectPath = parseGitLabProjectPath(urlOrPath);
+    if (!projectPath) {
+        throw new Error('Invalid GitLab URL. Use format: https://gitlab.com/group/repo, https://gitlab.com/group/subgroup/repo, or group/subgroup/repo');
     }
-
-    const { owner, repo } = parsed;
     const commits = new Map<string, CommitNode>();
     const refs = new Map<string, string>();
+    const encodedProjectPath = encodeURIComponent(projectPath);
 
     try {
         // Fetch repository info first to get default branch
         const repoInfoRes = await fetch(
-            `https://gitlab.com/api/v4/projects/${encodeURIComponent(`${owner}/${repo}`)}`,
+            `https://gitlab.com/api/v4/projects/${encodedProjectPath}`,
             { headers: createGitLabHeaders(authToken) }
         );
 
@@ -366,7 +385,7 @@ export async function parseGitLabRepo(
                 throw new Error('GitLab authentication failed or access denied. Check your access token.');
             }
             if (repoInfoRes.status === 404) {
-                throw new Error(`Repository not found: ${owner}/${repo}`);
+                throw new Error(`Repository not found: ${projectPath}`);
             }
             throw new Error(`Failed to fetch repository: ${repoInfoRes.statusText}`);
         }
@@ -381,7 +400,7 @@ export async function parseGitLabRepo(
 
         while (page <= maxPages && commits.size < maxCommits) {
             const commitsRes = await fetch(
-                `https://gitlab.com/api/v4/projects/${encodeURIComponent(`${owner}/${repo}`)}/repository/commits?per_page=${perPage}&page=${page}`,
+                `https://gitlab.com/api/v4/projects/${encodedProjectPath}/repository/commits?per_page=${perPage}&page=${page}`,
                 { headers: createGitLabHeaders(authToken) }
             );
 
@@ -428,7 +447,7 @@ export async function parseGitLabRepo(
 
         // Fetch branches for refs
         const branchesRes = await fetch(
-            `https://gitlab.com/api/v4/projects/${encodeURIComponent(`${owner}/${repo}`)}/repository/branches?per_page=100`,
+            `https://gitlab.com/api/v4/projects/${encodedProjectPath}/repository/branches?per_page=100`,
             { headers: createGitLabHeaders(authToken) }
         );
 
