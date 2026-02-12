@@ -8,16 +8,8 @@ interface CommitFiltersProps {
     onFiltersChange: (filters: FilterState) => void;
 }
 
-function formatDate(timestamp: number): string {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    });
-}
-
 export function CommitFilters({ filters, onFiltersChange }: CommitFiltersProps) {
-    const { nodes, graph, theme } = useGraphStore();
+    const { nodes, graph } = useGraphStore();
     const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
     const [showBranchDropdown, setShowBranchDropdown] = useState(false);
 
