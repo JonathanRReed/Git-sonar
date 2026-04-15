@@ -182,6 +182,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT © 2026 Git Sonar
+MIT. See [`LICENSE`](./LICENSE).
 
 ---
