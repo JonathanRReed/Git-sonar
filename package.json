@@ -19,18 +19,18 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@astrojs/react": "^4.4.2",
-    "@tailwindcss/vite": "^4.1.18",
+    "@astrojs/react": "^5.0.3",
+    "@tailwindcss/vite": "^4.2.3",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
-    "astro": "^5.17.2",
+    "astro": "^6.1.8",
     "fflate": "^0.8.2",
     "isomorphic-git": "^1.36.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^1.8.0",
     "pako": "^2.1.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.3",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
@@ -44,11 +44,11 @@
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
     "@vitest/coverage-v8": "4.1.4",
-    "eslint": "^8.57.1",
+    "eslint": "^10.2.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "jsdom": "^27.4.0",
-    "typescript": "^5.9.3",
+    "jsdom": "^29.0.2",
+    "typescript": "^6.0.3",
     "vitest": "4.1.4"
   }
 }
