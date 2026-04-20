@@ -20,7 +20,6 @@ export function debugLog(prefix: string, ...args: unknown[]): void {
  */
 export function debugWarn(prefix: string, ...args: unknown[]): void {
     if (isDev) {
-        // eslint-disable-next-line no-console
         console.warn(`[${prefix}]`, ...args);
     }
 }
@@ -30,7 +29,6 @@ export function debugWarn(prefix: string, ...args: unknown[]): void {
  */
 export function debugError(prefix: string, ...args: unknown[]): void {
     if (isDev) {
-        // eslint-disable-next-line no-console
         console.error(`[${prefix}]`, ...args);
     }
 }

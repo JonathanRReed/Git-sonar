@@ -50,7 +50,7 @@ export function CalendarView() {
     }
 
     const weeks: { date: Date; days: { date: Date; count: number }[] }[] = [];
-    let cursor = new Date(start);
+    const cursor = new Date(start);
     let maxCount = 0;
 
     while (cursor <= end) {

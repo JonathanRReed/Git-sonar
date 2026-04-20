@@ -8,8 +8,6 @@ async function loadApp(page) {
 async function loadBranchingDemo(page) {
     await loadApp(page);
     await page.getByRole('button', { name: /Load Demo/ }).click();
-    await expect(page.getByRole('button', { name: /Branching/ })).toBeVisible();
-    await page.getByRole('button', { name: /Branching/ }).click();
     await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible({ timeout: 5000 });
 }
 
@@ -22,14 +20,14 @@ test.describe('Git Sonar app', () => {
 
     test('loads the about page', async ({ page }) => {
         await page.goto('/about');
-        await expect(page.getByRole('heading', { name: /Jonathan Reed builds tools/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Jonathan Reed builds Git Sonar/ })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Launch Git Sonar' })).toBeVisible();
     });
 
     test('shows import panel on app page', async ({ page }) => {
         await loadApp(page);
         // Import panel is shown first (before loading a repo)
-        await expect(page.getByRole('heading', { name: 'Visualize Your Git History' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Inspect Git History' })).toBeVisible();
         await expect(page.getByPlaceholder('https://github.com/owner/repo or https://gitlab.com/owner/repo')).toBeVisible();
         await expect(page.getByLabel('Git visualization').getByRole('button', { name: 'Import' })).toBeVisible();
     });
