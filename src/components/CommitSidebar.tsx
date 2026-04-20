@@ -89,14 +89,15 @@ export function CommitSidebar() {
             <style>{`
                 .sidebar__header {
                     padding: 1rem;
-                    border-bottom: 1px solid var(--rp-highlight-low);
+                    border-bottom: 1px solid rgba(244, 240, 232, 0.1);
                 }
 
                 .sidebar__header h2 {
                     margin: 0 0 0.75rem;
                     font-size: 0.85rem;
                     font-weight: 600;
-                    color: var(--rp-subtle);
+                    color: rgba(244, 240, 232, 0.62);
+                    font-family: 'JetBrains Mono', monospace;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                 }
@@ -108,9 +109,9 @@ export function CommitSidebar() {
                 .search-input {
                     width: 100%;
                     padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-                    background: var(--rp-overlay);
-                    border: 1px solid var(--rp-highlight-med);
-                    border-radius: 6px;
+                    background: rgba(8, 9, 8, 0.62);
+                    border: 1px solid rgba(244, 240, 232, 0.11);
+                    border-radius: 0.75rem;
                     color: var(--rp-text);
                     font-size: 0.85rem;
                 }
@@ -121,7 +122,7 @@ export function CommitSidebar() {
 
                 .search-input:focus {
                     outline: none;
-                    border-color: var(--rp-foam);
+                    border-color: rgba(143, 211, 199, 0.55);
                 }
 
                 .search-input:focus + .search-kbd {
@@ -134,9 +135,9 @@ export function CommitSidebar() {
                     top: 50%;
                     transform: translateY(-50%);
                     padding: 0.15rem 0.4rem;
-                    background: var(--rp-surface);
-                    border: 1px solid var(--rp-highlight-med);
-                    border-radius: 4px;
+                    background: rgba(244, 240, 232, 0.06);
+                    border: 1px solid rgba(244, 240, 232, 0.1);
+                    border-radius: 0.5rem;
                     color: var(--rp-muted);
                     font-family: 'JetBrains Mono', monospace;
                     font-size: 0.7rem;
@@ -157,8 +158,8 @@ export function CommitSidebar() {
                     align-items: center;
                     gap: 0.35rem;
                     padding: 0.4rem 0.6rem;
-                    border: 1px solid var(--rp-highlight-med);
-                    border-radius: 6px;
+                    border: 1px solid rgba(244, 240, 232, 0.12);
+                    border-radius: 999px;
                     background: transparent;
                     color: var(--rp-subtle);
                     font-size: 0.75rem;
@@ -173,20 +174,20 @@ export function CommitSidebar() {
                 }
 
                 .filter-toggle:hover {
-                    border-color: var(--rp-foam);
+                    border-color: rgba(143, 211, 199, 0.45);
                     color: var(--rp-text);
                 }
 
                 .filter-toggle--active {
-                    background: rgba(156, 207, 216, 0.15);
-                    border-color: var(--rp-foam);
-                    color: var(--rp-foam);
+                    background: rgba(242, 179, 109, 0.13);
+                    border-color: rgba(242, 179, 109, 0.5);
+                    color: var(--rp-gold);
                 }
 
                 .filter-badge {
                     width: 6px;
                     height: 6px;
-                    background: var(--rp-love);
+                    background: var(--rp-gold);
                     border-radius: 50%;
                     margin-left: 0.25rem;
                 }
@@ -195,7 +196,7 @@ export function CommitSidebar() {
                     padding: 0.35rem 0.5rem;
                     border: none;
                     border-radius: 4px;
-                    background: rgba(235, 111, 146, 0.15);
+                    background: rgba(216, 111, 97, 0.15);
                     color: var(--rp-love);
                     font-size: 0.7rem;
                     font-weight: 600;
@@ -204,7 +205,7 @@ export function CommitSidebar() {
                 }
 
                 .filter-clear:hover {
-                    background: rgba(235, 111, 146, 0.25);
+                    background: rgba(216, 111, 97, 0.25);
                 }
             `}</style>
         </>

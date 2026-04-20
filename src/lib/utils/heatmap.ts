@@ -62,10 +62,10 @@ export function calculateHeatmapIntensities(
  * Uses a gradient from cool (blue) to hot (red)
  * 
  * @param intensity - Value from 0 to 1
- * @param baseColor - Optional base color to blend with
+ * @param _baseColor - Optional base color reserved for custom heatmap themes
  * @returns Hex color string
  */
-export function getHeatmapColor(intensity: number, baseColor?: string): string {
+export function getHeatmapColor(intensity: number, _baseColor?: string): string {
     // Clamp intensity to 0-1
     const t = Math.max(0, Math.min(1, intensity));
     

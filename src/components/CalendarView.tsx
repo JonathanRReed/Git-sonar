@@ -19,7 +19,7 @@ function formatMonth(date: Date) {
 }
 
 function formatRange(start: Date, end: Date) {
-  return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} to ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
 
 export function CalendarView() {
@@ -140,11 +140,10 @@ export function CalendarView() {
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
-          background: linear-gradient(
-            180deg,
-            rgba(var(--rp-base-rgb), 0.98) 0%,
-            rgba(var(--rp-base-rgb), 0.94) 100%
-          );
+          background:
+            radial-gradient(circle at 18% 14%, rgba(143, 211, 199, 0.14), transparent 30rem),
+            radial-gradient(circle at 86% 10%, rgba(242, 179, 109, 0.12), transparent 28rem),
+            rgba(8, 9, 8, 0.96);
           z-index: 6;
           overflow: auto;
         }
@@ -158,7 +157,10 @@ export function CalendarView() {
 
         .calendar-header h2 {
           margin: 0 0 0.35rem;
-          font-size: 1.2rem;
+          font-size: clamp(2.2rem, 5vw, 4.8rem);
+          line-height: 0.92;
+          font-weight: 800;
+          text-wrap: balance;
         }
 
         .calendar-header p {
@@ -169,7 +171,8 @@ export function CalendarView() {
 
         .calendar-stats {
           font-size: 0.9rem;
-          color: var(--rp-foam);
+          color: var(--rp-gold);
+          font-family: var(--font-mono);
         }
 
         .calendar-grid {
@@ -177,9 +180,11 @@ export function CalendarView() {
           flex-direction: column;
           gap: 0.75rem;
           padding: 1.5rem;
-          background: rgba(var(--rp-surface-rgb), 0.85);
-          border: 1px solid var(--rp-highlight-low);
-          border-radius: 16px;
+          background: rgba(16, 18, 15, 0.78);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 1rem;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(18px);
           overflow-x: auto;
         }
 

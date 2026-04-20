@@ -313,8 +313,21 @@ export function generateVectorSVG(
     }
 
 
-    // Definitions for gradients, filters, etc.
+    // Definitions for export art direction.
     svgParts.push(`  <defs>`);
+    svgParts.push(`    <radialGradient id="exportAmbientA" cx="18%" cy="14%" r="70%">`);
+    svgParts.push(`      <stop offset="0%" stop-color="${hexToRgba(colors.foam, 0.2)}"/>`);
+    svgParts.push(`      <stop offset="58%" stop-color="${hexToRgba(colors.foam, 0.08)}"/>`);
+    svgParts.push(`      <stop offset="100%" stop-color="${hexToRgba(colors.foam, 0)}"/>`);
+    svgParts.push(`    </radialGradient>`);
+    svgParts.push(`    <radialGradient id="exportAmbientB" cx="86%" cy="18%" r="62%">`);
+    svgParts.push(`      <stop offset="0%" stop-color="${hexToRgba(colors.gold, 0.18)}"/>`);
+    svgParts.push(`      <stop offset="68%" stop-color="${hexToRgba(colors.gold, 0.06)}"/>`);
+    svgParts.push(`      <stop offset="100%" stop-color="${hexToRgba(colors.gold, 0)}"/>`);
+    svgParts.push(`    </radialGradient>`);
+    svgParts.push(`    <pattern id="exportFineGrid" width="28" height="28" patternUnits="userSpaceOnUse">`);
+    svgParts.push(`      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="${hexToRgba(colors.text, 0.055)}" stroke-width="1"/>`);
+    svgParts.push(`    </pattern>`);
     if (normalizedBackground.type === 'gradient') {
         const angle = resolvedBackground.gradientAngle * (Math.PI / 180);
         const cx = contentWidth / 2;
@@ -338,8 +351,8 @@ export function generateVectorSVG(
         svgParts.push(`    </pattern>`);
     }
     svgParts.push(`    <style>`);
-    svgParts.push(`      .node-label { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: ${colors.text}; }`);
-    svgParts.push(`      .branch-label { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: ${colors.text}; }`);
+    svgParts.push(`      .node-label { font-family: 'Cabinet Grotesk', 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 700; fill: ${colors.text}; }`);
+    svgParts.push(`      .branch-label { font-family: 'JetBrains Mono', 'SFMono-Regular', monospace; font-size: 12px; font-weight: 600; fill: ${colors.text}; letter-spacing: 0.02em; }`);
     svgParts.push(`    </style>`);
     svgParts.push(`  </defs>`);
 
@@ -351,6 +364,12 @@ export function generateVectorSVG(
     } else if (normalizedBackground.type === 'grid') {
         svgParts.push(`  <rect width="100%" height="100%" fill="${resolvedBackground.color}"/>`);
         svgParts.push(`  <rect width="100%" height="100%" fill="url(#bgGrid)"/>`);
+    }
+    if (normalizedBackground.type !== 'transparent') {
+        svgParts.push(`  <rect width="100%" height="100%" fill="url(#exportAmbientA)"/>`);
+        svgParts.push(`  <rect width="100%" height="100%" fill="url(#exportAmbientB)"/>`);
+        svgParts.push(`  <rect width="100%" height="100%" fill="url(#exportFineGrid)" opacity="0.8"/>`);
+        svgParts.push(`  <rect x="18" y="18" width="${Math.max(contentWidth - 36, 1)}" height="${Math.max(contentHeight - 36, 1)}" rx="18" fill="none" stroke="${hexToRgba(colors.text, 0.13)}" stroke-width="1"/>`);
     }
 
     // Lane lines
@@ -390,7 +409,7 @@ export function generateVectorSVG(
             const pillHeight = 24;
             const pillRadius = 8;
 
-            svgParts.push(`      <rect x="${x - pillWidth / 2}" y="${y - pillHeight / 2}" width="${pillWidth}" height="${pillHeight}" rx="${pillRadius}" fill="${hexToRgba(colors.surface, 0.9)}" stroke="${hexToRgba(color, 0.6)}" stroke-width="1"/>`);
+            svgParts.push(`      <rect x="${x - pillWidth / 2}" y="${y - pillHeight / 2}" width="${pillWidth}" height="${pillHeight}" rx="${pillRadius}" fill="${hexToRgba(colors.base, 0.78)}" stroke="${hexToRgba(color, 0.68)}" stroke-width="1"/>`);
             svgParts.push(`      <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" class="branch-label">${escapeXml(branchName)}</text>`);
         }
         svgParts.push(`    </g>`);
@@ -400,7 +419,7 @@ export function generateVectorSVG(
     if (title) {
         svgParts.push(`    <!-- Title -->`);
         svgParts.push(`    <g class="title">`);
-        svgParts.push(`      <text x="${contentWidth / 2 + offsetX}" y="${30 + offsetY}" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="24" font-weight="700" fill="${colors.text}">${escapeXml(title)}</text>`);
+        svgParts.push(`      <text x="${contentWidth / 2 + offsetX}" y="${30 + offsetY}" text-anchor="middle" font-family="'Cabinet Grotesk', 'Inter', system-ui, sans-serif" font-size="24" font-weight="800" fill="${colors.text}">${escapeXml(title)}</text>`);
         svgParts.push(`    </g>`);
     }
 
@@ -433,7 +452,7 @@ export function generateVectorSVG(
                     const y = layout.paddingTop + ((bounds.maxY - layout.paddingTop) * ratio) + offsetY;
 
                     svgParts.push(`      <line x1="${60 + offsetX}" y1="${y}" x2="${70 + offsetX}" y2="${y}" stroke="${hexToRgba(colors.highlightMed, 0.4)}" stroke-width="1"/>`);
-                    svgParts.push(`      <text x="${50 + offsetX}" y="${y + 3}" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="10" fill="${colors.muted}">${dateStr}</text>`);
+                    svgParts.push(`      <text x="${50 + offsetX}" y="${y + 3}" text-anchor="end" font-family="'JetBrains Mono', 'SFMono-Regular', monospace" font-size="10" fill="${colors.muted}">${dateStr}</text>`);
                 }
             }
         }
@@ -474,7 +493,8 @@ export function generateVectorSVG(
             pathD = `M ${from.x + offsetX} ${from.y + offsetY} L ${to.x + offsetX} ${to.y + offsetY}`;
         }
 
-        svgParts.push(`      <path d="${pathD}" stroke="${hexToRgba(color, 0.9)}" stroke-width="${strokeWidth}"/>`);
+        svgParts.push(`      <path d="${pathD}" stroke="${hexToRgba(colors.base, 0.72)}" stroke-width="${strokeWidth + 5.2}"/>`);
+        svgParts.push(`      <path d="${pathD}" stroke="${hexToRgba(color, edge.isMerge ? 0.95 : 0.86)}" stroke-width="${strokeWidth}"/>`);
     }
     svgParts.push(`    </g>`);
 
@@ -490,6 +510,8 @@ export function generateVectorSVG(
         const cx = pos.x + offsetX;
         const cy = pos.y + offsetY;
 
+        svgParts.push(`      <circle cx="${cx}" cy="${cy}" r="${radius * 2.3}" fill="${hexToRgba(color, 0.16)}"/>`);
+
         if (isRoot) {
             // Diamond for root commits
             const points = [
@@ -498,7 +520,7 @@ export function generateVectorSVG(
                 `${cx},${cy + radius}`,
                 `${cx - radius},${cy}`,
             ].join(' ');
-            svgParts.push(`      <polygon points="${points}" fill="${color}" data-sha="${node.id.slice(0, 7)}" data-type="root"/>`);
+            svgParts.push(`      <polygon points="${points}" fill="${color}" stroke="${hexToRgba(colors.base, 0.92)}" stroke-width="3" data-sha="${node.id.slice(0, 7)}" data-type="root"/>`);
         } else if (isMerge) {
             // Hexagon for merge commits
             const points: string[] = [];
@@ -508,10 +530,10 @@ export function generateVectorSVG(
                 const py = cy + radius * Math.sin(angle);
                 points.push(`${px},${py}`);
             }
-            svgParts.push(`      <polygon points="${points.join(' ')}" fill="${color}" data-sha="${node.id.slice(0, 7)}" data-type="merge"/>`);
+            svgParts.push(`      <polygon points="${points.join(' ')}" fill="${color}" stroke="${hexToRgba(colors.base, 0.92)}" stroke-width="3" data-sha="${node.id.slice(0, 7)}" data-type="merge"/>`);
         } else {
             // Circle for regular commits
-            svgParts.push(`      <circle cx="${cx}" cy="${cy}" r="${radius}" fill="${color}" data-sha="${node.id.slice(0, 7)}"/>`);
+            svgParts.push(`      <circle cx="${cx}" cy="${cy}" r="${radius}" fill="${color}" stroke="${hexToRgba(colors.base, 0.92)}" stroke-width="3" data-sha="${node.id.slice(0, 7)}"/>`);
         }
 
         // Inner highlight dot
@@ -558,12 +580,9 @@ export function openPrintableSVG(
     nodes: PositionedNode[],
     edges: CommitEdge[],
     options?: SVGExportOptions
-): void {
+): boolean {
     const svgContent = generateVectorSVG(graph, nodes, edges, options);
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`<!DOCTYPE html>
+    const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -577,14 +596,27 @@ export function openPrintableSVG(
 <body>
 ${svgContent}
 </body>
-</html>`);
+</html>`;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
 
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.onload = () => {
+    if (!printWindow) {
+        URL.revokeObjectURL(url);
+        return false;
+    }
+
+    const cleanup = () => URL.revokeObjectURL(url);
+    printWindow.addEventListener('load', () => {
+        printWindow.focus();
         printWindow.print();
-        printWindow.onafterprint = () => printWindow.close();
-    };
+        printWindow.onafterprint = () => {
+            cleanup();
+            printWindow.close();
+        };
+    }, { once: true });
+    window.setTimeout(cleanup, 30000);
+    return true;
 }
 
 /**

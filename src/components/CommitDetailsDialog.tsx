@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
+import { copyToClipboard } from '@lib/utils/url-state';
 
 export function CommitDetailsDialog() {
     const { selectedId, graph, showDetails, toggleDetails, theme } = useGraphStore();
@@ -62,26 +63,14 @@ export function CommitDetailsDialog() {
 
     const handleCopySha = async () => {
         if (!commit) return;
-        try {
-            if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(commit.id);
-            } else {
-                const textarea = document.createElement('textarea');
-                textarea.value = commit.id;
-                textarea.setAttribute('readonly', '');
-                textarea.style.position = 'absolute';
-                textarea.style.left = '-9999px';
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-            }
+        const copied = await copyToClipboard(commit.id);
+        if (copied) {
             if (copyTimeoutRef.current) {
                 window.clearTimeout(copyTimeoutRef.current);
             }
             setCopiedCommitId(commit.id);
             copyTimeoutRef.current = window.setTimeout(() => setCopiedCommitId(null), 1500);
-        } catch {
+        } else {
             setCopiedCommitId(null);
         }
     };

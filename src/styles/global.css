@@ -4,54 +4,54 @@
 /* Rosé Pine color palette - https://rosepinetheme.com */
 @theme {
   /* Base */
-  --color-base: #191724;
-  --color-surface: #1f1d2e;
-  --color-overlay: #26233a;
+  --color-base: #080908;
+  --color-surface: #10120f;
+  --color-overlay: #1a1f1b;
 
   /* Text */
-  --color-muted: #6e6a86;
-  --color-subtle: #908caa;
-  --color-text: #e0def4;
+  --color-muted: #777d74;
+  --color-subtle: #b9b6ac;
+  --color-text: #f4f0e8;
 
   /* Accents */
-  --color-love: #eb6f92;
-  --color-gold: #f6c177;
-  --color-rose: #ebbcba;
-  --color-pine: #31748f;
-  --color-foam: #9ccfd8;
-  --color-iris: #c4a7e7;
+  --color-love: #d86f61;
+  --color-gold: #f2b36d;
+  --color-rose: #d6a49b;
+  --color-pine: #29423d;
+  --color-foam: #8fd3c7;
+  --color-iris: #c8b58a;
 
   /* Highlights */
-  --color-highlight-low: #21202e;
-  --color-highlight-med: #403d52;
-  --color-highlight-high: #524f67;
+  --color-highlight-low: #18201c;
+  --color-highlight-med: #314038;
+  --color-highlight-high: #4b6258;
 
   /* Fonts */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Cabinet Grotesk', 'Geist', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 /* CSS custom properties for components */
 :root {
-  --rp-base: #191724;
-  --rp-surface: #1f1d2e;
-  --rp-overlay: #26233a;
-  --rp-muted: #6e6a86;
-  --rp-subtle: #908caa;
-  --rp-text: #e0def4;
-  --rp-love: #eb6f92;
-  --rp-gold: #f6c177;
-  --rp-rose: #ebbcba;
-  --rp-pine: #31748f;
-  --rp-foam: #9ccfd8;
-  --rp-iris: #c4a7e7;
-  --rp-highlight-low: #21202e;
-  --rp-highlight-med: #403d52;
-  --rp-highlight-high: #524f67;
-  --rp-base-rgb: 25, 23, 36;
-  --rp-surface-rgb: 31, 29, 46;
-  --rp-overlay-rgb: 38, 35, 58;
-  --rp-text-rgb: 224, 222, 244;
+  --rp-base: #080908;
+  --rp-surface: #10120f;
+  --rp-overlay: #1a1f1b;
+  --rp-muted: #777d74;
+  --rp-subtle: #b9b6ac;
+  --rp-text: #f4f0e8;
+  --rp-love: #d86f61;
+  --rp-gold: #f2b36d;
+  --rp-rose: #d6a49b;
+  --rp-pine: #29423d;
+  --rp-foam: #8fd3c7;
+  --rp-iris: #c8b58a;
+  --rp-highlight-low: #18201c;
+  --rp-highlight-med: #314038;
+  --rp-highlight-high: #4b6258;
+  --rp-base-rgb: 8, 9, 8;
+  --rp-surface-rgb: 16, 18, 15;
+  --rp-overlay-rgb: 26, 31, 27;
+  --rp-text-rgb: 244, 240, 232;
 
   /* Glassmorphism */
   --glass-bg: rgba(var(--rp-surface-rgb), 0.8);
@@ -60,9 +60,9 @@
 
   /* Modern gradients */
   --gradient-foam: linear-gradient(135deg, #9ccfd8, #7cc1d4);
-  --gradient-iris: linear-gradient(135deg, #c4a7e7, #a487d7);
+  --gradient-iris: linear-gradient(135deg, #c8b58a, #9f936f);
   --gradient-gold: linear-gradient(135deg, #f6c177, #d4a057);
-  --gradient-love: linear-gradient(135deg, #eb6f92, #c8466d);
+  --gradient-love: linear-gradient(135deg, #d86f61, #a7473c);
 
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -150,28 +150,6 @@ textarea {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* Skip to main content link - visible on focus for keyboard users */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--rp-foam);
-  color: var(--rp-base);
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  z-index: 10000;
-  text-decoration: none;
-  border-radius: 0 0 8px 0;
-  transition: top 0.2s ease;
-}
-
-.skip-link:focus {
-  top: 0;
-  outline: 2px solid var(--rp-iris);
-  outline-offset: 2px;
 }
 
 /* No-JS notice */

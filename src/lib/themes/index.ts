@@ -9,29 +9,29 @@ import type { Theme, ThemeColors } from '@lib/git/types';
 export type { Theme, ThemeColors };
 
 /**
- * Rosé Pine Night (Dark) Theme
- * The classic dark mode theme.
+ * Git Sonar Night Theme
+ * The default product theme, aligned with the landing page.
  */
 const ROSE_PINE_NIGHT: Theme = {
     id: 'night',
-    name: 'Rosé Pine Night',
+    name: 'Git Sonar Night',
     variant: 'dark',
     colors: {
-        base: '#191724',
-        surface: '#1f1d2e',
-        overlay: '#26233a',
-        muted: '#6e6a86',
-        subtle: '#908caa',
-        text: '#e0def4',
-        love: '#eb6f92',
-        gold: '#f6c177',
-        rose: '#ebbcba',
-        pine: '#31748f',
-        foam: '#9ccfd8',
-        iris: '#c4a7e7',
-        highlightLow: '#21202e',
-        highlightMed: '#403d52',
-        highlightHigh: '#524f67',
+        base: '#080908',
+        surface: '#10120f',
+        overlay: '#1a1f1b',
+        muted: '#777d74',
+        subtle: '#b9b6ac',
+        text: '#f4f0e8',
+        love: '#d86f61',
+        gold: '#f2b36d',
+        rose: '#d6a49b',
+        pine: '#29423d',
+        foam: '#8fd3c7',
+        iris: '#c8b58a',
+        highlightLow: '#18201c',
+        highlightMed: '#314038',
+        highlightHigh: '#4b6258',
     },
 };
 
@@ -160,9 +160,9 @@ const THEME_STORAGE_KEY = 'git-sonar-theme';
  */
 const THEME_RGB: Record<ThemeId, { base: string; surface: string; text: string }> = {
     night: {
-        base: '25, 23, 36',
-        surface: '31, 29, 46',
-        text: '224, 222, 244',
+        base: '8, 9, 8',
+        surface: '16, 18, 15',
+        text: '244, 240, 232',
     },
     dawn: {
         base: '250, 244, 237',

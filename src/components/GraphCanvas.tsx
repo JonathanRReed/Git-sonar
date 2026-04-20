@@ -33,9 +33,10 @@ export function GraphCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [viewState, setViewState] = useState({ offsetX: 0, offsetY: -50, scale: 1 });
     const [hoverNodeId, setHoverNodeId] = useState<string | null>(null);
-    const [initialized, setInitialized] = useState(false);
     const [showHint, setShowHint] = useState(true);
     const [animTime, setAnimTime] = useState(0);
+    const initializedRef = useRef(false);
+    const skipNextSelectionCenterRef = useRef(false);
 
     // Calculate LOD level based on scale
     const lodLevel = useMemo(() => {
@@ -110,15 +111,9 @@ export function GraphCanvas() {
 
     // Hide hint after 4 seconds
     useEffect(() => {
-        if (nodes.length === 0) return;
-        if (reducedMotion || isPosterMode) {
-            setShowHint(false);
-            return;
-        }
-        if (showHint) {
-            const timeout = setTimeout(() => setShowHint(false), 3500);
-            return () => clearTimeout(timeout);
-        }
+        if (nodes.length === 0 || reducedMotion || isPosterMode || !showHint) return;
+        const timeout = setTimeout(() => setShowHint(false), 3500);
+        return () => clearTimeout(timeout);
     }, [nodes.length, showHint, reducedMotion, isPosterMode]);
 
     // Animation loop for selection effects
@@ -190,10 +185,15 @@ export function GraphCanvas() {
         return hitTestWorld(world.x, world.y, hitRadius);
     }, [screenToWorld, hitTestWorld]);
 
+    // Reset initialized state when graph changes
+    useEffect(() => {
+        initializedRef.current = false;
+    }, [graph]);
+
     // Center view on graph when nodes first load - with retry logic
     useEffect(() => {
         if (nodes.length === 0) return;
-        if (initialized) return;
+        if (initializedRef.current) return;
 
         const container = containerRef.current;
         if (!container) return;
@@ -203,7 +203,9 @@ export function GraphCanvas() {
         const canvasHeight = rect.height;
 
         if (canvasWidth === 0 || canvasHeight === 0) {
-            const retryId = setTimeout(() => setInitialized(false), 50);
+            const retryId = setTimeout(() => {
+                initializedRef.current = false;
+            }, 50);
             return () => clearTimeout(retryId);
         }
 
@@ -222,13 +224,19 @@ export function GraphCanvas() {
 
         const graphCenterX = (minX + maxX) / 2;
         const graphCenterY = (minY + maxY) / 2;
-        const anchorY = layoutMode === 'radial' ? graphCenterY : minY;
+        const padding = Math.max(layout.rowHeight, layout.laneWidth) * 1.5;
+        const graphWidth = maxX - minX + padding * 2;
+        const graphHeight = maxY - minY + padding * 2;
+        const scaleX = canvasWidth / graphWidth;
+        const scaleY = canvasHeight / graphHeight;
+        const nextScale = Math.max(0.25, Math.min(scaleX, scaleY, 1) * 0.9);
 
         setViewState({
-            offsetX: graphCenterX - canvasWidth / 2,
-            offsetY: anchorY - canvasHeight / 4,
-            scale: 1,
+            offsetX: graphCenterX - canvasWidth / (2 * nextScale),
+            offsetY: graphCenterY - canvasHeight / (2 * nextScale),
+            scale: nextScale,
         });
+        skipNextSelectionCenterRef.current = true;
 
         if (nodes.length > 0 && !selectedId) {
             const newestNode = [...nodes].reverse()[0];
@@ -237,18 +245,17 @@ export function GraphCanvas() {
             }
         }
 
-        setInitialized(true);
+        initializedRef.current = true;
         setShowHint(true);
-    }, [nodes, initialized, selectedId, selectCommit, getNodeWorldPos, positionsMap, layoutMode]);
-
-    // Reset initialized state when graph changes
-    useEffect(() => {
-        setInitialized(false);
-    }, [graph]);
+    }, [nodes, selectedId, selectCommit, getNodeWorldPos, positionsMap, layout]);
 
     // Smooth scroll to selected node (respects reduced motion preference)
     useEffect(() => {
-        if (!selectedId || nodes.length === 0 || !initialized) return;
+        if (!selectedId || nodes.length === 0 || !initializedRef.current) return;
+        if (skipNextSelectionCenterRef.current) {
+            skipNextSelectionCenterRef.current = false;
+            return;
+        }
 
         const node = nodes.find(n => n.id === selectedId);
         if (!node) return;
@@ -298,7 +305,7 @@ export function GraphCanvas() {
         };
 
         requestAnimationFrame(animate);
-    }, [selectedId, nodes, getNodeWorldPos, positionsMap, viewState.scale, initialized, reducedMotion]);
+    }, [selectedId, nodes, getNodeWorldPos, positionsMap, viewState.scale, reducedMotion]);
 
     // Render the canvas - optimized for performance
     useEffect(() => {
@@ -336,6 +343,49 @@ export function GraphCanvas() {
             }
 
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            const ambientA = ctx.createRadialGradient(
+                canvasWidth * 0.18,
+                canvasHeight * 0.16,
+                0,
+                canvasWidth * 0.18,
+                canvasHeight * 0.16,
+                Math.max(canvasWidth, canvasHeight) * 0.72
+            );
+            ambientA.addColorStop(0, hexToRgba(colors.foam, 0.15));
+            ambientA.addColorStop(0.58, hexToRgba(colors.foam, 0.05));
+            ambientA.addColorStop(1, hexToRgba(colors.foam, 0));
+            ctx.fillStyle = ambientA;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            const ambientB = ctx.createRadialGradient(
+                canvasWidth * 0.88,
+                canvasHeight * 0.18,
+                0,
+                canvasWidth * 0.88,
+                canvasHeight * 0.18,
+                Math.max(canvasWidth, canvasHeight) * 0.58
+            );
+            ambientB.addColorStop(0, hexToRgba(colors.gold, 0.13));
+            ambientB.addColorStop(0.68, hexToRgba(colors.gold, 0.04));
+            ambientB.addColorStop(1, hexToRgba(colors.gold, 0));
+            ctx.fillStyle = ambientB;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            ctx.strokeStyle = hexToRgba(colors.text, 0.035);
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvasWidth; x += 28) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvasHeight);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= canvasHeight; y += 28) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvasWidth, y);
+                ctx.stroke();
+            }
 
             if (backgroundStyle.type === 'grid') {
                 const rowSpacing = layout.rowHeight * viewState.scale;
@@ -506,24 +556,31 @@ export function GraphCanvas() {
                 : hexToRgba(accent.main, 0.9);
             const lineWidth = batch.isMerge ? 2.4 : 1.8;
 
+            const drawBatchPath = () => {
+                ctx.beginPath();
+                for (const edge of batch.edges) {
+                    ctx.moveTo(edge.fromX, edge.fromY);
+                    if (layoutMode === 'horizontal' && Math.abs(edge.fromY - edge.toY) > 1) {
+                        const midX = (edge.fromX + edge.toX) / 2;
+                        ctx.bezierCurveTo(midX, edge.fromY, midX, edge.toY, edge.toX, edge.toY);
+                    } else if (layoutMode !== 'radial' && Math.abs(edge.fromX - edge.toX) > 1) {
+                        const midY = (edge.fromY + edge.toY) / 2;
+                        ctx.bezierCurveTo(edge.fromX, midY, edge.toX, midY, edge.toX, edge.toY);
+                    } else {
+                        ctx.lineTo(edge.toX, edge.toY);
+                    }
+                }
+            };
+
+            ctx.strokeStyle = hexToRgba(colors.base, 0.72);
+            ctx.lineWidth = (lineWidth + 4.8) * scale;
+            ctx.globalAlpha = 1;
+            drawBatchPath();
+            ctx.stroke();
+
             ctx.strokeStyle = edgeColor;
             ctx.lineWidth = lineWidth * scale;
-            ctx.globalAlpha = 1;
-            ctx.beginPath();
-
-            // Draw all edges in this batch
-            for (const edge of batch.edges) {
-                ctx.moveTo(edge.fromX, edge.fromY);
-                if (layoutMode === 'horizontal' && Math.abs(edge.fromY - edge.toY) > 1) {
-                    const midX = (edge.fromX + edge.toX) / 2;
-                    ctx.bezierCurveTo(midX, edge.fromY, midX, edge.toY, edge.toX, edge.toY);
-                } else if (layoutMode !== 'radial' && Math.abs(edge.fromX - edge.toX) > 1) {
-                    const midY = (edge.fromY + edge.toY) / 2;
-                    ctx.bezierCurveTo(edge.fromX, midY, edge.toX, midY, edge.toX, edge.toY);
-                } else {
-                    ctx.lineTo(edge.toX, edge.toY);
-                }
-            }
+            drawBatchPath();
             ctx.stroke();
         }
 
@@ -602,6 +659,17 @@ export function GraphCanvas() {
             if (isSelected) radius = NODE_RADIUS_SELECTED;
             radius *= scale;
 
+            if (!simplified) {
+                const haloGradient = ctx.createRadialGradient(x, y, radius * 0.7, x, y, radius * 2.15);
+                haloGradient.addColorStop(0, hexToRgba(color, 0.16));
+                haloGradient.addColorStop(1, hexToRgba(color, 0));
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 2.15, 0, Math.PI * 2);
+                ctx.fillStyle = haloGradient;
+                ctx.fill();
+            }
+
             // Draw outer ring only for selected/hovered with subtle pulse animation
             if (!simplified && !isPosterMode && (isSelected || isHovered)) {
                 // Animated pulse for selected node (subtle sine wave 0.9 to 1.1)
@@ -659,6 +727,12 @@ export function GraphCanvas() {
             // Fill with solid color (faster than gradient)
             ctx.fillStyle = color;
             ctx.fill();
+
+            if (!simplified) {
+                ctx.strokeStyle = hexToRgba(colors.base, 0.92);
+                ctx.lineWidth = 2.4 * scale;
+                ctx.stroke();
+            }
 
             // Border for selected/hovered
             if (!simplified && !isPosterMode && (isSelected || isHovered)) {
@@ -1108,38 +1182,8 @@ export function GraphCanvas() {
     }, [isPosterMode, nodes.length, fitToView]);
 
     const resetView = useCallback(() => {
-        if (nodes.length === 0) return;
-
-        const container = containerRef.current;
-        if (!container) return;
-
-        const rect = container.getBoundingClientRect();
-        const canvasWidth = rect.width;
-        const canvasHeight = rect.height;
-
-        let minX = Number.POSITIVE_INFINITY;
-        let maxX = Number.NEGATIVE_INFINITY;
-        let minY = Number.POSITIVE_INFINITY;
-        let maxY = Number.NEGATIVE_INFINITY;
-
-        for (const node of nodes) {
-            const pos = positionsMap.get(node.id) ?? getNodeWorldPos(node);
-            minX = Math.min(minX, pos.x);
-            maxX = Math.max(maxX, pos.x);
-            minY = Math.min(minY, pos.y);
-            maxY = Math.max(maxY, pos.y);
-        }
-
-        const centerX = (minX + maxX) / 2;
-        const centerY = (minY + maxY) / 2;
-        const anchorY = layoutMode === 'radial' ? centerY : minY;
-
-        setViewState({
-            offsetX: centerX - canvasWidth / 2,
-            offsetY: anchorY - canvasHeight / 4,
-            scale: 1,
-        });
-    }, [nodes, getNodeWorldPos, positionsMap, layoutMode]);
+        fitToView();
+    }, [fitToView]);
 
     // Register zoom callbacks with the store for keyboard shortcuts
     const { registerZoomCallbacks } = useGraphStore();
@@ -1191,7 +1235,7 @@ export function GraphCanvas() {
             </div>
 
             {/* Onboarding hint - shows briefly */}
-            {nodes.length > 0 && showHint && !isPosterMode && (
+            {nodes.length > 0 && showHint && !isPosterMode && !reducedMotion && (
                 <div className="canvas-hint">
                     <span>Scroll to zoom • Drag to pan • Click to select</span>
                 </div>
@@ -1247,7 +1291,7 @@ export function GraphCanvas() {
         }
         
         .zoom-controls button:hover {
-          background: var(--rp-overlay, #26233a);
+          background: var(--rp-overlay, #1a1f1b);
           color: var(--rp-text, #e0def4);
         }
         

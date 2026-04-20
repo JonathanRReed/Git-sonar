@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect, type DragEvent, type ChangeEvent, type KeyboardEvent, type FormEvent } from 'react';
+import { useCallback, useState, useRef, type DragEvent, type ChangeEvent, type KeyboardEvent, type SubmitEvent } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
 import { parseGitZip, parseGitHubRepo, parseGitLabRepo, parseBitbucketRepo } from '@lib/git/import-git';
 import { getDemoDatasets, loadDemoDataset } from '@lib/demo-data';
@@ -22,9 +22,7 @@ const ICON_MAP = {
 export function ImportPanel() {
   const { setGraph, setLoading, setError, setRepoPath, setAuthToken, authToken, isLoading, error } = useGraphStore();
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedDemo, setSelectedDemo] = useState<string>('branching');
   const [demoSize, setDemoSize] = useState<keyof typeof DEMO_SIZE_PRESETS>('medium');
-  const [showDemoOptions, setShowDemoOptions] = useState(false);
   const [githubUrl, setGithubUrl] = useState('');
   const [tokenInput, setTokenInput] = useState(authToken ?? '');
   const [showToken, setShowToken] = useState(false);
@@ -39,6 +37,7 @@ export function ImportPanel() {
   const zipInputRef = useRef<HTMLInputElement>(null);
 
   const demoDatasets = getDemoDatasets();
+  const selectedDemo = DEMO_SIZE_PRESETS[demoSize].dataset;
 
   const handleDemoClick = useCallback(async (key: string) => {
     setLoading(true);
@@ -50,24 +49,6 @@ export function ImportPanel() {
       setError(err instanceof Error ? err.message : 'Failed to load demo');
     }
   }, [setGraph, setLoading, setError]);
-
-  useEffect(() => {
-    const preset = DEMO_SIZE_PRESETS[demoSize];
-    if (!preset) return;
-    setSelectedDemo(preset.dataset);
-  }, [demoSize]);
-
-  const syncDemoSize = useCallback((key: string) => {
-    if (key === 'simple') {
-      setDemoSize('small');
-      return;
-    }
-    if (key === 'complex') {
-      setDemoSize('large');
-      return;
-    }
-    setDemoSize('medium');
-  }, []);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -138,7 +119,7 @@ export function ImportPanel() {
   }, []);
 
   const handleGitHubSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
+    async (e: SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!githubUrl.trim()) return;
 
@@ -183,7 +164,9 @@ export function ImportPanel() {
                 key={key}
                 type="button"
                 className={`demo-size__btn ${demoSize === key ? 'demo-size__btn--active' : ''}`}
-                onClick={() => setDemoSize(key as keyof typeof DEMO_SIZE_PRESETS)}
+                onClick={() => {
+                  setDemoSize(key as keyof typeof DEMO_SIZE_PRESETS);
+                }}
                 disabled={isLoading}
                 aria-pressed={demoSize === key}
               >
@@ -193,7 +176,7 @@ export function ImportPanel() {
           </div>
           <button
             type="button"
-            onClick={() => setShowDemoOptions(!showDemoOptions)}
+            onClick={() => handleDemoClick(selectedDemo)}
             disabled={isLoading}
             className="import-btn import-btn--demo"
             aria-label="Load Demo"
@@ -207,34 +190,6 @@ export function ImportPanel() {
             <span className="import-btn__label">Load Demo</span>
             <span className="import-btn__desc">Choose a sample repository</span>
           </button>
-
-          {showDemoOptions && (
-            <div className="demo-dropdown">
-              {Object.entries(demoDatasets).map(([key, dataset]) => {
-                const IconComponent = ICON_MAP[dataset.iconName];
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDemo(key);
-                      syncDemoSize(key);
-                      setShowDemoOptions(false);
-                      handleDemoClick(key);
-                    }}
-                    disabled={isLoading}
-                    className={`demo-option ${selectedDemo === key ? 'demo-option--selected' : ''}`}
-                  >
-                    <span className="demo-option__icon"><IconComponent size={24} /></span>
-                    <div className="demo-option__content">
-                      <span className="demo-option__name">{dataset.name}</span>
-                      <span className="demo-option__desc">{dataset.description}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Git hosting URL input */}
@@ -318,7 +273,7 @@ export function ImportPanel() {
           />
           <span className="dropzone__icon"><Package size={32} /></span>
             <span className="dropzone__label">
-            {isDragging ? 'Drop it!' : 'Drop .git.zip (your .git folder)'}
+            {isDragging ? 'Drop the archive' : 'Drop .git.zip (your .git folder)'}
           </span>
           <span className="dropzone__desc">
             Or click to browse for a ZIP that contains your .git folder
@@ -363,15 +318,17 @@ export function ImportPanel() {
         .import-panel {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          max-width: 420px;
+          gap: 1rem;
+          width: min(100%, 64rem);
+          max-width: 64rem;
           margin: 0 auto;
         }
 
         .import-options {
-          display: flex;
-          flex-direction: column;
+          display: grid;
+          grid-template-columns: minmax(18rem, 0.8fr) minmax(20rem, 1.2fr);
           gap: 1rem;
+          align-items: stretch;
         }
 
         .import-btn {
@@ -379,19 +336,26 @@ export function ImportPanel() {
           flex-direction: column;
           align-items: center;
           gap: 0.5rem;
+          min-height: 13rem;
           padding: 1.5rem;
-          border: 2px solid var(--rp-highlight-med);
-          border-radius: 12px;
-          background: var(--rp-surface);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 1rem;
+          background:
+            radial-gradient(circle at 78% 18%, rgba(242, 179, 109, 0.16), transparent 12rem),
+            rgba(16, 18, 15, 0.78);
           color: var(--rp-text);
           cursor: pointer;
           transition: all 0.2s ease;
           text-align: center;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.22);
+          backdrop-filter: blur(18px);
         }
 
         .import-btn:hover:not(:disabled) {
-          border-color: var(--rp-iris);
-          background: var(--rp-overlay);
+          border-color: rgba(143, 211, 199, 0.45);
+          background:
+            radial-gradient(circle at 78% 18%, rgba(143, 211, 199, 0.16), transparent 12rem),
+            rgba(26, 31, 27, 0.82);
           transform: translateY(-2px);
         }
 
@@ -413,9 +377,9 @@ export function ImportPanel() {
           display: inline-flex;
           gap: 0.35rem;
           padding: 0.35rem;
-          background: rgba(38, 35, 58, 0.5);
-          border: 1px solid var(--rp-highlight-low);
-          border-radius: 10px;
+          background: rgba(244, 240, 232, 0.045);
+          border: 1px solid rgba(244, 240, 232, 0.09);
+          border-radius: 999px;
           margin-bottom: 0.5rem;
         }
 
@@ -426,19 +390,19 @@ export function ImportPanel() {
           font-size: 0.7rem;
           font-weight: 600;
           padding: 0.35rem 0.6rem;
-          border-radius: 8px;
+          border-radius: 999px;
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .demo-size__btn--active {
-          border-color: var(--rp-foam);
-          color: var(--rp-text);
-          background: rgba(156, 207, 216, 0.12);
+          border-color: rgba(242, 179, 109, 0.5);
+          color: var(--rp-gold);
+          background: rgba(242, 179, 109, 0.14);
         }
 
         .demo-size__btn:hover:not(:disabled) {
-          border-color: var(--rp-iris);
+          border-color: rgba(143, 211, 199, 0.45);
           color: var(--rp-text);
         }
 
@@ -448,9 +412,9 @@ export function ImportPanel() {
           left: 0;
           right: 0;
           z-index: 10;
-          background: var(--rp-surface);
-          border: 1px solid var(--rp-highlight-med);
-          border-radius: 12px;
+          background: rgba(12, 14, 12, 0.94);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 1rem;
           box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.4);
           padding: 0.5rem;
           display: flex;
@@ -475,7 +439,7 @@ export function ImportPanel() {
           align-items: center;
           gap: 0.75rem;
           padding: 1rem;
-          border-radius: 8px;
+          border-radius: 0.75rem;
           background: transparent;
           border: 1px solid transparent;
           color: var(--rp-text);
@@ -486,13 +450,13 @@ export function ImportPanel() {
         }
 
         .demo-option:hover {
-          background: var(--rp-overlay);
-          border-color: var(--rp-foam);
+          background: rgba(143, 211, 199, 0.1);
+          border-color: rgba(143, 211, 199, 0.45);
         }
 
         .demo-option--selected {
-          background: rgba(156, 207, 216, 0.1);
-          border-color: var(--rp-foam);
+          background: rgba(242, 179, 109, 0.12);
+          border-color: rgba(242, 179, 109, 0.5);
         }
 
         .demo-option__icon {
@@ -520,13 +484,17 @@ export function ImportPanel() {
           flex-direction: column;
           gap: 0.75rem;
           padding: 1.25rem;
-          border: 2px solid var(--rp-highlight-med);
-          border-radius: 12px;
-          background: var(--rp-surface);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 1rem;
+          background:
+            linear-gradient(120deg, rgba(143, 211, 199, 0.08), transparent 46%),
+            rgba(16, 18, 15, 0.78);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(18px);
         }
 
         .github-form:focus-within {
-          border-color: var(--rp-iris);
+          border-color: rgba(143, 211, 199, 0.45);
         }
 
         .github-form__header {
@@ -564,9 +532,9 @@ export function ImportPanel() {
 
         .github-form__token-toggle {
           padding: 0.625rem 0.85rem;
-          border: 1px solid var(--rp-highlight-med);
-          border-radius: 8px;
-          background: var(--rp-surface);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 999px;
+          background: rgba(8, 9, 8, 0.55);
           color: var(--rp-text);
           font-size: 0.8rem;
           font-weight: 600;
@@ -575,7 +543,7 @@ export function ImportPanel() {
         }
 
         .github-form__token-toggle:hover:not(:disabled) {
-          border-color: var(--rp-iris);
+          border-color: rgba(143, 211, 199, 0.45);
           transform: translateY(-1px);
         }
 
@@ -598,15 +566,15 @@ export function ImportPanel() {
         }
 
         .github-form__remember input {
-          accent-color: var(--rp-iris);
+          accent-color: var(--rp-gold);
         }
 
         .github-form__input {
           flex: 1;
           padding: 0.625rem 0.875rem;
-          border: 1px solid var(--rp-highlight-med);
-          border-radius: 8px;
-          background: var(--rp-overlay);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 0.75rem;
+          background: rgba(8, 9, 8, 0.62);
           color: var(--rp-text);
           font-size: 0.9rem;
         }
@@ -617,22 +585,22 @@ export function ImportPanel() {
 
         .github-form__input:focus {
           outline: none;
-          border-color: var(--rp-iris);
+          border-color: rgba(143, 211, 199, 0.55);
         }
 
         .github-form__submit {
           padding: 0.625rem 1rem;
           border: none;
-          border-radius: 8px;
-          background: var(--rp-iris);
-          color: var(--rp-base);
-          font-weight: 600;
+          border-radius: 999px;
+          background: var(--rp-gold);
+          color: #10110f;
+          font-weight: 800;
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .github-form__submit:hover:not(:disabled) {
-          background: var(--rp-foam);
+          background: #ffd08f;
           transform: translateY(-1px);
         }
 
@@ -667,9 +635,14 @@ export function ImportPanel() {
           align-items: center;
           gap: 0.5rem;
           padding: 2rem 1.5rem;
-          border: 2px dashed var(--rp-highlight-med);
-          border-radius: 12px;
-          background: var(--rp-surface);
+          grid-column: 1 / -1;
+          border: 1px dashed rgba(244, 240, 232, 0.18);
+          border-radius: 1rem;
+          background:
+            linear-gradient(90deg, rgba(143, 211, 199, 0.07) 1px, transparent 1px),
+            linear-gradient(rgba(143, 211, 199, 0.05) 1px, transparent 1px),
+            rgba(16, 18, 15, 0.64);
+          background-size: 24px 24px;
           cursor: pointer;
           transition: all 0.2s ease;
           text-align: center;
@@ -677,8 +650,8 @@ export function ImportPanel() {
 
         .dropzone:hover,
         .dropzone--active {
-          border-color: var(--rp-foam);
-          background: var(--rp-overlay);
+          border-color: rgba(143, 211, 199, 0.5);
+          background-color: rgba(26, 31, 27, 0.82);
         }
 
         .dropzone--active {
@@ -703,8 +676,9 @@ export function ImportPanel() {
 
         .import-help {
           padding: 0.75rem 1rem;
-          background: var(--rp-surface);
-          border-radius: 8px;
+          background: rgba(16, 18, 15, 0.72);
+          border: 1px solid rgba(244, 240, 232, 0.1);
+          border-radius: 1rem;
         }
 
         .import-help summary {
@@ -732,8 +706,9 @@ export function ImportPanel() {
         .import-help__content code {
           display: block;
           padding: 0.75rem 1rem;
-          background: var(--rp-overlay);
-          border-radius: 6px;
+          background: rgba(8, 9, 8, 0.72);
+          border: 1px solid rgba(244, 240, 232, 0.08);
+          border-radius: 0.75rem;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.8rem;
           color: var(--rp-foam);
@@ -754,9 +729,9 @@ export function ImportPanel() {
           align-items: center;
           gap: 0.5rem;
           padding: 0.75rem 1rem;
-          background: rgba(235, 111, 146, 0.15);
+          background: rgba(216, 111, 97, 0.15);
           border: 1px solid var(--rp-love);
-          border-radius: 8px;
+          border-radius: 0.75rem;
           color: var(--rp-love);
           font-size: 0.9rem;
         }
@@ -774,9 +749,24 @@ export function ImportPanel() {
           width: 20px;
           height: 20px;
           border: 2px solid var(--rp-highlight-med);
-          border-top-color: var(--rp-iris);
+          border-top-color: var(--rp-gold);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
+        }
+
+        @media (max-width: 820px) {
+          .import-options {
+            grid-template-columns: 1fr;
+          }
+
+          .dropzone {
+            grid-column: auto;
+          }
+
+          .github-form__input-row,
+          .github-form__token-row {
+            flex-direction: column;
+          }
         }
 
         @keyframes spin {

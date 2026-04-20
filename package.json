@@ -43,12 +43,12 @@
     "@types/pako": "^2.0.4",
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
-    "@vitest/coverage-v8": "4.0.17",
+    "@vitest/coverage-v8": "4.1.4",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^27.4.0",
     "typescript": "^5.9.3",
-    "vitest": "4.0.17"
+    "vitest": "4.1.4"
   }
 }
