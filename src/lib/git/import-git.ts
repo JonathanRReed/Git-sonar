@@ -247,7 +247,7 @@ export async function parseGitHubRepo(
         return buildRepoGraph(commits, refs, defaultBranch);
     } catch (err) {
         if (err instanceof TypeError && err.message.includes('fetch')) {
-            throw new Error('Network error. Please check your connection and try again.');
+            throw new Error('Network error. Please check your connection and try again.', { cause: err });
         }
         throw err;
     }
@@ -351,7 +351,7 @@ export async function parseBitbucketRepo(
         return buildRepoGraph(commits, refs, defaultBranch);
     } catch (err) {
         if (err instanceof TypeError && err.message.includes('fetch')) {
-            throw new Error('Network error. Please check your connection and try again.');
+            throw new Error('Network error. Please check your connection and try again.', { cause: err });
         }
         throw err;
     }
@@ -465,7 +465,7 @@ export async function parseGitLabRepo(
         return buildRepoGraph(commits, refs, defaultBranch);
     } catch (err) {
         if (err instanceof TypeError && err.message.includes('fetch')) {
-            throw new Error('Network error. Please check your connection and try again.');
+            throw new Error('Network error. Please check your connection and try again.', { cause: err });
         }
         throw err;
     }
@@ -481,7 +481,7 @@ export async function parseGitZip(zipFile: File): Promise<RepoGraph> {
     const fs = createMemoryFS();
 
     for (const [path, content] of Object.entries(files)) {
-        let entryPath = path.replace(/\\/g, '/').replace(/^\.\/+/, '');
+        const entryPath = path.replace(/\\/g, '/').replace(/^\.\/+/, '');
         if (!entryPath || entryPath.startsWith('__MACOSX/')) continue;
 
         // Skip directories (content is empty Uint8Array for dirs)
