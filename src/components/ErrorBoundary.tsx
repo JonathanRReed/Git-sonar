@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { debugError } from '@lib/utils/debug';
 import { AlertTriangle } from 'lucide-react';

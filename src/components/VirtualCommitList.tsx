@@ -245,6 +245,7 @@ export function VirtualCommitList({ searchQuery = '', filters }: CommitListProps
                     flex: 1;
                     overflow-y: auto;
                     overflow-x: hidden;
+                    padding: 0.35rem;
                 }
 
                 .virtual-commit-list__spacer {
@@ -263,14 +264,14 @@ export function VirtualCommitList({ searchQuery = '', filters }: CommitListProps
                     align-items: flex-start;
                     gap: 0.75rem;
                     padding: 0.6rem 0.75rem;
-                    border-radius: 6px;
+                    border-radius: 0.75rem;
                     cursor: pointer;
-                    transition: background 0.1s ease;
+                    transition: background 0.16s ease, transform 0.16s ease;
                     box-sizing: border-box;
                 }
 
                 .commit-item:hover {
-                    background: var(--rp-overlay);
+                    background: rgba(244, 240, 232, 0.045);
                 }
 
                 .commit-item:focus-visible {
@@ -279,7 +280,8 @@ export function VirtualCommitList({ searchQuery = '', filters }: CommitListProps
                 }
 
                 .commit-item--selected {
-                    background: var(--rp-highlight-low);
+                    background: rgba(242, 179, 109, 0.12);
+                    box-shadow: inset 0 0 0 1px rgba(242, 179, 109, 0.28);
                 }
 
                 .commit-item__dot {
@@ -289,11 +291,13 @@ export function VirtualCommitList({ searchQuery = '', filters }: CommitListProps
                     background: var(--rp-foam);
                     margin-top: 0.25rem;
                     flex-shrink: 0;
+                    box-shadow: 0 0 0 5px rgba(143, 211, 199, 0.08);
                 }
 
                 .commit-item__dot--merge {
-                    background: var(--rp-iris);
-                    border-radius: 2px;
+                    background: var(--rp-gold);
+                    border-radius: 3px;
+                    box-shadow: 0 0 0 5px rgba(242, 179, 109, 0.08);
                 }
 
                 .commit-item__content {
@@ -303,7 +307,8 @@ export function VirtualCommitList({ searchQuery = '', filters }: CommitListProps
 
                 .commit-item__message {
                     font-size: 0.85rem;
-                    color: var(--rp-text);
+                    color: #fffaf2;
+                    font-weight: 700;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;

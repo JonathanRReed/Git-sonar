@@ -1,38 +1,47 @@
 import { test, expect } from '@playwright/test';
 
+async function loadApp(page) {
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
+}
+
+async function loadBranchingDemo(page) {
+    await loadApp(page);
+    await page.getByRole('button', { name: /Load Demo/ }).click();
+    await expect(page.getByRole('button', { name: /Branching/ })).toBeVisible();
+    await page.getByRole('button', { name: /Branching/ }).click();
+    await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible({ timeout: 5000 });
+}
+
 test.describe('Git Sonar app', () => {
     test('loads the landing page', async ({ page }) => {
         await page.goto('/');
-        await expect(page.getByRole('heading', { name: 'Git Sonar' })).toBeVisible();
-        await expect(page.getByText('Visualize Git history')).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Map your Git history/ })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Open app' })).toBeVisible();
+    });
+
+    test('loads the about page', async ({ page }) => {
+        await page.goto('/about');
+        await expect(page.getByRole('heading', { name: /Jonathan Reed builds tools/ })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Launch Git Sonar' })).toBeVisible();
     });
 
     test('shows import panel on app page', async ({ page }) => {
-        await page.goto('/app');
+        await loadApp(page);
         // Import panel is shown first (before loading a repo)
         await expect(page.getByRole('heading', { name: 'Visualize Your Git History' })).toBeVisible();
         await expect(page.getByPlaceholder('https://github.com/owner/repo or https://gitlab.com/owner/repo')).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Import' })).toBeVisible();
+        await expect(page.getByLabel('Git visualization').getByRole('button', { name: 'Import' })).toBeVisible();
     });
 
     test('can load demo data', async ({ page }) => {
-        await page.goto('/app');
-        // Click the demo button to expand dropdown
-        await page.getByRole('button', { name: /Load Demo/ }).click();
-        // Select branching demo
-        await page.getByRole('button', { name: /Branching/ }).click();
-        // Wait for graph to load - sidebar becomes visible with commit list
-        await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible({ timeout: 5000 });
+        await loadBranchingDemo(page);
         // Search input should be available
         await expect(page.getByPlaceholder('Search commits...')).toBeVisible();
     });
 
     test('keyboard shortcuts work', async ({ page }) => {
-        await page.goto('/app');
-        // Load demo first
-        await page.getByRole('button', { name: /Load Demo/ }).click();
-        await page.getByRole('button', { name: /Branching/ }).click();
-        await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible({ timeout: 5000 });
+        await loadBranchingDemo(page);
         
         // Press ? to open help
         await page.keyboard.press('?');
@@ -44,11 +53,7 @@ test.describe('Git Sonar app', () => {
     });
 
     test('search filters commits', async ({ page }) => {
-        await page.goto('/app');
-        // Load demo
-        await page.getByRole('button', { name: /Load Demo/ }).click();
-        await page.getByRole('button', { name: /Branching/ }).click();
-        await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible({ timeout: 5000 });
+        await loadBranchingDemo(page);
         
         // Focus search with / key
         await page.keyboard.press('/');
@@ -61,11 +66,7 @@ test.describe('Git Sonar app', () => {
     });
 
     test('theme selector changes colors', async ({ page }) => {
-        await page.goto('/app');
-        // Load demo to show controls
-        await page.getByRole('button', { name: /Load Demo/ }).click();
-        await page.getByRole('button', { name: /Branching/ }).click();
-        await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible({ timeout: 5000 });
+        await loadBranchingDemo(page);
         
         // Change theme
         const themeSelect = page.getByLabel('Theme');

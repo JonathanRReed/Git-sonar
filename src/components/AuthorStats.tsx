@@ -153,8 +153,8 @@ export function AuthorStats() {
 
             <style>{`
                 .author-stats {
-                    border-top: 1px solid var(--rp-highlight-low);
-                    background: var(--rp-surface);
+                    border-top: 1px solid rgba(244, 240, 232, 0.1);
+                    background: rgba(8, 9, 8, 0.2);
                 }
 
                 .author-stats__header {
@@ -167,11 +167,11 @@ export function AuthorStats() {
                     border: none;
                     color: var(--rp-text);
                     cursor: pointer;
-                    transition: background 0.15s;
+                    transition: background 0.15s, color 0.15s;
                 }
 
                 .author-stats__header:hover {
-                    background: var(--rp-overlay);
+                    background: rgba(244, 240, 232, 0.045);
                 }
 
                 .author-stats__title {
@@ -180,14 +180,15 @@ export function AuthorStats() {
                     gap: 0.5rem;
                     font-size: 0.85rem;
                     font-weight: 600;
-                    color: var(--rp-subtle);
+                    color: rgba(244, 240, 232, 0.62);
+                    font-family: 'JetBrains Mono', monospace;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                 }
 
                 .author-stats__count {
                     padding: 0.15rem 0.5rem;
-                    background: var(--rp-overlay);
+                    background: rgba(242, 179, 109, 0.14);
                     border-radius: 999px;
                     font-size: 0.7rem;
                     color: var(--rp-foam);
@@ -208,8 +209,8 @@ export function AuthorStats() {
                     align-items: center;
                     gap: 0.35rem;
                     padding: 0.35rem 0.6rem;
-                    border: 1px solid var(--rp-highlight-med);
-                    border-radius: 6px;
+                    border: 1px solid rgba(244, 240, 232, 0.12);
+                    border-radius: 999px;
                     background: transparent;
                     color: var(--rp-subtle);
                     font-size: 0.7rem;
@@ -219,14 +220,14 @@ export function AuthorStats() {
                 }
 
                 .sort-btn:hover {
-                    border-color: var(--rp-foam);
+                    border-color: rgba(143, 211, 199, 0.45);
                     color: var(--rp-text);
                 }
 
                 .sort-btn--active {
-                    background: rgba(156, 207, 216, 0.15);
-                    border-color: var(--rp-foam);
-                    color: var(--rp-foam);
+                    background: rgba(242, 179, 109, 0.13);
+                    border-color: rgba(242, 179, 109, 0.5);
+                    color: var(--rp-gold);
                 }
 
                 .author-stats__list {
@@ -241,8 +242,9 @@ export function AuthorStats() {
                     align-items: center;
                     gap: 0.5rem;
                     padding: 0.5rem;
-                    background: var(--rp-overlay);
-                    border-radius: 8px;
+                    background: rgba(244, 240, 232, 0.045);
+                    border: 1px solid rgba(244, 240, 232, 0.06);
+                    border-radius: 0.75rem;
                     transition: background 0.15s;
                 }
 
@@ -262,6 +264,7 @@ export function AuthorStats() {
                     height: 28px;
                     border-radius: 6px;
                     background: var(--rp-highlight-med);
+                    border: 1px solid rgba(244, 240, 232, 0.08);
                 }
 
                 .author-item__info {

@@ -1,5 +1,4 @@
 import type { RepoGraph } from '@lib/git/types';
-import type { ReactNode } from 'react';
 
 interface DemoDataset {
     name: string;

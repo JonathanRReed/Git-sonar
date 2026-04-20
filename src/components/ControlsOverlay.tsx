@@ -40,21 +40,6 @@ const SHORTCUT_CATEGORIES = [
     },
 ];
 
-// Flat shortcuts list for legacy support
-const SHORTCUTS = [
-    { key: '←', action: 'Previous commit' },
-    { key: '→', action: 'Next commit' },
-    { key: '↑', action: 'Move to upper lane' },
-    { key: '↓', action: 'Move to lower lane' },
-    { key: 'Enter', action: 'Open commit details' },
-    { key: 'Esc', action: 'Close dialogs' },
-    { key: '/', action: 'Focus search' },
-    { key: '+ -', action: 'Zoom in/out' },
-    { key: '0', action: 'Reset zoom' },
-    { key: '?', action: 'Toggle this help' },
-    { key: 'T', action: 'Toggle teaching mode' },
-];
-
 const MAX_POSTER_COMMITS = 5000;
 
 const EXPORT_LAYOUTS = {
@@ -81,6 +66,7 @@ export function ControlsOverlay() {
     const [cropMarksEnabled, setCropMarksEnabled] = useState(false);
     const [safeAreaEnabled, setSafeAreaEnabled] = useState(false);
     const [shareCopied, setShareCopied] = useState(false);
+    const [exportStatus, setExportStatus] = useState<string | null>(null);
 
     const {
         showHelp,
@@ -131,6 +117,11 @@ export function ControlsOverlay() {
     } = useGraphStore();
 
     const exportLayout = viewMode === 'poster' ? EXPORT_LAYOUTS.poster : EXPORT_LAYOUTS.inspect;
+
+    const reportExportStatus = useCallback((message: string) => {
+        setExportStatus(message);
+        window.setTimeout(() => setExportStatus(null), 2600);
+    }, []);
 
     // Handle keyboard navigation
     const handleKeyDown = useCallback(
@@ -221,7 +212,10 @@ export function ControlsOverlay() {
 
     // Export as PNG (full graph, not just visible viewport)
     const handleExportPNG = useCallback(async () => {
-        if (!graph || nodes.length === 0) return;
+        if (!graph || nodes.length === 0) {
+            reportExportStatus('Load a graph before exporting');
+            return;
+        }
 
         try {
             await downloadFullGraphPNG(graph, nodes, edges, `git-sonar-${exportDPI}x.png`, {
@@ -235,51 +229,74 @@ export function ControlsOverlay() {
                 layoutMode,
                 layout: exportLayout,
             });
+            reportExportStatus('PNG export started');
         } catch (err) {
             console.error('Failed to export PNG:', err);
+            setError(err instanceof Error ? err.message : 'Failed to export PNG');
+            reportExportStatus('PNG export failed');
         }
-    }, [graph, nodes, edges, exportDPI, backgroundStyle, theme.colors, posterTitle, showTimeline, layoutMode, exportLayout]);
+    }, [graph, nodes, edges, exportDPI, backgroundStyle, theme.colors, posterTitle, showTimeline, layoutMode, exportLayout, reportExportStatus, setError]);
 
     // Export as SVG (true vector)
     const handleExportSVG = useCallback(() => {
-        if (!graph || nodes.length === 0) return; 
+        if (!graph || nodes.length === 0) {
+            reportExportStatus('Load a graph before exporting');
+            return;
+        }
 
-        downloadVectorSVG(graph, nodes, edges, `git-sonar-${exportDPI}x.svg`, {
-            includeLabels: true,
-            includeLanes: true,
-            background: backgroundStyle,
-            themeColors: theme.colors,
-            scale: exportDPI,
-            title: posterTitle || undefined,
-            includeTimeline: showTimeline,
-            exportSize,
-            bleedInches: bleedEnabled ? 0.125 : 0,
-            includeCropMarks: cropMarksEnabled,
-            includeSafeArea: safeAreaEnabled,
-            layoutMode,
-            layout: exportLayout,
-        });
-    }, [graph, nodes, edges, exportDPI, exportSize, bleedEnabled, cropMarksEnabled, safeAreaEnabled, backgroundStyle, theme.colors, posterTitle, showTimeline, layoutMode, exportLayout]);
+        try {
+            downloadVectorSVG(graph, nodes, edges, `git-sonar-${exportDPI}x.svg`, {
+                includeLabels: true,
+                includeLanes: true,
+                background: backgroundStyle,
+                themeColors: theme.colors,
+                scale: exportDPI,
+                title: posterTitle || undefined,
+                includeTimeline: showTimeline,
+                exportSize,
+                bleedInches: bleedEnabled ? 0.125 : 0,
+                includeCropMarks: cropMarksEnabled,
+                includeSafeArea: safeAreaEnabled,
+                layoutMode,
+                layout: exportLayout,
+            });
+            reportExportStatus('SVG export started');
+        } catch (err) {
+            console.error('Failed to export SVG:', err);
+            setError(err instanceof Error ? err.message : 'Failed to export SVG');
+            reportExportStatus('SVG export failed');
+        }
+    }, [graph, nodes, edges, exportDPI, exportSize, bleedEnabled, cropMarksEnabled, safeAreaEnabled, backgroundStyle, theme.colors, posterTitle, showTimeline, layoutMode, exportLayout, reportExportStatus, setError]);
 
     const handleExportPDF = useCallback(() => {
-        if (!graph || nodes.length === 0) return;
+        if (!graph || nodes.length === 0) {
+            reportExportStatus('Load a graph before exporting');
+            return;
+        }
 
-        openPrintableSVG(graph, nodes, edges, {
-            includeLabels: true,
-            includeLanes: true,
-            background: backgroundStyle,
-            themeColors: theme.colors,
-            scale: exportDPI,
-            title: posterTitle || undefined,
-            includeTimeline: showTimeline,
-            exportSize,
-            bleedInches: bleedEnabled ? 0.125 : 0,
-            includeCropMarks: cropMarksEnabled,
-            includeSafeArea: safeAreaEnabled,
-            layoutMode,
-            layout: exportLayout,
-        });
-    }, [graph, nodes, edges, exportDPI, exportSize, bleedEnabled, cropMarksEnabled, safeAreaEnabled, backgroundStyle, theme.colors, posterTitle, showTimeline, layoutMode, exportLayout]);
+        try {
+            const opened = openPrintableSVG(graph, nodes, edges, {
+                includeLabels: true,
+                includeLanes: true,
+                background: backgroundStyle,
+                themeColors: theme.colors,
+                scale: exportDPI,
+                title: posterTitle || undefined,
+                includeTimeline: showTimeline,
+                exportSize,
+                bleedInches: bleedEnabled ? 0.125 : 0,
+                includeCropMarks: cropMarksEnabled,
+                includeSafeArea: safeAreaEnabled,
+                layoutMode,
+                layout: exportLayout,
+            });
+            reportExportStatus(opened ? 'PDF print window opened' : 'Allow popups to export PDF');
+        } catch (err) {
+            console.error('Failed to export PDF:', err);
+            setError(err instanceof Error ? err.message : 'Failed to export PDF');
+            reportExportStatus('PDF export failed');
+        }
+    }, [graph, nodes, edges, exportDPI, exportSize, bleedEnabled, cropMarksEnabled, safeAreaEnabled, backgroundStyle, theme.colors, posterTitle, showTimeline, layoutMode, exportLayout, reportExportStatus, setError]);
 
     const handleLoadAllCommits = useCallback(async () => {
         if (!currentRepoPath || !currentRepoProvider) return;
@@ -405,38 +422,44 @@ export function ControlsOverlay() {
                             <div className="poster-options">
                                 <button
                                     type="button"
-                                    className={`control-btn control-btn--small ${showTimeline ? 'control-btn--active' : ''}`}
+                                    className={`control-btn control-btn--labeled ${showTimeline ? 'control-btn--active' : ''}`}
                                     onClick={toggleTimeline}
                                     aria-pressed={showTimeline}
+                                    aria-label="Toggle timeline ruler"
                                     title="Show timeline ruler"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M12 2v20" />
                                         <path d="M8 6h8M6 12h12M8 18h8" />
                                     </svg>
+                                    <span>Timeline</span>
                                 </button>
                                 <button
                                     type="button"
-                                    className={`control-btn control-btn--small ${showWatermark ? 'control-btn--active' : ''}`}
+                                    className={`control-btn control-btn--labeled ${showWatermark ? 'control-btn--active' : ''}`}
                                     onClick={toggleWatermark}
                                     aria-pressed={showWatermark}
+                                    aria-label="Toggle Git Sonar watermark"
                                     title="Show Git Sonar watermark"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="12" cy="12" r="10" />
                                         <text x="12" y="16" textAnchor="middle" fontSize="8" fill="currentColor" stroke="none">GS</text>
                                     </svg>
+                                    <span>Watermark</span>
                                 </button>
                                 <button
                                     type="button"
-                                    className={`control-btn control-btn--small ${showSignature ? 'control-btn--active' : ''}`}
+                                    className={`control-btn control-btn--labeled ${showSignature ? 'control-btn--active' : ''}`}
                                     onClick={toggleSignature}
                                     aria-pressed={showSignature}
+                                    aria-label="Toggle date signature"
                                     title="Show date signature"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                                     </svg>
+                                    <span>Date</span>
                                 </button>
                             </div>
                         </>
@@ -468,9 +491,10 @@ export function ControlsOverlay() {
 
                     <button
                         type="button"
-                        className={`control-btn ${showHeatmap ? 'control-btn--active' : ''}`}
+                        className={`control-btn control-btn--labeled ${showHeatmap ? 'control-btn--active' : ''}`}
                         onClick={toggleHeatmap}
                         aria-pressed={showHeatmap}
+                        aria-label="Toggle activity heatmap"
                         title={`Activity heatmap ${showHeatmap ? 'ON' : 'OFF'}`}
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -479,6 +503,7 @@ export function ControlsOverlay() {
                             <rect x="14" y="14" width="7" height="7" rx="1" />
                             <rect x="3" y="14" width="7" height="7" rx="1" />
                         </svg>
+                        <span>Heatmap</span>
                     </button>
 
                     <div className="dpi-selector">
@@ -509,8 +534,8 @@ export function ControlsOverlay() {
                             <option value="A2">A2</option>
                             <option value="A1">A1</option>
                             <option value="Square">Square</option>
-                            <option value="Poster18x24">Poster 18×24</option>
-                            <option value="Poster24x36">Poster 24×36</option>
+                            <option value="Poster18x24">Poster 18x24</option>
+                            <option value="Poster24x36">Poster 24x36</option>
                         </select>
                         <label className="bleed-toggle">
                             <input
@@ -518,7 +543,7 @@ export function ControlsOverlay() {
                                 checked={bleedEnabled}
                                 onChange={(e) => setBleedEnabled(e.target.checked)}
                             />
-                            Add 0.125″ bleed
+                            Add 0.125 in bleed
                         </label>
                         <label className="bleed-toggle">
                             <input
@@ -580,10 +605,10 @@ export function ControlsOverlay() {
                     {currentRepoPath && (
                         <button
                             type="button"
-                            className={`control-btn ${shareCopied ? 'control-btn--active' : ''}`}
+                            className={`control-btn control-btn--labeled ${shareCopied ? 'control-btn--active' : ''}`}
                             onClick={handleShareLink}
-                            aria-label={shareCopied ? 'Link copied!' : 'Copy share link'}
-                            title={shareCopied ? 'Link copied to clipboard!' : 'Copy shareable link'}
+                            aria-label={shareCopied ? 'Link copied' : 'Copy share link'}
+                            title={shareCopied ? 'Link copied to clipboard' : 'Copy shareable link'}
                         >
                             {shareCopied ? (
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -598,12 +623,13 @@ export function ControlsOverlay() {
                                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                                 </svg>
                             )}
+                            <span>{shareCopied ? 'Copied' : 'Share'}</span>
                         </button>
                     )}
 
                     <button
                         type="button"
-                        className="control-btn"
+                        className="control-btn control-btn--labeled"
                         onClick={toggleHelp}
                         aria-label="Keyboard shortcuts"
                         title="Keyboard shortcuts (?)"
@@ -612,10 +638,11 @@ export function ControlsOverlay() {
                             <path d="M4 11h16m-8 0a4 4 0 1 1 0 -8 4 4 0 0 1 0 8" />
                             <path d="M12 3v2M12 19v2M8 7h8" />
                         </svg>
+                        <span>Keys</span>
                     </button>
                     <button
                         type="button"
-                        className={`control-btn ${showTeaching ? 'control-btn--active' : ''}`}
+                        className={`control-btn control-btn--labeled ${showTeaching ? 'control-btn--active' : ''}`}
                         onClick={toggleTeaching}
                         aria-label="Teaching mode"
                         title="Teaching mode (T)"
@@ -625,11 +652,12 @@ export function ControlsOverlay() {
                             <path d="M3 10v6a9 9 0 0 0 18 0v-6" />
                             <path d="M9 14h6" />
                         </svg>
+                        <span>Guide</span>
                     </button>
 
                     <button
                         type="button"
-                        className="control-btn"
+                        className="control-btn control-btn--labeled"
                         onClick={handleExportPNG}
                         aria-label="Export as PNG"
                         title="Export as PNG"
@@ -638,10 +666,11 @@ export function ControlsOverlay() {
                             <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2 3h6l2-3h4a2 2 0 012 2v11z" />
                             <circle cx="12" cy="13" r="4" />
                         </svg>
+                        <span>PNG</span>
                     </button>
                     <button
                         type="button"
-                        className="control-btn"
+                        className="control-btn control-btn--labeled"
                         onClick={handleExportSVG}
                         aria-label="Export as SVG"
                         title="Export as SVG"
@@ -653,10 +682,11 @@ export function ControlsOverlay() {
                             <line x1="16" y1="17" x2="8" y2="17" />
                             <polyline points="10,9 9,9 8,9" />
                         </svg>
+                        <span>SVG</span>
                     </button>
                     <button
                         type="button"
-                        className="control-btn"
+                        className="control-btn control-btn--labeled"
                         onClick={handleExportPDF}
                         aria-label="Export as PDF"
                         title="Export as PDF"
@@ -667,7 +697,13 @@ export function ControlsOverlay() {
                             <rect x="6" y="14" width="12" height="6" rx="1" />
                             <path d="M8 16h3" />
                         </svg>
+                        <span>PDF</span>
                     </button>
+                    {exportStatus && (
+                        <div className="export-status" role="status" aria-live="polite">
+                            {exportStatus}
+                        </div>
+                    )}
                 </div>
 
             {/* Teaching overlay */}
@@ -696,7 +732,7 @@ export function ControlsOverlay() {
                                 <ul>
                                     <li>Use search to jump by author, SHA, or message</li>
                                     <li>Arrow keys navigate commits; Enter opens details</li>
-                                    <li>Load all commits for full‑history posters</li>
+                                    <li>Load all commits for full-history posters</li>
                                 </ul>
                             </div>
                             <div>
@@ -704,7 +740,7 @@ export function ControlsOverlay() {
                                 <ul>
                                     <li>Switch to Poster mode for clean exports</li>
                                     <li>Try theme + background combos for contrast</li>
-                                    <li>Export SVG/PDF for print‑ready output</li>
+                                    <li>Export SVG/PDF for print-ready output</li>
                                 </ul>
                             </div>
                         </div>
@@ -789,18 +825,19 @@ export function ControlsOverlay() {
           max-width: calc(100% - 5.5rem);
           z-index: 10;
           padding: 0.35rem;
-          background: rgba(var(--rp-surface-rgb), 0.88);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 14px;
-          backdrop-filter: blur(12px);
+          background: rgba(12, 14, 12, 0.76);
+          border: 1px solid rgba(244, 240, 232, 0.12);
+          border-radius: 1rem;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 70px rgba(0, 0, 0, 0.24);
+          backdrop-filter: blur(18px);
         }
 
         .mode-toggle {
           display: flex;
           align-items: center;
-          background: rgba(var(--rp-surface-rgb), 0.9);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
+          background: rgba(244, 240, 232, 0.045);
+          border: 1px solid rgba(244, 240, 232, 0.08);
+          border-radius: 0.75rem;
           padding: 0.2rem;
         }
 
@@ -809,7 +846,7 @@ export function ControlsOverlay() {
           border-radius: 8px;
           border: none;
           background: transparent;
-          color: var(--rp-subtle);
+          color: rgba(244, 240, 232, 0.62);
           font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.02em;
@@ -817,30 +854,30 @@ export function ControlsOverlay() {
         }
 
         .mode-btn--active {
-          background: rgba(156, 207, 216, 0.15);
-          color: var(--rp-text);
+          background: rgba(242, 179, 109, 0.18);
+          color: var(--rp-gold);
         }
 
         .dpi-selector {
           display: flex;
           align-items: center;
           gap: 0.35rem;
-          background: rgba(var(--rp-surface-rgb), 0.9);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
+          background: rgba(244, 240, 232, 0.045);
+          border: 1px solid rgba(244, 240, 232, 0.08);
+          border-radius: 0.75rem;
           padding: 0.2rem 0.5rem;
         }
 
         .dpi-selector label {
           font-size: 0.7rem;
           font-weight: 600;
-          color: var(--rp-subtle);
+          color: rgba(244, 240, 232, 0.62);
           letter-spacing: 0.02em;
         }
 
         .dpi-selector select {
-          background: rgba(var(--rp-overlay-rgb), 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(8, 9, 8, 0.72);
+          border: 1px solid rgba(244, 240, 232, 0.1);
           border-radius: 6px;
           padding: 0.2rem 0.4rem;
           font-size: 0.75rem;
@@ -852,8 +889,8 @@ export function ControlsOverlay() {
         }
 
         .dpi-selector select:hover {
-          border-color: rgba(156, 207, 216, 0.3);
-          background: rgba(var(--rp-overlay-rgb), 0.95);
+          border-color: rgba(143, 211, 199, 0.35);
+          background: rgba(8, 9, 8, 0.9);
         }
 
         .dpi-selector select:focus {
@@ -864,22 +901,22 @@ export function ControlsOverlay() {
           display: flex;
           align-items: center;
           gap: 0.35rem;
-          background: rgba(var(--rp-surface-rgb), 0.9);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
+          background: rgba(244, 240, 232, 0.045);
+          border: 1px solid rgba(244, 240, 232, 0.08);
+          border-radius: 0.75rem;
           padding: 0.2rem 0.5rem;
         }
 
         .layout-selector label {
           font-size: 0.7rem;
           font-weight: 600;
-          color: var(--rp-subtle);
+          color: rgba(244, 240, 232, 0.62);
           letter-spacing: 0.02em;
         }
 
         .layout-selector select {
-          background: rgba(var(--rp-overlay-rgb), 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(8, 9, 8, 0.72);
+          border: 1px solid rgba(244, 240, 232, 0.1);
           border-radius: 6px;
           padding: 0.2rem 0.4rem;
           font-size: 0.75rem;
@@ -891,8 +928,8 @@ export function ControlsOverlay() {
         }
 
         .layout-selector select:hover {
-          border-color: rgba(156, 207, 216, 0.3);
-          background: rgba(var(--rp-overlay-rgb), 0.95);
+          border-color: rgba(143, 211, 199, 0.35);
+          background: rgba(8, 9, 8, 0.9);
         }
 
         .layout-selector select:focus {
@@ -912,15 +949,15 @@ export function ControlsOverlay() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.08em;
-          color: var(--rp-subtle);
+          color: rgba(244, 240, 232, 0.62);
         }
 
         .background-selector select,
         .size-selector select {
           padding: 0.45rem 0.65rem;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(244, 240, 232, 0.1);
           border-radius: 8px;
-          background: rgba(var(--rp-surface-rgb), 0.92);
+          background: rgba(8, 9, 8, 0.72);
           backdrop-filter: blur(12px);
           color: var(--rp-text);
           font-size: 0.75rem;
@@ -935,17 +972,17 @@ export function ControlsOverlay() {
           align-items: center;
           gap: 0.4rem;
           font-size: 0.7rem;
-          color: var(--rp-subtle);
+          color: rgba(244, 240, 232, 0.62);
         }
 
         .bleed-toggle input {
-          accent-color: var(--rp-iris);
+          accent-color: var(--rp-gold);
         }
 
         .background-selector select:hover,
         .size-selector select:hover {
-          border-color: rgba(156, 207, 216, 0.3);
-          background: rgba(var(--rp-overlay-rgb), 0.95);
+          border-color: rgba(143, 211, 199, 0.35);
+          background: rgba(8, 9, 8, 0.9);
         }
 
         .background-selector select:focus,
@@ -964,14 +1001,14 @@ export function ControlsOverlay() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.08em;
-          color: var(--rp-subtle);
+          color: rgba(244, 240, 232, 0.62);
         }
 
         .theme-selector select {
           padding: 0.45rem 0.65rem;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(244, 240, 232, 0.1);
           border-radius: 8px;
-          background: rgba(var(--rp-surface-rgb), 0.92);
+          background: rgba(8, 9, 8, 0.72);
           backdrop-filter: blur(12px);
           color: var(--rp-text);
           font-size: 0.75rem;
@@ -982,8 +1019,8 @@ export function ControlsOverlay() {
         }
 
         .theme-selector select:hover {
-          border-color: rgba(156, 207, 216, 0.3);
-          background: rgba(var(--rp-overlay-rgb), 0.95);
+          border-color: rgba(143, 211, 199, 0.35);
+          background: rgba(8, 9, 8, 0.9);
         }
 
         .theme-selector select:focus {
@@ -996,18 +1033,32 @@ export function ControlsOverlay() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
-          background: rgba(var(--rp-surface-rgb), 0.92);
+          border: 1px solid rgba(244, 240, 232, 0.11);
+          border-radius: 0.75rem;
+          background: rgba(8, 9, 8, 0.72);
           backdrop-filter: blur(16px);
           color: var(--rp-text);
           cursor: pointer;
-          transition: border-color 0.2s ease, background 0.2s ease;
+          transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .control-btn--labeled {
+          width: auto;
+          gap: 0.42rem;
+          padding: 0 0.72rem;
+        }
+
+        .control-btn--labeled span {
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+          white-space: nowrap;
         }
 
         .control-btn--active {
-          border-color: rgba(156, 207, 216, 0.4);
-          background: rgba(var(--rp-overlay-rgb), 0.95);
+          border-color: rgba(242, 179, 109, 0.5);
+          background: rgba(242, 179, 109, 0.13);
+          color: var(--rp-gold);
         }
 
         .control-btn--load-all {
@@ -1037,9 +1088,9 @@ export function ControlsOverlay() {
           min-width: 150px;
           max-width: 250px;
           padding: 0.5rem 0.75rem;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(244, 240, 232, 0.1);
           border-radius: 10px;
-          background: rgba(var(--rp-surface-rgb), 0.92);
+          background: rgba(8, 9, 8, 0.72);
           backdrop-filter: blur(16px);
           color: var(--rp-text);
           font-size: 0.75rem;
@@ -1067,9 +1118,9 @@ export function ControlsOverlay() {
           min-width: 150px;
           max-width: 250px;
           padding: 0.35rem 0.6rem;
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(244, 240, 232, 0.08);
           border-radius: 8px;
-          background: rgba(var(--rp-surface-rgb), 0.85);
+          background: rgba(8, 9, 8, 0.62);
           backdrop-filter: blur(16px);
           color: var(--rp-subtle);
           font-size: 0.7rem;
@@ -1090,6 +1141,7 @@ export function ControlsOverlay() {
         .poster-options {
           display: flex;
           gap: 0.25rem;
+          flex-wrap: wrap;
         }
 
         .control-btn--small {
@@ -1106,11 +1158,27 @@ export function ControlsOverlay() {
         .control-btn svg {
           width: 20px;
           height: 20px;
+          flex: 0 0 auto;
         }
 
         .control-btn:hover {
-          background: rgba(var(--rp-overlay-rgb), 0.92);
-          border-color: rgba(156, 207, 216, 0.3);
+          background: rgba(143, 211, 199, 0.1);
+          border-color: rgba(143, 211, 199, 0.35);
+          transform: translateY(-1px);
+        }
+
+        .export-status {
+          display: inline-flex;
+          align-items: center;
+          min-height: 32px;
+          padding: 0 0.7rem;
+          border: 1px solid rgba(143, 211, 199, 0.2);
+          border-radius: 999px;
+          background: rgba(143, 211, 199, 0.09);
+          color: rgba(244, 240, 232, 0.82);
+          font-size: 0.74rem;
+          font-weight: 700;
+          white-space: nowrap;
         }
 
 .help-overlay {
@@ -1417,6 +1485,16 @@ export function ControlsOverlay() {
           .control-btn {
             width: 38px;
             height: 38px;
+          }
+
+          .control-btn--labeled {
+            width: auto;
+            max-width: 8rem;
+            padding: 0 0.55rem;
+          }
+
+          .control-btn--labeled span {
+            font-size: 0.68rem;
           }
 
           .control-btn svg {

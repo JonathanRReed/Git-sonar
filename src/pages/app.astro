@@ -8,13 +8,15 @@ import { CommitDetailsDialog } from "@components/CommitDetailsDialog";
 import { ControlsOverlay } from "@components/ControlsOverlay";
 import { LiveRegion } from "@components/LiveRegion";
 import { TimelineScrubber } from "@components/TimelineScrubber";
-import { LoadingSkeleton, CommitListSkeleton, StatsSkeleton } from "@components/LoadingSkeleton";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 import { CommitSidebar } from "@components/CommitSidebar";
 import { CalendarView } from "@components/CalendarView";
+import { AppShellController } from "@components/AppShellController";
 
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
+const siteUrl = "https://gitsonar.jonathanrreed.com";
+const socialImageUrl = `${siteUrl}/og-image.svg`;
 ---
 
 <html lang="en">
@@ -25,44 +27,50 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
         <meta name="generator" content={Astro.generator} />
         <meta
             name="description"
-            content="Visualize Git history as a beautiful interactive graph. Import your repository and explore commits, branches, and merges."
+            content="Inspect Git history as an interactive graph. Import a repository and review commits, branches, and merges locally."
         />
-        <link rel="canonical" href="https://gitsonar.jonathanrreed.com/app" />
+        <link rel="canonical" href={`${siteUrl}/app`} />
+        <meta name="author" content="Jonathan Reed" />
         <title>Git Sonar</title>
         {analyticsDomain && (
-            <script defer data-domain={analyticsDomain} src={analyticsSrc}></script>
+            <script is:inline defer data-domain={analyticsDomain} src={analyticsSrc}></script>
         )}
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://gitsonar.jonathanrreed.com/app" />
+        <meta property="og:url" content={`${siteUrl}/app`} />
         <meta
             property="og:title"
             content="Git Sonar - Interactive Graph View"
         />
         <meta
             property="og:description"
-            content="Explore your Git history as a beautiful interactive graph. Import your repository and understand your project's evolution."
+            content="Inspect Git history as an interactive graph. Import a repository and review commits, branches, and merges locally."
         />
-        <meta property="og:image" content="/og-image.svg" />
+        <meta property="og:image" content={socialImageUrl} />
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="https://gitsonar.jonathanrreed.com/app" />
+        <meta property="twitter:url" content={`${siteUrl}/app`} />
         <meta
             property="twitter:title"
             content="Git Sonar - Interactive Graph View"
         />
         <meta
             property="twitter:description"
-            content="Explore your Git history as a beautiful interactive graph."
+            content="Inspect Git history as an interactive graph."
         />
-        <meta property="twitter:image" content="/og-image.svg" />
+        <meta property="twitter:image" content={socialImageUrl} />
 
+        <link rel="preconnect" href="https://api.fontshare.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
             rel="stylesheet"
         />
     </head>
@@ -156,7 +164,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 <!-- Import panel (shown when no graph) -->
                 <div class="import-container" id="import-container">
                     <div class="import-header">
-                        <h1>Visualize Your Git History</h1>
+                        <h1>Inspect Git History</h1>
                         <p>
                             See your commits, branches, and merges as an
                             interactive graph
@@ -189,229 +197,38 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 
             <!-- Commit details modal -->
             <CommitDetailsDialog client:load />
+            <AppShellController client:load />
         </div>
                 </ErrorBoundary>
-
-
-		<script>
-			import { useGraphStore } from "@lib/store/graph-store";
-
-            // Update stats display
-            function clearStats(statsEl: HTMLElement) {
-                while (statsEl.firstChild) {
-                    statsEl.removeChild(statsEl.firstChild);
-                }
-            }
-
-            function appendStat(statsEl: HTMLElement, value: string, label: string) {
-                const stat = document.createElement("div");
-                stat.className = "stat";
-
-                const valueSpan = document.createElement("span");
-                valueSpan.className = "stat__value";
-                valueSpan.textContent = value;
-
-                const labelSpan = document.createElement("span");
-                labelSpan.className = "stat__label";
-                labelSpan.textContent = label;
-
-                stat.appendChild(valueSpan);
-                stat.appendChild(labelSpan);
-                statsEl.appendChild(stat);
-            }
-
-            function setStatsLoading(statsEl: HTMLElement) {
-                clearStats(statsEl);
-                const loading = document.createElement("div");
-                loading.className = "loading-indicator";
-                loading.textContent = "Loading...";
-                statsEl.appendChild(loading);
-            }
-
-            function updateStats() {
-                const state = useGraphStore.getState();
-                const statsEl = document.getElementById("app-stats");
-                if (!statsEl) return;
-
-                if (!state.graph) {
-                    clearStats(statsEl);
-                    return;
-                }
-
-                clearStats(statsEl);
-                const m = state.graph.metrics;
-                appendStat(statsEl, m.commitCount.toLocaleString(), "commits");
-                appendStat(statsEl, m.authorCount.toLocaleString(), "authors");
-                appendStat(statsEl, m.mergeCount.toLocaleString(), "merges");
-            }
-
-			// Toggle views based on graph state
-			function updateView() {
-				const state = useGraphStore.getState();
-				const importEl = document.getElementById("import-container");
-				const graphEl = document.getElementById("graph-container");
-				const btnNew = document.getElementById("btn-new");
-				const statsEl = document.getElementById("app-stats");
-
-				document.body.dataset.viewMode = state.viewMode;
-
-                if (state.isLoading) {
-                    if (importEl) importEl.style.display = "flex";
-                    if (graphEl) graphEl.style.display = "none";
-                    // Show loading state in stats
-                    if (statsEl) {
-                        setStatsLoading(statsEl);
-                    }
-                    return;
-                }
-
-
-                if (state.graph) {
-                    if (importEl) importEl.style.display = "none";
-                    if (graphEl) graphEl.style.display = "flex";
-                    if (btnNew) btnNew.style.display = "flex";
-                } else {
-                    if (importEl) importEl.style.display = "flex";
-                    if (graphEl) graphEl.style.display = "none";
-                    if (btnNew) btnNew.style.display = "none";
-                    document.getElementById("sidebar")?.classList.remove("open");
-                    document.getElementById("sidebar-overlay")?.classList.remove("open");
-                    document
-                        .getElementById("mobile-menu-toggle")
-                        ?.setAttribute("aria-expanded", "false");
-                }
-
-                updateStats();
-            }
-
-            const DEFAULT_MAX_COMMITS = 1000;
-
-            async function handleQueryImport() {
-                const params = new URLSearchParams(window.location.search);
-                const githubRepo = params.get('github');
-                const gitlabRepo = params.get('gitlab');
-                const bitbucketRepo = params.get('bitbucket');
-
-                // Apply URL state settings (theme, layout, view)
-                const state = useGraphStore.getState() as any;
-
-                const themeParam = params.get('theme');
-                if (themeParam && ['night', 'dawn', 'github', 'nord', 'dracula'].includes(themeParam)) {
-                    state.setTheme(themeParam);
-                }
-
-                const layoutParam = params.get('layout');
-                if (layoutParam && ['vertical', 'horizontal', 'radial'].includes(layoutParam)) {
-                    state.setLayoutMode(layoutParam);
-                }
-
-                const viewParam = params.get('view');
-                if (viewParam && ['inspect', 'poster', 'calendar'].includes(viewParam)) {
-                    state.setViewMode(viewParam);
-                }
-
-                const commitParam = params.get('commit');
-
-                const repoPath = githubRepo || gitlabRepo || bitbucketRepo;
-                if (!repoPath) return;
-
-                const provider = githubRepo ? 'github' : gitlabRepo ? 'gitlab' : 'bitbucket';
-
-                state.setLoading(true);
-                state.setError(null);
-
-                try {
-                    const imports = (await import("@lib/git/import-git")) as any;
-                    let graph;
-
-                    if (provider === 'gitlab') {
-                        graph = await imports.parseGitLabRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
-                    } else if (provider === 'bitbucket') {
-                        graph = await imports.parseBitbucketRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
-                    } else {
-                        graph = await imports.parseGitHubRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
-                    }
-
-                    state.setGraph(graph);
-                    state.setRepoPath(repoPath, provider, graph.commits.size >= DEFAULT_MAX_COMMITS);
-
-                    // If a specific commit was requested in URL, select it
-                    if (commitParam) {
-                        const shortSha = commitParam.toLowerCase();
-                        // Find matching commit by prefix
-                        for (const [sha] of graph.commits) {
-                            if (sha.startsWith(shortSha) || sha === shortSha) {
-                                state.selectCommit(sha);
-                                break;
-                            }
-                        }
-                    }
-                } catch (err) {
-                    state.setError(err instanceof Error ? err.message : 'Failed to import repository');
-                }
-            }
-
-            // Subscribe to store changes
-            useGraphStore.subscribe((state, prevState) => {
-                if (state.graph !== prevState.graph || state.isLoading !== prevState.isLoading) {
-                    updateView();
-                }
-                if (state.viewMode !== prevState.viewMode) {
-                    document.body.dataset.viewMode = state.viewMode;
-                }
-            });
-
-            // Initialize
-            updateView();
-            handleQueryImport();
-
-            // New/Import button handler
-            document
-                .getElementById("btn-new")
-                ?.addEventListener("click", () => {
-                    useGraphStore.getState().clearGraph();
-                });
-
-            // Help button
-            document
-                .getElementById("btn-help")
-                ?.addEventListener("click", () => {
-                    useGraphStore.getState().toggleHelp();
-                });
-
-            // Mobile sidebar toggle
-            const sidebarEl = document.getElementById("sidebar");
-            const sidebarOverlay = document.getElementById("sidebar-overlay");
-            const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
-
-            const setSidebarOpen = (open: boolean) => {
-                if (!sidebarEl || !sidebarOverlay || !mobileMenuToggle) return;
-                sidebarEl.classList.toggle("open", open);
-                sidebarOverlay.classList.toggle("open", open);
-                mobileMenuToggle.setAttribute("aria-expanded", String(open));
-            };
-
-            mobileMenuToggle?.addEventListener("click", () => {
-                const isOpen = sidebarEl?.classList.contains("open") ?? false;
-                setSidebarOpen(!isOpen);
-            });
-
-            sidebarOverlay?.addEventListener("click", () => {
-                setSidebarOpen(false);
-            });
-
-            // Check reduced motion
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                useGraphStore.getState().setReducedMotion(true);
-            }
-        </script>
 
         <style>
             .app {
                 display: flex;
                 flex-direction: column;
-                height: 100vh;
+                height: 100dvh;
                 overflow: hidden;
+                position: relative;
+                isolation: isolate;
+                color: var(--rp-text);
+                background:
+                    radial-gradient(circle at 18% 8%, rgba(143, 211, 199, 0.16), transparent 32rem),
+                    radial-gradient(circle at 88% 14%, rgba(242, 179, 109, 0.13), transparent 30rem),
+                    linear-gradient(180deg, #080908 0%, #10120f 48%, #090a0a 100%);
+                font-family: "Cabinet Grotesk", var(--font-sans);
+            }
+
+            .app::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                z-index: -1;
+                pointer-events: none;
+                opacity: 0.16;
+                background-image:
+                    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+                background-size: 4px 4px, 4px 4px;
+                mask-image: radial-gradient(circle at center, black, transparent 82%);
             }
 
             /* Header */
@@ -419,9 +236,13 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 display: flex;
                 align-items: center;
                 gap: 1rem;
-                padding: 0.75rem 1.25rem;
-                background: var(--rp-surface);
-                border-bottom: 1px solid var(--rp-highlight-low);
+                margin: 0.85rem 0.85rem 0;
+                padding: 0.65rem 0.75rem;
+                background: rgba(12, 14, 12, 0.76);
+                border: 1px solid rgba(244, 240, 232, 0.12);
+                border-radius: 999px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 70px rgba(0, 0, 0, 0.28);
+                backdrop-filter: blur(20px);
                 flex-shrink: 0;
                 z-index: 100;
             }
@@ -432,14 +253,18 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 gap: 0.5rem;
                 text-decoration: none;
                 color: var(--rp-text);
-                font-weight: 600;
+                font-weight: 800;
                 font-size: 1rem;
             }
 
             .app-logo__icon {
-                width: 22px;
-                height: 22px;
-                color: var(--rp-foam);
+                width: 2.25rem;
+                height: 2.25rem;
+                padding: 0.45rem;
+                border-radius: 999px;
+                color: #0b0c0a;
+                background: var(--rp-gold);
+                box-shadow: 0 0 34px rgba(242, 179, 109, 0.28);
             }
 
             .app-stats {
@@ -456,8 +281,9 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 
             .stat__value {
                 font-size: 1.1rem;
-                font-weight: 600;
+                font-weight: 800;
                 color: var(--rp-text);
+                font-variant-numeric: tabular-nums;
             }
 
             .stat__label {
@@ -475,13 +301,14 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 display: flex;
                 align-items: center;
                 gap: 0.4rem;
-                padding: 0.5rem 0.75rem;
-                border: none;
-                border-radius: 6px;
+                min-height: 42px;
+                padding: 0.5rem 0.85rem;
+                border: 1px solid rgba(244, 240, 232, 0.1);
+                border-radius: 999px;
                 font-size: 0.85rem;
-                font-weight: 500;
+                font-weight: 800;
                 cursor: pointer;
-                transition: all 0.15s ease;
+                transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
             }
 
             .btn svg {
@@ -490,29 +317,34 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
             }
 
             .btn--ghost {
-                background: transparent;
+                background: rgba(244, 240, 232, 0.04);
                 color: var(--rp-subtle);
                 padding: 0.5rem;
             }
 
             .btn--ghost:hover {
-                background: var(--rp-overlay);
+                background: rgba(143, 211, 199, 0.1);
+                border-color: rgba(143, 211, 199, 0.35);
                 color: var(--rp-text);
+                transform: translateY(-1px);
             }
 
             .btn--primary {
-                background: var(--rp-foam);
-                color: var(--rp-base);
+                background: var(--rp-gold);
+                color: #10110f;
+                box-shadow: 0 12px 38px rgba(242, 179, 109, 0.22);
             }
 
             .btn--primary:hover {
-                background: var(--rp-iris);
+                background: #ffd08f;
+                transform: translateY(-1px);
             }
 
             /* Main layout */
             .app-main {
                 flex: 1;
                 overflow: hidden;
+                min-height: 0;
             }
 
             /* Import view */
@@ -522,7 +354,7 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 align-items: center;
                 justify-content: center;
                 height: 100%;
-                padding: 2rem;
+                padding: clamp(1.2rem, 4vw, 3rem);
                 animation: fadeIn 0.3s ease;
             }
 
@@ -539,26 +371,32 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 
             .import-header {
                 text-align: center;
-                margin-bottom: 2rem;
+                margin-bottom: 2.25rem;
             }
 
             .import-header h1 {
-                margin: 0 0 0.5rem;
-                font-size: 1.75rem;
-                font-weight: 600;
+                margin: 0 0 0.75rem;
+                max-width: 52rem;
+                font-size: clamp(3rem, 7vw, 6.5rem);
+                line-height: 0.92;
+                font-weight: 800;
+                text-wrap: balance;
                 color: var(--rp-text);
             }
 
             .import-header p {
                 margin: 0;
-                color: var(--rp-subtle);
-                font-size: 1rem;
+                color: rgba(244, 240, 232, 0.7);
+                font-size: clamp(1.05rem, 1.5vw, 1.28rem);
             }
 
             /* Graph view */
             .graph-container {
                 display: flex;
                 height: 100%;
+                gap: 0.75rem;
+                padding: 0.85rem;
+                box-sizing: border-box;
             }
 
             body[data-view-mode="poster"] .app-header,
@@ -583,12 +421,16 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 
             /* Sidebar */
             .sidebar {
-                width: 320px;
+                width: 328px;
                 flex-shrink: 0;
                 display: flex;
                 flex-direction: column;
-                background: var(--rp-surface);
-                border-right: 1px solid var(--rp-highlight-low);
+                overflow: hidden;
+                background: rgba(16, 18, 15, 0.78);
+                border: 1px solid rgba(244, 240, 232, 0.11);
+                border-radius: 1rem;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.24);
+                backdrop-filter: blur(18px);
             }
 
             .sidebar__header {
@@ -709,6 +551,11 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 flex: 1;
                 position: relative;
                 overflow: hidden;
+                min-width: 0;
+                border: 1px solid rgba(244, 240, 232, 0.11);
+                border-radius: 1rem;
+                background: rgba(8, 9, 8, 0.52);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 28px 80px rgba(0, 0, 0, 0.25);
             }
 
             body[data-view-mode="calendar"] .graph-canvas,
@@ -723,8 +570,8 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 width: 44px;
                 height: 44px;
                 background: transparent;
-                border: 1px solid var(--rp-highlight-med);
-                border-radius: 8px;
+                border: 1px solid rgba(244, 240, 232, 0.12);
+                border-radius: 999px;
                 color: var(--rp-subtle);
                 cursor: pointer;
                 align-items: center;
@@ -752,8 +599,8 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 .sidebar {
                     position: fixed;
                     left: -100%;
-                    top: 60px;
-                    bottom: 0;
+                    top: 5.35rem;
+                    bottom: 0.85rem;
                     z-index: 200;
                     transition: left 0.3s ease;
                 }
@@ -767,7 +614,8 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
                 }
 
                 .app-header {
-                    padding: 0.75rem 1rem;
+                    margin: 0.5rem 0.5rem 0;
+                    padding: 0.55rem 0.65rem;
                 }
 
                 .app-logo__text {

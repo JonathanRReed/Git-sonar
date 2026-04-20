@@ -1,8 +1,71 @@
 ---
 import "@styles/global.css";
 
+const siteUrl = "https://gitsonar.jonathanrreed.com";
+const socialImageUrl = `${siteUrl}/og-image.svg`;
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
+
+const bentoCards = [
+	{
+		className: "bento-card bento-card--wide",
+		title: "Read the repository like a map",
+		text: "Trace branch decisions, merge pressure, and long-running work without cloning context into a spreadsheet.",
+		meta: "graph-first review",
+	},
+	{
+		className: "bento-card bento-card--tall bento-card--image",
+		title: "Private by design",
+		text: "Repository archives are parsed in the browser. The graph runs locally, with no account gate between you and the data.",
+		meta: "local analysis",
+	},
+	{
+		className: "bento-card",
+		title: "Filter the noise",
+		text: "Search commits, authors, branches, and dates while the canvas keeps the active paths visible.",
+		meta: "fast triage",
+	},
+	{
+		className: "bento-card bento-card--compact bento-card--accent",
+		title: "Export the moment",
+		text: "Turn a release, migration, or milestone into a crisp artifact for docs, retros, and onboarding.",
+		meta: "poster output",
+	},
+	{
+		className: "bento-card bento-card--medium",
+		title: "Built for messy histories",
+		text: "Merges, side branches, and bursty contribution patterns stay legible instead of collapsing into a flat list.",
+		meta: "branch clarity",
+	},
+	{
+		className: "bento-card bento-card--wide bento-card--terminal",
+		title: "Start with a URL or archive",
+		text: "Load GitHub, GitLab, Bitbucket, or a zipped .git directory. No CLI setup, no project mutation.",
+		meta: "zero install path",
+	},
+];
+
+const workflow = [
+	{
+		title: "Import a history",
+		text: "Paste a repo URL or drop an archive. Git Sonar builds a commit graph in memory.",
+	},
+	{
+		title: "Follow the shape",
+		text: "Use pan, zoom, author filters, calendar view, and commit details to understand how work moved.",
+	},
+	{
+		title: "Share the readout",
+		text: "Export a poster-ready view or keep the app open while you review release context with the team.",
+	},
+];
+
+const capabilityRows = [
+	["Browser parser", "Repository archives stay local"],
+	["Graph canvas", "Branches and merges render as inspectable topology"],
+	["Poster exports", "SVG and PNG keep the same visual language"],
+	["Keyboard review", "Search, pan, zoom, and commit detail flows stay fast"],
+];
 ---
 
 <html lang="en">
@@ -13,1582 +76,1259 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 		<meta name="generator" content={Astro.generator} />
 		<meta
 			name="description"
-			content="Visualize your Git commit history as a beautiful interactive graph. Understand branches, merges, and project evolution at a glance."
+			content="Git Sonar turns Git history into a private, interactive graph for branch review, onboarding, release analysis, and poster-ready exports."
 		/>
-		<link rel="canonical" href="https://gitsonar.jonathanrreed.com/" />
-		<title>Git Sonar - Visualize Git History</title>
+		<link rel="canonical" href={`${siteUrl}/`} />
+		<meta name="author" content="Jonathan Reed" />
+		<title>Git Sonar, private Git history visualization</title>
 		{analyticsDomain && (
-			<script defer data-domain={analyticsDomain} src={analyticsSrc}></script>
+			<script is:inline defer data-domain={analyticsDomain} src={analyticsSrc}></script>
 		)}
 
-		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://gitsonar.jonathanrreed.com/" />
-		<meta property="og:title" content="Git Sonar - Visualize Git History" />
+		<meta property="og:url" content={`${siteUrl}/`} />
+		<meta
+			property="og:title"
+			content="Git Sonar, private Git history visualization"
+		/>
 		<meta
 			property="og:description"
-			content="See your commits, branches, and merges as a beautiful interactive graph. 100% private, runs in your browser."
+			content="Explore commits, branches, merges, and project evolution as a private browser-based graph."
 		/>
-		<meta property="og:image" content="/og-image.svg" />
+		<meta property="og:image" content={socialImageUrl} />
 
-		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content="https://gitsonar.jonathanrreed.com/" />
+		<meta property="twitter:url" content={`${siteUrl}/`} />
 		<meta
 			property="twitter:title"
-			content="Git Sonar - Visualize Git History"
+			content="Git Sonar, private Git history visualization"
 		/>
 		<meta
 			property="twitter:description"
-			content="See your commits, branches, and merges as a beautiful interactive graph. 100% private, runs in your browser."
+			content="A browser-based graph for reading Git history without sending code to a server."
 		/>
-		<meta property="twitter:image" content="/og-image.svg" />
+		<meta property="twitter:image" content={socialImageUrl} />
 
-		<!-- JSON-LD Structured Data -->
-		<script type="application/ld+json">
+		<script is:inline type="application/ld+json">
 			{
 				"@context": "https://schema.org",
 				"@type": "SoftwareApplication",
 				"name": "Git Sonar",
 				"applicationCategory": "DeveloperApplication",
 				"operatingSystem": "Web Browser",
-				"description": "Visualize your Git commit history as a beautiful interactive graph. Understand branches, merges, and project evolution at a glance.",
+				"description": "Git Sonar turns Git history into a private, interactive graph for branch review, onboarding, release analysis, and poster-ready exports.",
 				"offers": {
 					"@type": "Offer",
 					"price": "0",
 					"priceCurrency": "USD"
 				},
 				"featureList": [
-					"Interactive 2D graph visualization",
-					"100% browser-based, no server required",
+					"Interactive Git graph visualization",
+					"Browser-based repository parsing",
+					"Branch and merge inspection",
 					"Keyboard-first navigation",
-					"Screen reader accessible",
-					"Import from GitHub, GitLab, Bitbucket, or ZIP",
-					"Poster-ready SVG/PDF exports"
+					"SVG and poster-ready exports"
 				]
 			}
 		</script>
 
+		<link rel="preconnect" href="https://api.fontshare.com" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+			href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
 			rel="stylesheet"
 		/>
 	</head>
 	<body>
-		<div class="landing">
-			<!-- Animated background -->
-			<div class="bg-effects">
-				<div class="bg-gradient"></div>
-				<div class="bg-grid"></div>
-				<div class="bg-glow bg-glow--1"></div>
-				<div class="bg-glow bg-glow--2"></div>
-			</div>
+		<main class="site-shell overflow-x-hidden w-full max-w-full" id="main-content">
+			<div class="noise" aria-hidden="true"></div>
+			<div class="ambient ambient--one" aria-hidden="true"></div>
+			<div class="ambient ambient--two" aria-hidden="true"></div>
 
-			<!-- Navigation -->
-			<nav class="nav">
-				<a href="/" class="nav__logo">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-					>
-						<circle cx="12" cy="6" r="3"></circle>
-						<circle cx="6" cy="18" r="3"></circle>
-						<circle cx="18" cy="18" r="3"></circle>
-						<path d="M12 9v3m-3 3l3-3m3 3l-3-3"></path>
-					</svg>
+			<nav class="nav-shell" aria-label="Primary navigation">
+				<a href="/" class="brand-mark" aria-label="Git Sonar home">
+					<span class="brand-mark__icon" aria-hidden="true">
+						<svg viewBox="0 0 32 32" fill="none">
+							<path d="M16 5v22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+							<circle cx="16" cy="7" r="4" fill="currentColor" />
+							<circle cx="9" cy="22" r="4" fill="currentColor" />
+							<circle cx="23" cy="22" r="4" fill="currentColor" />
+							<path d="M16 13c0 4-7 4-7 9M16 13c0 4 7 4 7 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+						</svg>
+					</span>
 					<span>Git Sonar</span>
 				</a>
-				<div class="nav__links">
+
+				<div class="nav-links" aria-label="Page sections">
+					<a href="#read">Read</a>
+					<a href="#workflow">Workflow</a>
+					<a href="/about">About</a>
+				</div>
+
+				<div class="nav-actions">
 					<a
 						href="https://github.com/git-sonar/git-sonar"
 						target="_blank"
-						rel="noopener"
-						class="nav__link nav__link--github"
+						rel="noopener noreferrer"
 					>
-						<svg
-							viewBox="0 0 24 24"
-							fill="currentColor"
-							width="18"
-							height="18"
-						>
-							<path
-								d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-							></path>
-						</svg>
 						GitHub
 					</a>
-					<button type="button" class="nav__toggle" id="motion-toggle">
-						Motion On
-					</button>
-					<a href="/app" class="nav__cta">Open App</a>
+					<a class="nav-cta" href="/app">Open app</a>
 				</div>
 			</nav>
 
-			<!-- Hero -->
-			<main class="hero">
-				<div class="hero__content">
-					<div class="hero__badge">
-						<span class="pulse"></span>
-						100% Private • Runs in Browser
-					</div>
-					<h1 class="hero__title">
-						Visualize
-						<span class="hero__title--accent">Git history</span>
+			<section class="hero-section" aria-labelledby="hero-title">
+				<div class="hero-copy">
+					<p class="eyebrow">Private Git history visualization</p>
+					<h1 id="hero-title">
+						Map your Git history.
+						<span class="inline-orbit" aria-hidden="true">
+							<span></span>
+							<span></span>
+							<span></span>
+						</span>
 					</h1>
-					<p class="hero__subtitle">
-						Explore Git history as a clean, interactive graph. See commits,
-						branches, and merges at a glance.
+					<p class="hero-lede">
+						Git Sonar turns branches, merges, authors, and time into a browser-based graph you can inspect without uploading your code.
 					</p>
-					<div class="hero__actions">
-						<a href="/app" class="btn btn--primary btn--lg">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<path d="M5 12h14m-7-7l7 7-7 7"></path>
-							</svg>
-							Launch App
-						</a>
-						<a href="#features" class="btn btn--ghost btn--lg">
-							Learn More
-						</a>
-					</div>
-					<div class="hero__tech">
-						<span class="tech-badge">Astro</span>
-						<span class="tech-badge">React</span>
-						<span class="tech-badge">Canvas 2D</span>
+					<div class="hero-actions" aria-label="Primary actions">
+						<a class="button button--primary" href="/app">Open the app</a>
+						<a class="button button--secondary" href="#read">See the system</a>
 					</div>
 				</div>
 
-				<!-- Animated hero graphic -->
-				<div class="hero__graphic">
-					<div class="graph-container">
-						<svg
-							class="graph-demo"
-							viewBox="0 0 400 320"
-							fill="none"
-							id="hero-graph"
-						>
-							<!-- Glow filters -->
+				<div class="hero-visual" aria-label="Stylized Git history graph preview">
+					<div class="scanline" aria-hidden="true"></div>
+					<div class="graph-window">
+						<div class="window-top">
+							<span></span>
+							<span></span>
+							<span></span>
+							<code>release-read.git</code>
+						</div>
+						<svg class="sonar-graph" viewBox="0 0 640 520" role="img" aria-label="Commit graph preview with branches and merges">
 							<defs>
-								<filter
-									id="glow-foam"
-									x="-50%"
-									y="-50%"
-									width="200%"
-									height="200%"
-								>
-									<feGaussianBlur
-										stdDeviation="4"
-										result="coloredBlur"></feGaussianBlur>
-									<feMerge>
-										<feMergeNode in="coloredBlur"
-										></feMergeNode>
-										<feMergeNode in="SourceGraphic"
-										></feMergeNode>
-									</feMerge>
-								</filter>
-								<filter
-									id="glow-iris"
-									x="-50%"
-									y="-50%"
-									width="200%"
-									height="200%"
-								>
-									<feGaussianBlur
-										stdDeviation="4"
-										result="coloredBlur"></feGaussianBlur>
-									<feMerge>
-										<feMergeNode in="coloredBlur"
-										></feMergeNode>
-										<feMergeNode in="SourceGraphic"
-										></feMergeNode>
-									</feMerge>
-								</filter>
-								<filter
-									id="glow-gold"
-									x="-50%"
-									y="-50%"
-									width="200%"
-									height="200%"
-								>
-									<feGaussianBlur
-										stdDeviation="4"
-										result="coloredBlur"></feGaussianBlur>
-									<feMerge>
-										<feMergeNode in="coloredBlur"
-										></feMergeNode>
-										<feMergeNode in="SourceGraphic"
-										></feMergeNode>
-									</feMerge>
-								</filter>
+								<linearGradient id="branchGlow" x1="0" x2="1">
+									<stop offset="0%" stop-color="#f2b36d" />
+									<stop offset="100%" stop-color="#8fd3c7" />
+								</linearGradient>
 							</defs>
-
-							<!-- Animated edges with dasharray -->
-							<g class="edges">
-								<path
-									class="edge edge--foam"
-									d="M200 52 L200 88"
-									stroke="#9ccfd8"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--foam"
-									d="M200 112 L200 148"
-									stroke="#9ccfd8"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--iris"
-									d="M200 112 C200 136 120 136 120 148"
-									stroke="#c4a7e7"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--gold"
-									d="M200 112 C200 136 280 136 280 148"
-									stroke="#f6c177"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--foam"
-									d="M200 172 L200 208"
-									stroke="#9ccfd8"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--iris"
-									d="M120 172 C120 196 200 196 200 208"
-									stroke="#c4a7e7"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--gold"
-									d="M280 172 C280 196 200 196 200 208"
-									stroke="#f6c177"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--iris"
-									d="M120 172 L120 248"
-									stroke="#c4a7e7"
-									stroke-width="2.5"></path>
-								<path
-									class="edge edge--gold"
-									d="M280 172 L280 248"
-									stroke="#f6c177"
-									stroke-width="2.5"></path>
+							<path class="graph-line graph-line--main" d="M320 56 L320 120 L320 184 L320 248 L320 312 L320 376 L320 448" />
+							<path class="graph-line" d="M320 184 C248 204 210 242 210 292 C210 344 252 374 320 376" />
+							<path class="graph-line" d="M320 248 C410 262 456 304 456 352 C456 398 404 430 320 448" />
+							<path class="graph-line graph-line--hot" d="M320 120 C382 132 416 164 416 204 C416 240 374 260 320 248" />
+							{[56, 120, 184, 248, 312, 376, 448].map((cy, index) => (
+								<g class="commit-mark">
+									<circle class="commit-halo" cx="320" cy={cy} r={index === 5 ? "27" : "22"} />
+									<circle class={`commit commit--${index + 1}`} cx="320" cy={cy} r={index === 5 ? "14" : "11"} />
+								</g>
+							))}
+							<g class="commit-mark">
+								<circle class="commit-halo" cx="210" cy="292" r="24" />
+								<circle class="commit commit--branch" cx="210" cy="292" r="12" />
 							</g>
-
-							<!-- Animated nodes -->
-							<g class="nodes">
-								<circle
-									class="node node--1"
-									cx="200"
-									cy="40"
-									r="12"
-									fill="#9ccfd8"
-									filter="url(#glow-foam)"></circle>
-								<circle
-									class="node node--2"
-									cx="200"
-									cy="100"
-									r="12"
-									fill="#9ccfd8"
-									filter="url(#glow-foam)"></circle>
-								<circle
-									class="node node--3"
-									cx="120"
-									cy="160"
-									r="12"
-									fill="#c4a7e7"
-									filter="url(#glow-iris)"></circle>
-								<circle
-									class="node node--4"
-									cx="200"
-									cy="160"
-									r="12"
-									fill="#9ccfd8"
-									filter="url(#glow-foam)"></circle>
-								<circle
-									class="node node--5"
-									cx="280"
-									cy="160"
-									r="12"
-									fill="#f6c177"
-									filter="url(#glow-gold)"></circle>
-								<polygon
-									class="node node--6 node--merge"
-									points="200,208 215,220 200,232 185,220"
-									fill="#9ccfd8"
-									filter="url(#glow-foam)"></polygon>
-								<circle
-									class="node node--7"
-									cx="120"
-									cy="260"
-									r="10"
-									fill="#c4a7e7"
-									filter="url(#glow-iris)"></circle>
-								<circle
-									class="node node--8"
-									cx="280"
-									cy="260"
-									r="10"
-									fill="#f6c177"
-									filter="url(#glow-gold)"></circle>
+							<g class="commit-mark">
+								<circle class="commit-halo" cx="456" cy="352" r="26" />
+								<circle class="commit commit--branch" cx="456" cy="352" r="13" />
 							</g>
-
-							<!-- Branch labels -->
-							<g class="labels">
-								<rect
-									x="176"
-									y="6"
-									width="48"
-									height="18"
-									rx="4"
-									fill="#26233a"
-									stroke="#9ccfd8"
-									stroke-width="1"></rect>
-								<text
-									x="200"
-									y="18"
-									text-anchor="middle"
-									fill="#9ccfd8"
-									font-size="10"
-									font-weight="600">main</text
-								>
-
-								<rect
-									x="83"
-									y="128"
-									width="75"
-									height="16"
-									rx="4"
-									fill="#26233a"
-									stroke="#c4a7e7"
-									stroke-width="1"></rect>
-								<text
-									x="120"
-									y="140"
-									text-anchor="middle"
-									fill="#c4a7e7"
-									font-size="9">feature-auth</text
-								>
-
-								<rect
-									x="240"
-									y="128"
-									width="80"
-									height="16"
-									rx="4"
-									fill="#26233a"
-									stroke="#f6c177"
-									stroke-width="1"></rect>
-								<text
-									x="280"
-									y="140"
-									text-anchor="middle"
-									fill="#f6c177"
-									font-size="9">feature-api</text
-								>
+							<g class="commit-mark">
+								<circle class="commit-halo" cx="416" cy="204" r="22" />
+								<circle class="commit commit--branch" cx="416" cy="204" r="10" />
 							</g>
+							<rect class="branch-label" x="350" y="101" width="96" height="28" rx="7" />
+							<text x="366" y="120">main</text>
+							<rect class="branch-label" x="94" y="263" width="124" height="28" rx="7" />
+							<text x="109" y="282">feature/auth</text>
+							<rect class="branch-label" x="460" y="325" width="112" height="28" rx="7" />
+							<text x="475" y="344">release/1.8</text>
 						</svg>
-					</div>
-				</div>
-			</main>
-
-			<!-- Features -->
-			<section id="features" class="features">
-				<h2 class="section-title">Why Git Sonar?</h2>
-				<div class="feature-grid">
-					<div class="feature glass-card">
-						<div class="feature__icon feature__icon--foam">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<path d="M12 3v18m9-9H3"></path>
-							</svg>
+						<div class="graph-caption">
+							<span>1,247 commits</span>
+							<span>38 authors</span>
+							<span>142 merges</span>
 						</div>
-						<h3>No Setup Required</h3>
-						<p>
-							Import from GitHub or drop a .git.zip file.
-							No CLI tools, no configuration.
-						</p>
-					</div>
-
-					<div class="feature glass-card">
-						<div class="feature__icon feature__icon--iris">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<circle cx="11" cy="11" r="8"></circle>
-								<path d="M21 21l-4.35-4.35"></path>
-							</svg>
-						</div>
-						<h3>Search & Filter</h3>
-						<p>
-							Find any commit by message, author, or SHA. Filter
-							your history to focus on what matters.
-						</p>
-					</div>
-
-					<div class="feature glass-card">
-						<div class="feature__icon feature__icon--gold">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<rect x="3" y="3" width="18" height="18" rx="2"
-								></rect>
-								<path d="M9 9h6v6H9z"></path>
-							</svg>
-						</div>
-						<h3>Beautiful Visualization</h3>
-						<p>
-							Clean vertical layout with smooth animations.
-							Distinct shapes for merges and branch points.
-						</p>
-					</div>
-
-					<div class="feature glass-card">
-						<div class="feature__icon feature__icon--love">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<path
-									d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-								></path>
-							</svg>
-						</div>
-						<h3>100% Private</h3>
-						<p>
-							Everything runs in your browser. Your code never
-							touches our servers.
-						</p>
 					</div>
 				</div>
 			</section>
 
-			<!-- Animated Stats Section -->
-			<section class="stats-section">
-				<div class="stats-grid">
-					<div class="stat-item">
-						<span class="stat-value" data-target="100">0</span>
-						<span class="stat-suffix">%</span>
-						<span class="stat-label">Private</span>
-						<span class="stat-desc">No data leaves your browser</span>
-					</div>
-					<div class="stat-item">
-						<span class="stat-value" data-target="5000">0</span>
-						<span class="stat-suffix">+</span>
-						<span class="stat-label">Commits</span>
-						<span class="stat-desc">Support for large repositories</span>
-					</div>
-					<div class="stat-item">
-						<span class="stat-value" data-target="3">0</span>
-						<span class="stat-suffix"></span>
-						<span class="stat-label">Platforms</span>
-						<span class="stat-desc">GitHub, GitLab, Bitbucket</span>
-					</div>
-					<div class="stat-item">
-						<span class="stat-value" data-target="5">0</span>
-						<span class="stat-suffix"></span>
-						<span class="stat-label">Themes</span>
-						<span class="stat-desc">Rose Pine, Nord, Dracula & more</span>
-					</div>
+			<section class="capability-ledger" aria-label="Product capabilities">
+				<div class="ledger-title">
+					<span>The pipeline</span>
+					<span>local in, visual out</span>
+				</div>
+				<div class="ledger-grid">
+					{capabilityRows.map(([name, detail]) => (
+						<div class="ledger-item">
+							<strong>{name}</strong>
+							<span>{detail}</span>
+						</div>
+					))}
 				</div>
 			</section>
 
-			<!-- How it works -->
-			<section class="how-it-works">
-				<h2 class="section-title">Get Started in Seconds</h2>
-				<div class="steps">
-					<div class="step glass-card">
-						<div class="step__number">1</div>
-						<div class="step__content">
-							<h3>Open the app</h3>
-							<p>Click "Launch App" above or go to /app</p>
-						</div>
-					</div>
-					<div class="step glass-card">
-						<div class="step__number">2</div>
-						<div class="step__content">
-							<h3>Import your repo</h3>
-							<p>
-								Enter a GitHub URL or drop a .git.zip file
-							</p>
-						</div>
-					</div>
-					<div class="step glass-card">
-						<div class="step__number">3</div>
-						<div class="step__content">
-							<h3>Explore history</h3>
-							<p>
-								Pan, zoom, click commits, and search your
-								history
-							</p>
-						</div>
-					</div>
+			<section class="chapter chapter--read" id="read" aria-labelledby="read-title">
+				<div class="section-heading">
+					<p class="eyebrow">The readout</p>
+					<h2 id="read-title">A cleaner way to inspect commit history.</h2>
+					<p>
+						Import repository history, inspect the graph, filter by the signal you need, and export the view when it is ready to share.
+					</p>
 				</div>
-				<div class="cta-section">
-					<a href="/app" class="btn btn--primary btn--lg">
-						Try It Now
-					</a>
+
+				<div class="bento-grid">
+					{bentoCards.map((card) => (
+						<article class={card.className}>
+							<div class="bento-card__meta">{card.meta}</div>
+							<h3>{card.title}</h3>
+							<p>{card.text}</p>
+						</article>
+					))}
 				</div>
 			</section>
 
-			<!-- Use Cases Section -->
-			<section class="use-cases">
-				<h2 class="section-title">Perfect For</h2>
-				<div class="use-cases-grid">
-					<div class="use-case glass-card">
-						<div class="use-case__icon">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-								<circle cx="9" cy="7" r="4"></circle>
-								<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-								<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-							</svg>
-						</div>
-						<h3>Team Onboarding</h3>
-						<p>Help new team members understand project history and contribution patterns at a glance.</p>
-					</div>
-					<div class="use-case glass-card">
-						<div class="use-case__icon use-case__icon--iris">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-								<line x1="3" y1="9" x2="21" y2="9"></line>
-								<line x1="9" y1="21" x2="9" y2="9"></line>
-							</svg>
-						</div>
-						<h3>Print Posters</h3>
-						<p>Create beautiful wall art from your project's history. Perfect for offices and milestones.</p>
-					</div>
-					<div class="use-case glass-card">
-						<div class="use-case__icon use-case__icon--gold">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-								<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-							</svg>
-						</div>
-						<h3>Teaching Git</h3>
-						<p>Visualize branching and merging concepts for students learning version control.</p>
-					</div>
-					<div class="use-case glass-card">
-						<div class="use-case__icon use-case__icon--love">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-							</svg>
-						</div>
-						<h3>Code Reviews</h3>
-						<p>Understand the context of changes by seeing how branches evolved over time.</p>
-					</div>
+			<section class="chapter chapter--workflow" id="workflow" aria-labelledby="workflow-title">
+				<div class="pinned-copy">
+					<p class="eyebrow">Workflow</p>
+					<h2 id="workflow-title">From repository noise to a usable readout.</h2>
+					<p class="scrub-copy">
+						Load a history, read the shape, isolate the important paths, then export the view your team needs to discuss.
+					</p>
+				</div>
+
+				<div class="workflow-stack">
+					{workflow.map((step, index) => (
+						<article class="workflow-card" data-step={index + 1}>
+							<span>{String(index + 1).padStart(2, "0")}</span>
+							<h3>{step.title}</h3>
+							<p>{step.text}</p>
+						</article>
+					))}
 				</div>
 			</section>
 
-			<!-- Footer -->
+			<section class="final-cta" aria-labelledby="cta-title">
+				<p class="eyebrow">Start reading</p>
+				<h2 id="cta-title">Open a repository history and see what the log has been hiding.</h2>
+				<div class="hero-actions">
+					<a class="button button--primary" href="/app">Launch Git Sonar</a>
+					<a class="button button--secondary" href="https://github.com/git-sonar/git-sonar" target="_blank" rel="noopener noreferrer">View source</a>
+				</div>
+			</section>
+
 			<footer class="footer">
-				<p>
-					Built with
-					<a href="https://astro.build" target="_blank" rel="noopener"
-						>Astro</a
-					>,
-					<a href="https://react.dev" target="_blank" rel="noopener"
-						>React</a
-					>, and Canvas. Open source.
-				</p>
-				<p class="footer__copyright">© 2026 Git Sonar</p>
+				<a href="/" class="brand-mark">
+					<span class="brand-mark__icon" aria-hidden="true">
+						<svg viewBox="0 0 32 32" fill="none">
+							<path d="M16 5v22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+							<circle cx="16" cy="7" r="4" fill="currentColor" />
+							<circle cx="9" cy="22" r="4" fill="currentColor" />
+							<circle cx="23" cy="22" r="4" fill="currentColor" />
+						</svg>
+					</span>
+					<span>Git Sonar</span>
+				</a>
+				<div class="footer-links">
+					<a href="/app">App</a>
+					<a href="/about">About</a>
+					<a href="https://github.com/git-sonar/git-sonar" target="_blank" rel="noopener noreferrer">GitHub</a>
+					<a href="/robots.txt">Robots</a>
+				</div>
+				<p>Copyright 2026 Git Sonar. Built with Astro, React, and Canvas.</p>
 			</footer>
-		</div>
+		</main>
 
 		<script>
-			const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-			const savedMotion = localStorage.getItem('git-sonar-motion');
-			const initialMotion = savedMotion ?? (prefersReduced ? 'reduced' : 'full');
-			document.body.dataset.motion = initialMotion;
+			const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-			window.addEventListener('DOMContentLoaded', () => {
-				const landing = document.querySelector('.landing');
-				requestAnimationFrame(() => landing?.classList.add('is-ready'));
+			if (!reduceMotion) {
+				const revealTargets = document.querySelectorAll(
+					".bento-card, .workflow-card, .ledger-item, .section-heading, .final-cta",
+				);
 
-				const toggle = document.getElementById('motion-toggle');
-				const updateLabel = () => {
-					const motion = document.body.dataset.motion === 'reduced' ? 'reduced' : 'full';
-					if (toggle) {
-						toggle.textContent = motion === 'reduced' ? 'Motion Off' : 'Motion On';
-					}
-				};
-
-				updateLabel();
-
-				toggle?.addEventListener('click', () => {
-					const next = document.body.dataset.motion === 'reduced' ? 'full' : 'reduced';
-					document.body.dataset.motion = next;
-					localStorage.setItem('git-sonar-motion', next);
-					updateLabel();
-				});
-
-				// Animated counter for stats
-				const observerOptions = {
-					threshold: 0.5,
-					rootMargin: '0px'
-				};
-
-				const animateValue = (element: Element, target: number, duration: number = 2000) => {
-					const start = 0;
-					const startTime = performance.now();
-					
-					const updateValue = (currentTime: number) => {
-						const elapsed = currentTime - startTime;
-						const progress = Math.min(elapsed / duration, 1);
-						
-						// Easing function
-						const eased = 1 - Math.pow(1 - progress, 3);
-						const current = Math.round(start + (target - start) * eased);
-						
-						element.textContent = current.toLocaleString();
-						
-						if (progress < 1) {
-							requestAnimationFrame(updateValue);
+				const revealObserver = new IntersectionObserver(
+					(entries) => {
+						for (const entry of entries) {
+							if (entry.isIntersecting) {
+								entry.target.classList.add("is-visible");
+								revealObserver.unobserve(entry.target);
+							}
 						}
-					};
-					
-					requestAnimationFrame(updateValue);
-				};
+					},
+					{ rootMargin: "0px 0px -12% 0px", threshold: 0.18 },
+				);
 
-				const statsObserver = new IntersectionObserver((entries) => {
-					entries.forEach(entry => {
-						if (entry.isIntersecting) {
-							const statValues = entry.target.querySelectorAll('.stat-value[data-target]');
-							statValues.forEach(el => {
-								const target = parseInt(el.getAttribute('data-target') || '0', 10);
-								animateValue(el, target);
-							});
-							statsObserver.unobserve(entry.target);
-						}
-					});
-				}, observerOptions);
-
-				const statsSection = document.querySelector('.stats-section');
-				if (statsSection) {
-					statsObserver.observe(statsSection);
+				for (const target of revealTargets) {
+					revealObserver.observe(target);
 				}
-			});
+
+				const scrubCopy = document.querySelector<HTMLElement>(".scrub-copy");
+				const workflowSection = document.querySelector<HTMLElement>(".chapter--workflow");
+
+				const updateScrub = () => {
+					if (!scrubCopy || !workflowSection) return;
+					const rect = workflowSection.getBoundingClientRect();
+					const distance = window.innerHeight + rect.height;
+					const progress = Math.min(Math.max((window.innerHeight - rect.top) / distance, 0), 1);
+					scrubCopy.style.setProperty("--scrub-opacity", String(0.28 + progress * 0.72));
+					scrubCopy.style.setProperty("--scrub-y", `${18 - progress * 18}px`);
+				};
+
+				updateScrub();
+				window.addEventListener("scroll", updateScrub, { passive: true });
+				window.addEventListener("resize", updateScrub);
+			} else {
+				document.documentElement.dataset.reducedMotion = "true";
+			}
 		</script>
 
 		<style>
-			/* Base */
-			.landing {
-				min-height: 100vh;
-				background: var(--rp-base);
-				color: var(--rp-text);
-				position: relative;
-				overflow-x: hidden;
+			:global(html) {
+				scroll-behavior: smooth;
+				background: #090a0a;
 			}
 
-			/* Animated background effects */
-			.bg-effects {
+			.site-shell {
+				min-height: 100dvh;
+				position: relative;
+				isolation: isolate;
+				overflow: hidden;
+				background:
+					radial-gradient(circle at 18% 8%, rgba(143, 211, 199, 0.18), transparent 32rem),
+					radial-gradient(circle at 86% 12%, rgba(242, 179, 109, 0.14), transparent 30rem),
+					linear-gradient(180deg, #080908 0%, #10120f 48%, #090a0a 100%);
+				color: #f4f0e8;
+				font-family: "Cabinet Grotesk", var(--font-sans);
+			}
+
+			.noise {
 				position: fixed;
 				inset: 0;
+				z-index: -1;
 				pointer-events: none;
-				z-index: 0;
-				overflow: hidden;
-			}
-
-			.bg-gradient {
-				position: absolute;
-				inset: 0;
-				background: radial-gradient(
-					ellipse 80% 50% at 50% -20%,
-					rgba(156, 207, 216, 0.1),
-					transparent
-				);
-			}
-
-			.bg-grid {
-				position: absolute;
-				inset: 0;
+				opacity: 0.17;
 				background-image:
-					linear-gradient(
-						rgba(156, 207, 216, 0.03) 1px,
-						transparent 1px
-					),
-					linear-gradient(
-						90deg,
-						rgba(156, 207, 216, 0.03) 1px,
-						transparent 1px
-					);
-				background-size: 60px 60px;
-				mask: linear-gradient(
-					to bottom,
-					transparent,
-					black 20%,
-					black 80%,
-					transparent
-				);
+					linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+				background-size: 4px 4px, 4px 4px;
+				mask-image: radial-gradient(circle at center, black, transparent 82%);
 			}
 
-			.bg-glow {
-				position: absolute;
-				width: 600px;
-				height: 600px;
-				border-radius: 50%;
-				filter: blur(120px);
-				opacity: 0.4;
-			}
-
-			.bg-glow--1 {
-				top: -200px;
-				right: -100px;
-				background: var(--rp-foam);
-				opacity: 0.15;
-			}
-
-			.bg-glow--2 {
-				bottom: -200px;
-				left: -100px;
-				background: var(--rp-iris);
-				opacity: 0.1;
-				animation-delay: -7s;
-			}
-
-			@keyframes float-glow {
-				0%,
-				100% {
-					transform: translate(0, 0) scale(1);
-				}
-				50% {
-					transform: translate(30px, -30px) scale(1.1);
-				}
-			}
-
-			/* Navigation */
-			.nav {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				padding: 1rem 2rem;
-				max-width: 1320px;
-				margin: 0 auto;
-				position: relative;
-				z-index: 10;
-			}
-
-			.nav__logo {
-				display: flex;
-				align-items: center;
-				gap: 0.5rem;
-				text-decoration: none;
-				color: var(--rp-text);
-				font-weight: 600;
-				font-size: 1.1rem;
-				transition: transform 0.2s;
-			}
-
-			.nav__logo:hover {
-				transform: translateY(-1px);
-			}
-
-			.nav__logo svg {
-				width: 24px;
-				height: 24px;
-				color: var(--rp-foam);
-			}
-
-			.nav__links {
-				display: flex;
-				align-items: center;
-				gap: 1.5rem;
-			}
-
-			.nav__link {
-				display: flex;
-				align-items: center;
-				gap: 0.4rem;
-				color: var(--rp-subtle);
-				text-decoration: none;
-				font-size: 0.9rem;
-				transition: all 0.15s;
-			}
-
-			.nav__link svg {
-				width: 18px;
-				height: 18px;
-			}
-
-			.nav__link:hover {
-				color: var(--rp-text);
-			}
-
-			.nav__cta {
-				padding: 0.5rem 1rem;
-				background: var(--rp-surface);
-				color: var(--rp-text);
-				text-decoration: none;
-				border-radius: 6px;
-				font-size: 0.9rem;
-				font-weight: 500;
-				border: 1px solid var(--rp-highlight-med);
-				transition: all 0.15s;
-			}
-
-			.nav__cta:hover {
-				background: var(--rp-overlay);
-				border-color: var(--rp-foam);
-			}
-
-			.nav__toggle {
-				padding: 0.45rem 0.8rem;
+			.ambient {
+				position: fixed;
+				z-index: -2;
 				border-radius: 999px;
-				border: 1px solid var(--rp-highlight-med);
-				background: transparent;
-				color: var(--rp-subtle);
-				font-size: 0.75rem;
-				font-weight: 600;
-				letter-spacing: 0.02em;
-				transition: all 0.2s ease;
+				filter: blur(80px);
+				opacity: 0.36;
+				pointer-events: none;
 			}
 
-			.nav__toggle:hover {
-				color: var(--rp-text);
-				border-color: var(--rp-foam);
-				background: rgba(156, 207, 216, 0.08);
+			.ambient--one {
+				width: 26rem;
+				height: 26rem;
+				left: -9rem;
+				top: 26rem;
+				background: #29423d;
 			}
 
-			/* Hero */
-			.hero {
+			.ambient--two {
+				width: 31rem;
+				height: 31rem;
+				right: -12rem;
+				top: 66rem;
+				background: #5f3b23;
+			}
+
+			.nav-shell {
+				position: sticky;
+				top: 1rem;
+				z-index: 20;
 				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 4rem;
+				grid-template-columns: 1fr auto 1fr;
 				align-items: center;
-				max-width: 1320px;
+				gap: 1rem;
+				width: min(92rem, calc(100% - 2rem));
+				margin: 1rem auto 0;
+				padding: 0.7rem;
+				border: 1px solid rgba(244, 240, 232, 0.12);
+				border-radius: 999px;
+				background: rgba(12, 14, 12, 0.72);
+				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 70px rgba(0, 0, 0, 0.28);
+				backdrop-filter: blur(20px);
+			}
+
+			.brand-mark,
+			.nav-links,
+			.nav-actions,
+			.hero-actions,
+			.graph-caption,
+			.footer-links {
+				display: flex;
+				align-items: center;
+			}
+
+			.brand-mark {
+				gap: 0.7rem;
+				color: #f4f0e8;
+				text-decoration: none;
+				font-weight: 800;
+				letter-spacing: 0;
+			}
+
+			.brand-mark__icon {
+				display: grid;
+				place-items: center;
+				width: 2.45rem;
+				height: 2.45rem;
+				border-radius: 50%;
+				color: #0b0c0a;
+				background: #f2b36d;
+				box-shadow: 0 0 34px rgba(242, 179, 109, 0.28);
+			}
+
+			.brand-mark__icon svg {
+				width: 1.2rem;
+				height: 1.2rem;
+			}
+
+			.nav-links {
+				gap: 0.25rem;
+				padding: 0.25rem;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.045);
+			}
+
+			.nav-links a,
+			.nav-actions a,
+			.footer-links a {
+				min-height: 44px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				color: rgba(244, 240, 232, 0.72);
+				text-decoration: none;
+				font-weight: 700;
+				transition: color 180ms ease, background 180ms ease, transform 180ms ease, border-color 180ms ease;
+			}
+
+			.nav-links a {
+				padding: 0 1rem;
+				border-radius: 999px;
+			}
+
+			.nav-links a:hover,
+			.nav-actions a:hover,
+			.footer-links a:hover {
+				color: #fffaf2;
+			}
+
+			.nav-actions {
+				justify-content: flex-end;
+				gap: 0.45rem;
+			}
+
+			.nav-actions a {
+				padding: 0 0.9rem;
+				border-radius: 999px;
+			}
+
+			.nav-cta {
+				color: #10110f !important;
+				background: #f2b36d;
+				box-shadow: 0 12px 38px rgba(242, 179, 109, 0.22);
+			}
+
+			.nav-cta:hover,
+			.button--primary:hover {
+				transform: translateY(-2px);
+				background: #ffd08f;
+			}
+
+			.hero-section {
+				width: min(92rem, calc(100% - 2rem));
 				margin: 0 auto;
-				padding: 4rem 2rem 6rem;
+				display: grid;
+				grid-template-columns: minmax(0, 1fr);
+				justify-items: center;
+				gap: clamp(2.4rem, 5vw, 4.4rem);
+				min-height: calc(100dvh - 5rem);
+				padding: clamp(4.5rem, 7vw, 6.5rem) 0 clamp(3rem, 6vw, 5rem);
+			}
+
+			.hero-copy {
+				width: min(100%, 72rem);
+				text-align: center;
+			}
+
+			.eyebrow {
+				margin: 0 0 1.15rem;
+				color: #8fd3c7;
+				font-family: var(--font-mono);
+				font-size: 0.78rem;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			.hero-copy h1,
+			.section-heading h2,
+			.pinned-copy h2,
+			.final-cta h2 {
+				margin: 0;
+				max-width: 66rem;
+				font-size: clamp(3rem, 7vw, 6.8rem);
+				line-height: 0.92;
+				font-weight: 800;
+				letter-spacing: 0;
+				text-wrap: balance;
+			}
+
+			.inline-orbit {
+				position: relative;
+				display: inline-grid;
+				place-items: center;
+				width: clamp(5.5rem, 12vw, 11rem);
+				height: clamp(2.1rem, 4.6vw, 4.1rem);
+				margin-left: 0.35rem;
+				border-radius: 999px;
+				vertical-align: middle;
+				background:
+					linear-gradient(90deg, rgba(143, 211, 199, 0.13) 1px, transparent 1px),
+					linear-gradient(rgba(143, 211, 199, 0.09) 1px, transparent 1px),
+					radial-gradient(circle at 72% 42%, rgba(242, 179, 109, 0.3), transparent 36%),
+					rgba(12, 18, 16, 0.72);
+				background-size: 22px 22px, 22px 22px, auto, auto;
+				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 20px 50px rgba(0, 0, 0, 0.28);
+			}
+
+			.inline-orbit span {
+				position: absolute;
+				border-radius: 999px;
+				background: #f4f0e8;
+				box-shadow: 0 0 0 5px rgba(244, 240, 232, 0.08);
+			}
+
+			.inline-orbit span:nth-child(1) {
+				width: 0.72rem;
+				height: 0.72rem;
+				left: 24%;
+				top: 50%;
+			}
+
+			.inline-orbit span:nth-child(2) {
+				width: 0.88rem;
+				height: 0.88rem;
+				left: 54%;
+				top: 28%;
+				background: #f2b36d;
+			}
+
+			.inline-orbit span:nth-child(3) {
+				width: 0.66rem;
+				height: 0.66rem;
+				right: 18%;
+				bottom: 28%;
+				background: #8fd3c7;
+			}
+
+			.hero-lede,
+			.section-heading p,
+			.pinned-copy p,
+			.final-cta p,
+			.bento-card p,
+			.workflow-card p,
+			.footer p {
+				color: rgba(244, 240, 232, 0.7);
+				font-size: clamp(1.03rem, 1.3vw, 1.22rem);
+				line-height: 1.65;
+				text-wrap: pretty;
+			}
+
+			.hero-lede {
+				max-width: 39rem;
+				margin: 1.7rem auto 0;
+			}
+
+			.hero-actions {
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 0.85rem;
+				margin-top: 2.2rem;
+			}
+
+			.button {
+				min-height: 48px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0 1.25rem;
+				border-radius: 999px;
+				font-weight: 800;
+				text-decoration: none;
+				transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+			}
+
+			.button:active,
+			.nav-actions a:active,
+			.nav-links a:active,
+			.bento-card:active {
+				transform: scale(0.98);
+			}
+
+			.button--primary {
+				color: #10110f;
+				background: #f2b36d;
+				box-shadow: 0 16px 46px rgba(242, 179, 109, 0.24);
+			}
+
+			.button--secondary {
+				color: #f4f0e8;
+				border: 1px solid rgba(244, 240, 232, 0.18);
+				background: rgba(244, 240, 232, 0.06);
+			}
+
+			.button--secondary:hover {
+				transform: translateY(-2px);
+				border-color: rgba(143, 211, 199, 0.5);
+				background: rgba(143, 211, 199, 0.1);
+			}
+
+			.hero-visual {
+				position: relative;
+				display: grid;
+				place-items: center;
+				width: 100%;
+				min-width: 0;
+				justify-self: center;
+				align-self: center;
+			}
+
+			.graph-window {
+				position: relative;
+				overflow: hidden;
+				width: min(100%, 52rem);
+				margin-inline: auto;
+				justify-self: center;
+				border-radius: 1.4rem;
+				border: 1px solid rgba(244, 240, 232, 0.14);
+				background:
+					radial-gradient(circle at 65% 24%, rgba(242, 179, 109, 0.14), transparent 18rem),
+					linear-gradient(145deg, rgba(26, 31, 27, 0.9), rgba(7, 8, 7, 0.9));
+				box-shadow:
+					inset 0 1px 0 rgba(255, 255, 255, 0.08),
+					0 40px 100px rgba(0, 0, 0, 0.42);
+			}
+
+			.window-top,
+			.graph-caption {
 				position: relative;
 				z-index: 1;
 			}
 
-			.hero::before {
-				content: '';
-				position: absolute;
-				inset: -2rem 0 auto 40%;
-				height: 65%;
-				background: radial-gradient(circle at top, rgba(156, 207, 216, 0.08), transparent 70%);
-				pointer-events: none;
-				z-index: 0;
-			}
-
-			.hero__badge {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5rem;
-				padding: 0.4rem 0.9rem;
-				background: rgba(156, 207, 216, 0.1);
-				border: 1px solid rgba(156, 207, 216, 0.2);
-				border-radius: 100px;
-				font-size: 0.8rem;
-				color: var(--rp-foam);
-				margin-bottom: 1.5rem;
-			}
-
-			.pulse {
-				width: 8px;
-				height: 8px;
-				background: var(--rp-foam);
-				border-radius: 50%;
-			}
-
-			@keyframes pulse {
-				0%,
-				100% {
-					opacity: 1;
-					transform: scale(1);
-				}
-				50% {
-					opacity: 0.5;
-					transform: scale(1.2);
-				}
-			}
-
-			.hero__title {
-				font-size: 3.5rem;
-				font-weight: 700;
-				line-height: 1.1;
-				margin: 0 0 1.5rem;
-			}
-
-			.hero__title--accent {
-				display: block;
-				background: linear-gradient(
-					135deg,
-					var(--rp-foam),
-					var(--rp-iris)
-				);
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
-				background-clip: text;
-			}
-
-			.hero__subtitle {
-				font-size: 1.2rem;
-				color: var(--rp-subtle);
-				line-height: 1.6;
-				margin: 0 0 2rem;
-				max-width: 480px;
-			}
-
-			.hero__actions {
+			.window-top {
 				display: flex;
+				align-items: center;
+				gap: 0.45rem;
+				padding: 0.85rem 1rem;
+				border-bottom: 1px solid rgba(244, 240, 232, 0.1);
+			}
+
+			.window-top span {
+				width: 0.65rem;
+				height: 0.65rem;
+				border-radius: 999px;
+				background: rgba(244, 240, 232, 0.25);
+			}
+
+			.window-top code {
+				margin-left: auto;
+				color: rgba(244, 240, 232, 0.58);
+				font-family: var(--font-mono);
+				font-size: 0.78rem;
+			}
+
+			.sonar-graph {
+				width: 100%;
+				display: block;
+				padding: 1rem;
+			}
+
+			.sonar-graph text {
+				fill: rgba(244, 240, 232, 0.78);
+				font-family: var(--font-mono);
+				font-size: 13px;
+			}
+
+			.graph-line {
+				fill: none;
+				stroke: rgba(143, 211, 199, 0.68);
+				stroke-width: 4;
+				stroke-linecap: round;
+				stroke-dasharray: 12 14;
+				animation: dash 22s linear infinite;
+			}
+
+			.graph-line--main {
+				stroke: rgba(143, 211, 199, 0.82);
+				stroke-width: 5;
+				stroke-dasharray: none;
+			}
+
+			.graph-line--hot {
+				stroke: rgba(242, 179, 109, 0.78);
+			}
+
+			.commit {
+				fill: #f4f0e8;
+				stroke: #0b0c0a;
+				stroke-width: 5;
+				transform-box: fill-box;
+				transform-origin: center;
+				animation: pulseNode 3.8s ease-in-out infinite;
+			}
+
+			.commit-halo {
+				fill: rgba(143, 211, 199, 0.08);
+				stroke: rgba(143, 211, 199, 0.12);
+				stroke-width: 1;
+			}
+
+			.commit--branch {
+				fill: #8fd3c7;
+			}
+
+			.commit--3,
+			.commit--7 {
+				fill: #f2b36d;
+			}
+
+			.branch-label {
+				fill: rgba(9, 10, 9, 0.72);
+				stroke: rgba(244, 240, 232, 0.16);
+			}
+
+			.graph-caption {
+				justify-content: space-between;
+				gap: 0.75rem;
+				padding: 0 1.1rem 1.15rem;
+				color: rgba(244, 240, 232, 0.62);
+				font-family: var(--font-mono);
+				font-size: 0.8rem;
+			}
+
+			.scanline {
+				position: absolute;
+				inset: 7% -3% auto;
+				height: 1px;
+				background: linear-gradient(90deg, transparent, rgba(143, 211, 199, 0.8), transparent);
+				box-shadow: 0 0 32px rgba(143, 211, 199, 0.65);
+				z-index: 2;
+				animation: scan 5.5s ease-in-out infinite;
+			}
+
+			.capability-ledger {
+				width: min(92rem, calc(100% - 2rem));
+				margin: 0 auto;
+				border-block: 1px solid rgba(244, 240, 232, 0.1);
+				background:
+					linear-gradient(90deg, rgba(143, 211, 199, 0.08), transparent 34%, rgba(242, 179, 109, 0.08)),
+					rgba(244, 240, 232, 0.035);
+			}
+
+			.ledger-title,
+			.ledger-grid,
+			.ledger-item {
+				display: grid;
+			}
+
+			.ledger-title {
+				grid-template-columns: 1fr auto;
+				gap: 1rem;
+				padding: 1rem 1.1rem;
+				border-bottom: 1px solid rgba(244, 240, 232, 0.08);
+				color: rgba(244, 240, 232, 0.58);
+				font-family: var(--font-mono);
+				font-size: 0.82rem;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+
+			.ledger-grid {
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+			}
+
+			.ledger-item {
+				align-content: start;
+				min-height: 9rem;
+				padding: 1.1rem;
+				border-right: 1px solid rgba(244, 240, 232, 0.08);
+			}
+
+			.ledger-item:last-child {
+				border-right: none;
+			}
+
+			.ledger-item strong {
+				color: #fffaf2;
+				font-size: 1.15rem;
+			}
+
+			.ledger-item span {
+				margin-top: 0.7rem;
+				color: rgba(244, 240, 232, 0.64);
+				line-height: 1.5;
+			}
+
+			.chapter {
+				width: min(92rem, calc(100% - 2rem));
+				margin: 0 auto;
+				padding: clamp(8rem, 14vw, 14rem) 0;
+			}
+
+			.section-heading {
+				max-width: 58rem;
+				margin-bottom: clamp(3rem, 6vw, 5rem);
+			}
+
+			.section-heading h2,
+			.pinned-copy h2,
+			.final-cta h2 {
+				font-size: clamp(2.75rem, 5.6vw, 5.4rem);
+			}
+
+			.section-heading p {
+				max-width: 42rem;
+				margin: 1.2rem 0 0;
+			}
+
+			.section-heading--split {
+				max-width: none;
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.58fr);
+				gap: clamp(2rem, 6vw, 6rem);
+				align-items: end;
+			}
+
+			.bento-grid {
+				display: grid;
+				grid-template-columns: repeat(12, minmax(0, 1fr));
+				grid-auto-flow: dense;
 				gap: 1rem;
 			}
 
-			.hero__tech {
-				display: flex;
-				gap: 0.5rem;
-				margin-top: 2rem;
-			}
-
-			.tech-badge {
-				padding: 0.3rem 0.7rem;
-				background: var(--rp-surface);
-				border: 1px solid var(--rp-highlight-low);
-				border-radius: 4px;
-				font-size: 0.75rem;
-				color: var(--rp-muted);
-				font-family: var(--font-mono);
-			}
-
-			@keyframes fadeInUp {
-				from {
-					opacity: 0;
-					transform: translateY(20px);
-				}
-				to {
-					opacity: 1;
-					transform: translateY(0);
-				}
-			}
-
-			.hero__graphic {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-
-			.graph-container {
-				position: relative;
-				padding: 1.5rem;
-				background: rgba(31, 29, 46, 0.6);
-				border: 1px solid var(--rp-highlight-low);
-				border-radius: 16px;
-				backdrop-filter: blur(20px);
-				box-shadow:
-					0 0 0 1px rgba(156, 207, 216, 0.05),
-					0 20px 50px -10px rgba(0, 0, 0, 0.4);
-			}
-
-			.graph-demo {
-				width: 100%;
-				max-width: 400px;
-				display: block;
-			}
-
-			/* Animated nodes */
-			.nodes .node {
-				animation: none;
-			}
-
-			.node--1 {
-				animation-delay: 0.2s;
-			}
-			.node--2 {
-				animation-delay: 0.4s;
-			}
-			.node--3 {
-				animation-delay: 0.6s;
-			}
-			.node--4 {
-				animation-delay: 0.6s;
-			}
-			.node--5 {
-				animation-delay: 0.6s;
-			}
-			.node--6 {
-				animation-delay: 0.8s;
-			}
-			.node--7 {
-				animation-delay: 1s;
-			}
-			.node--8 {
-				animation-delay: 1s;
-			}
-
-			@keyframes nodeAppear {
-				from {
-					opacity: 0;
-					transform: scale(0);
-				}
-				to {
-					opacity: 1;
-					transform: scale(1);
-				}
-			}
-
-			/* Animated edges */
-			.edges .edge {
-				stroke-dasharray: 200;
-				stroke-dashoffset: 200;
-				animation: none;
-			}
-
-			.edge--foam {
-				animation-delay: 0.3s;
-			}
-			.edge--iris {
-				animation-delay: 0.5s;
-			}
-			.edge--gold {
-				animation-delay: 0.5s;
-			}
-
-			@keyframes edgeDraw {
-				to {
-					stroke-dashoffset: 0;
-				}
-			}
-
-			/* Labels animation */
-			.labels rect,
-			.labels text {
-				animation: none;
-			}
-
-			.landing.is-ready .bg-glow {
-				animation: float-glow 15s ease-in-out infinite;
-			}
-
-			.landing.is-ready .pulse {
-				animation: pulse 2s ease-in-out infinite;
-			}
-
-			.landing.is-ready .hero__badge {
-				animation: fadeInUp 0.6s ease-out;
-			}
-
-			.landing.is-ready .hero__title {
-				animation: fadeInUp 0.6s ease-out 0.1s both;
-			}
-
-			.landing.is-ready .hero__subtitle {
-				animation: fadeInUp 0.6s ease-out 0.2s both;
-			}
-
-			.landing.is-ready .hero__actions {
-				animation: fadeInUp 0.6s ease-out 0.3s both;
-			}
-
-			.landing.is-ready .hero__tech {
-				animation: fadeInUp 0.6s ease-out 0.4s both;
-			}
-
-			.landing.is-ready .hero__graphic {
-				animation: fadeInUp 0.8s ease-out 0.2s both;
-			}
-
-			.landing.is-ready .nodes .node {
-				animation: nodeAppear 0.5s ease-out both;
-			}
-
-			.landing.is-ready .edges .edge {
-				animation: edgeDraw 1s ease-out forwards;
-			}
-
-			.landing.is-ready .labels rect,
-			.landing.is-ready .labels text {
-				animation: fadeIn 0.4s ease-out both;
-				animation-delay: 1.2s;
-			}
-
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-				}
-				to {
-					opacity: 1;
-				}
-			}
-
-			/* Buttons */
-			.btn {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5rem;
-				padding: 0.75rem 1.25rem;
-				border: none;
-				border-radius: 8px;
-				font-size: 0.95rem;
-				font-weight: 500;
-				text-decoration: none;
-				cursor: pointer;
-				transition: all 0.2s ease;
-			}
-
-			.btn svg {
-				width: 18px;
-				height: 18px;
-			}
-
-			.btn--lg {
-				padding: 1rem 1.75rem;
-				font-size: 1rem;
-			}
-
-			.btn--primary {
-				background: linear-gradient(
-					135deg,
-					var(--rp-foam),
-					var(--rp-iris)
-				);
-				color: var(--rp-base);
-				box-shadow: 0 4px 15px rgba(156, 207, 216, 0.3);
-			}
-
-			.btn--primary:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 8px 25px rgba(156, 207, 216, 0.4);
-			}
-
-			.btn--ghost {
-				background: transparent;
-				color: var(--rp-subtle);
-				border: 1px solid var(--rp-highlight-med);
-			}
-
-			.btn--ghost:hover {
-				border-color: var(--rp-subtle);
-				color: var(--rp-text);
-				background: rgba(255, 255, 255, 0.03);
-			}
-
-			/* Glass card effect */
-			.glass-card {
-				background: rgba(31, 29, 46, 0.5);
-				border: 1px solid var(--rp-highlight-low);
-				backdrop-filter: blur(10px);
-				transition: all 0.3s ease;
-			}
-
-			.glass-card:hover {
-				background: rgba(38, 35, 58, 0.6);
-				border-color: var(--rp-highlight-med);
-				transform: translateY(-4px);
-				box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.3);
-			}
-
-			/* Sections */
-			.section-title {
-				text-align: center;
-				font-size: 2rem;
-				font-weight: 600;
-				margin: 0 0 3rem;
-			}
-
-			/* Features */
-			.features {
-				padding: 6rem 2rem;
-				position: relative;
-				z-index: 1;
-			}
-
-			/* Stats Section */
-			.stats-section {
-				padding: 4rem 2rem;
-				position: relative;
-				z-index: 1;
-				background: linear-gradient(
-					180deg,
-					rgba(var(--rp-surface-rgb, 31, 29, 46), 0.3) 0%,
-					transparent 100%
-				);
-			}
-
-			.stats-grid {
-				display: grid;
-				grid-template-columns: repeat(4, 1fr);
-				gap: 2rem;
-				max-width: 900px;
-				margin: 0 auto;
-			}
-
-			.stat-item {
-				text-align: center;
-				padding: 1.5rem;
-			}
-
-			.stat-value {
-				font-size: 3rem;
-				font-weight: 700;
-				background: linear-gradient(135deg, var(--rp-foam), var(--rp-iris));
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
-				background-clip: text;
-				line-height: 1;
-			}
-
-			.stat-suffix {
-				font-size: 2rem;
-				font-weight: 600;
-				color: var(--rp-foam);
-			}
-
-			.stat-label {
-				display: block;
-				font-size: 1rem;
-				font-weight: 600;
-				color: var(--rp-text);
-				margin-top: 0.5rem;
-			}
-
-			.stat-desc {
-				display: block;
-				font-size: 0.8rem;
-				color: var(--rp-muted);
-				margin-top: 0.25rem;
-			}
-
-			/* Use Cases Section */
-			.use-cases {
-				padding: 6rem 2rem;
-				position: relative;
-				z-index: 1;
-			}
-
-			.use-cases-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-				gap: 1.5rem;
-				max-width: 1100px;
-				margin: 0 auto;
-			}
-
-			.use-case {
-				padding: 2rem;
-				border-radius: 16px;
-				text-align: center;
-			}
-
-			.use-case__icon {
-				width: 60px;
-				height: 60px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				margin: 0 auto 1.25rem;
-				border-radius: 16px;
-				background: rgba(156, 207, 216, 0.15);
-				color: var(--rp-foam);
-			}
-
-			.use-case__icon svg {
-				width: 28px;
-				height: 28px;
-			}
-
-			.use-case__icon--iris {
-				background: rgba(196, 167, 231, 0.15);
-				color: var(--rp-iris);
-			}
-
-			.use-case__icon--gold {
-				background: rgba(246, 193, 119, 0.15);
-				color: var(--rp-gold);
-			}
-
-			.use-case__icon--love {
-				background: rgba(235, 111, 146, 0.15);
-				color: var(--rp-love);
-			}
-
-			.use-case h3 {
-				margin: 0 0 0.75rem;
-				font-size: 1.15rem;
-				font-weight: 600;
-			}
-
-			.use-case p {
-				margin: 0;
-				color: var(--rp-subtle);
-				font-size: 0.9rem;
-				line-height: 1.6;
-			}
-
-			.feature-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-				gap: 1.5rem;
-				max-width: 1100px;
-				margin: 0 auto;
-			}
-
-			.feature {
-				padding: 1.75rem;
-				border-radius: 16px;
-				text-align: center;
-			}
-
-			.feature__icon {
-				width: 56px;
-				height: 56px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				margin: 0 auto 1.25rem;
-				border-radius: 14px;
-			}
-
-			.feature__icon svg {
-				width: 26px;
-				height: 26px;
-			}
-
-			.feature__icon--foam {
-				background: rgba(156, 207, 216, 0.15);
-				color: var(--rp-foam);
-			}
-
-			.feature__icon--iris {
-				background: rgba(196, 167, 231, 0.15);
-				color: var(--rp-iris);
-			}
-
-			.feature__icon--gold {
-				background: rgba(246, 193, 119, 0.15);
-				color: var(--rp-gold);
-			}
-
-			.feature__icon--love {
-				background: rgba(235, 111, 146, 0.15);
-				color: var(--rp-love);
-			}
-
-			.feature h3 {
-				margin: 0 0 0.5rem;
-				font-size: 1.1rem;
-				font-weight: 600;
-			}
-
-			.feature p {
-				margin: 0;
-				color: var(--rp-subtle);
-				font-size: 0.9rem;
-				line-height: 1.6;
-			}
-
-			/* How it works */
-			.how-it-works {
-				padding: 6rem 2rem;
-				max-width: 900px;
-				margin: 0 auto;
-				position: relative;
-				z-index: 1;
-			}
-
-			.steps {
+			.bento-card {
+				min-height: 18rem;
+				grid-column: span 4;
 				display: flex;
 				flex-direction: column;
-				gap: 1.25rem;
-				margin-bottom: 3rem;
+				justify-content: flex-end;
+				position: relative;
+				overflow: hidden;
+				padding: clamp(1.2rem, 3vw, 2rem);
+				border-radius: 1rem;
+				border: 1px solid rgba(244, 240, 232, 0.11);
+				background:
+					linear-gradient(160deg, rgba(244, 240, 232, 0.09), rgba(244, 240, 232, 0.035)),
+					rgba(12, 14, 12, 0.76);
+				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+				transition: transform 260ms ease, border-color 260ms ease, background 260ms ease;
 			}
 
-			.step {
-				display: flex;
-				align-items: flex-start;
-				gap: 1.5rem;
-				padding: 1.25rem 1.5rem;
-				border-radius: 12px;
+			.bento-card::before {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: radial-gradient(circle at var(--x, 18%) var(--y, 12%), rgba(143, 211, 199, 0.16), transparent 16rem);
+				opacity: 0;
+				transition: opacity 260ms ease;
 			}
 
-			.step__number {
-				width: 44px;
-				height: 44px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				background: linear-gradient(
-					135deg,
-					var(--rp-foam),
-					var(--rp-iris)
-				);
-				color: var(--rp-base);
-				border-radius: 12px;
-				font-weight: 700;
-				font-size: 1.1rem;
-				flex-shrink: 0;
+			.bento-card:hover {
+				transform: translateY(-6px);
+				border-color: rgba(143, 211, 199, 0.36);
+				background:
+					linear-gradient(160deg, rgba(244, 240, 232, 0.12), rgba(244, 240, 232, 0.04)),
+					rgba(12, 14, 12, 0.84);
 			}
 
-			.step__content h3 {
-				margin: 0 0 0.25rem;
-				font-size: 1.1rem;
-				font-weight: 600;
+			.bento-card:hover::before {
+				opacity: 1;
 			}
 
-			.step__content p {
-				margin: 0;
-				color: var(--rp-subtle);
-				font-size: 0.95rem;
+			.bento-card--wide {
+				grid-column: span 7;
 			}
 
-			.cta-section {
-				text-align: center;
+			.bento-card--compact {
+				grid-column: span 3;
 			}
 
-			/* Footer */
-			.footer {
-				padding: 3rem 2rem;
-				text-align: center;
-				border-top: 1px solid var(--rp-highlight-low);
+			.bento-card--medium {
+				grid-column: span 5;
+			}
+
+			.bento-card--tall {
+				grid-column: span 5;
+				grid-row: span 2;
+				min-height: 37rem;
+			}
+
+			.bento-card--image {
+				background:
+					radial-gradient(circle at 72% 18%, rgba(143, 211, 199, 0.24), transparent 15rem),
+					linear-gradient(90deg, rgba(143, 211, 199, 0.11) 1px, transparent 1px),
+					linear-gradient(rgba(143, 211, 199, 0.08) 1px, transparent 1px),
+					linear-gradient(155deg, rgba(244, 240, 232, 0.11), rgba(244, 240, 232, 0.035));
+				background-size: auto, 40px 40px, 40px 40px, auto;
+			}
+
+			.bento-card--accent {
+				background:
+					radial-gradient(circle at 90% 10%, rgba(242, 179, 109, 0.28), transparent 15rem),
+					linear-gradient(160deg, rgba(242, 179, 109, 0.18), rgba(244, 240, 232, 0.04));
+			}
+
+			.bento-card--terminal {
+				background:
+					linear-gradient(90deg, rgba(143, 211, 199, 0.12) 1px, transparent 1px),
+					linear-gradient(rgba(143, 211, 199, 0.1) 1px, transparent 1px),
+					linear-gradient(160deg, rgba(244, 240, 232, 0.09), rgba(244, 240, 232, 0.035));
+				background-size: 32px 32px, 32px 32px, auto;
+			}
+
+			.bento-card__meta {
 				position: relative;
 				z-index: 1;
+				margin-bottom: auto;
+				color: #f2b36d;
+				font-family: var(--font-mono);
+				font-size: 0.74rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+
+			.bento-card h3,
+			.workflow-card h3 {
+				position: relative;
+				z-index: 1;
+				margin: 0;
+				color: #fffaf2;
+				font-size: clamp(1.55rem, 2.8vw, 2.55rem);
+				line-height: 1.02;
+				font-weight: 800;
+				text-wrap: balance;
+			}
+
+			.bento-card p,
+			.workflow-card p {
+				position: relative;
+				z-index: 1;
+				max-width: 34rem;
+				margin: 1rem 0 0;
+			}
+
+			.chapter--workflow {
+				display: grid;
+				grid-template-columns: minmax(18rem, 0.75fr) minmax(0, 1fr);
+				gap: clamp(2rem, 6vw, 6rem);
+				align-items: start;
+			}
+
+			.pinned-copy {
+				position: sticky;
+				top: 8rem;
+			}
+
+			.scrub-copy {
+				--scrub-opacity: 0.28;
+				--scrub-y: 18px;
+				max-width: 34rem;
+				margin-top: 1.35rem;
+				opacity: var(--scrub-opacity);
+				transform: translateY(var(--scrub-y));
+				transition: opacity 90ms linear, transform 90ms linear;
+			}
+
+			.workflow-stack {
+				display: grid;
+				gap: 1rem;
+				padding-top: 4rem;
+			}
+
+			.workflow-card {
+				position: sticky;
+				top: 8rem;
+				min-height: 24rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-end;
+				padding: clamp(1.4rem, 3vw, 2.3rem);
+				border: 1px solid rgba(244, 240, 232, 0.12);
+				border-radius: 1rem;
+				background:
+					radial-gradient(circle at 85% 20%, rgba(143, 211, 199, 0.14), transparent 17rem),
+					linear-gradient(150deg, rgba(244, 240, 232, 0.11), rgba(244, 240, 232, 0.04));
+				box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+			}
+
+			.workflow-card:nth-child(2) {
+				top: 9.5rem;
+				background:
+					radial-gradient(circle at 85% 20%, rgba(242, 179, 109, 0.18), transparent 17rem),
+					linear-gradient(150deg, rgba(244, 240, 232, 0.11), rgba(244, 240, 232, 0.04));
+			}
+
+			.workflow-card:nth-child(3) {
+				top: 11rem;
+			}
+
+			.workflow-card span {
+				margin-bottom: auto;
+				color: rgba(244, 240, 232, 0.46);
+				font-family: var(--font-mono);
+				font-size: 1rem;
+			}
+
+			.final-cta {
+				width: min(92rem, calc(100% - 2rem));
+				margin: 0 auto clamp(5rem, 9vw, 8rem);
+				padding: clamp(3rem, 7vw, 6rem);
+				border-radius: 1.3rem;
+				border: 1px solid rgba(244, 240, 232, 0.13);
+				background:
+					linear-gradient(120deg, rgba(242, 179, 109, 0.2), transparent 45%),
+					radial-gradient(circle at 85% 12%, rgba(143, 211, 199, 0.18), transparent 24rem),
+					rgba(244, 240, 232, 0.065);
+				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 34px 100px rgba(0, 0, 0, 0.32);
+			}
+
+			.final-cta h2 {
+				max-width: 76rem;
+			}
+
+			.footer {
+				width: min(92rem, calc(100% - 2rem));
+				margin: 0 auto;
+				padding: 2rem 0 3rem;
+				display: grid;
+				grid-template-columns: 1fr auto 1fr;
+				gap: 1rem;
+				align-items: center;
+				border-top: 1px solid rgba(244, 240, 232, 0.1);
+			}
+
+			.footer-links {
+				justify-content: center;
+				gap: 1rem;
 			}
 
 			.footer p {
 				margin: 0;
-				color: var(--rp-muted);
-				font-size: 0.9rem;
+				justify-self: end;
+				text-align: right;
+				font-size: 0.93rem;
 			}
 
-			.footer a {
-				color: var(--rp-subtle);
-				text-decoration: none;
-				transition: color 0.15s;
+			.bento-card,
+			.workflow-card,
+			.ledger-item,
+			.section-heading,
+			.final-cta {
+				opacity: 0;
+				transform: translateY(28px);
+				transition: opacity 520ms ease, transform 520ms ease;
 			}
 
-			.footer a:hover {
-				color: var(--rp-foam);
+			.bento-card.is-visible,
+			.workflow-card.is-visible,
+			.ledger-item.is-visible,
+			.section-heading.is-visible,
+			.final-cta.is-visible,
+			:global(html[data-reduced-motion="true"]) .bento-card,
+			:global(html[data-reduced-motion="true"]) .workflow-card,
+			:global(html[data-reduced-motion="true"]) .ledger-item,
+			:global(html[data-reduced-motion="true"]) .section-heading,
+			:global(html[data-reduced-motion="true"]) .final-cta {
+				opacity: 1;
+				transform: translateY(0);
 			}
 
-			.footer__copyright {
-				margin-top: 0.5rem !important;
-				font-size: 0.8rem !important;
-			}
-
-			/* Responsive */
-			@media (max-width: 768px) {
-				.hero {
-					grid-template-columns: 1fr;
-					text-align: center;
-					padding: 2rem;
-					gap: 3rem;
-				}
-
-				.hero__title {
-					font-size: 2.5rem;
-				}
-
-				.hero__subtitle {
-					margin-left: auto;
-					margin-right: auto;
-				}
-
-				.hero__actions {
-					justify-content: center;
-					flex-wrap: wrap;
-				}
-
-				.hero__tech {
-					justify-content: center;
-				}
-
-				.hero__graphic {
-					order: -1;
-				}
-
-				.graph-container {
-					padding: 1rem;
-				}
-
-				.graph-demo {
-					max-width: 280px;
-				}
-
-				.nav {
-					padding: 1rem;
-				}
-
-				.nav__links {
-					gap: 0.75rem;
-				}
-
-				.hero__badge {
-					font-size: 0.75rem;
-				}
-
-				.feature-grid {
-					grid-template-columns: 1fr;
-				}
-
-				.stats-grid {
-					grid-template-columns: repeat(2, 1fr);
-					gap: 1rem;
-				}
-
-				.stat-value {
-					font-size: 2.25rem;
-				}
-
-				.stat-suffix {
-					font-size: 1.5rem;
-				}
-
-				.use-cases-grid {
-					grid-template-columns: 1fr;
+			@keyframes dash {
+				to {
+					stroke-dashoffset: -260;
 				}
 			}
 
-			/* Smooth scroll */
-			html {
-				scroll-behavior: smooth;
+			@keyframes pulseNode {
+				0%,
+				100% {
+					transform: scale(1);
+				}
+				50% {
+					transform: scale(1.16);
+				}
 			}
 
-			/* Respect reduced motion */
+			@keyframes scan {
+				0%,
+				100% {
+					transform: translateY(0);
+					opacity: 0;
+				}
+				15%,
+				85% {
+					opacity: 1;
+				}
+				50% {
+					transform: translateY(30rem);
+				}
+			}
+
 			@media (prefers-reduced-motion: reduce) {
-				.bg-glow,
-				.pulse,
-				.nodes .node,
-				.edges .edge,
-				.labels rect,
-				.labels text {
-					animation: none !important;
+				*,
+				*::before,
+				*::after {
+					animation-duration: 0.01ms !important;
+					animation-iteration-count: 1 !important;
+					scroll-behavior: auto !important;
+					transition-duration: 0.01ms !important;
 				}
 
-				.edges .edge {
-					stroke-dasharray: none;
-					stroke-dashoffset: 0;
+				.pinned-copy,
+				.workflow-card {
+					position: static;
 				}
 			}
 
-			body[data-motion="reduced"] .bg-glow,
-			body[data-motion="reduced"] .pulse,
-			body[data-motion="reduced"] .nodes .node,
-			body[data-motion="reduced"] .edges .edge,
-			body[data-motion="reduced"] .labels rect,
-			body[data-motion="reduced"] .labels text {
-				animation: none !important;
+			@media (max-width: 980px) {
+				.nav-shell {
+					grid-template-columns: 1fr auto;
+				}
+
+				.nav-links {
+					display: none;
+				}
+
+				.hero-section,
+				.chapter--workflow,
+				.section-heading--split,
+				.footer {
+					grid-template-columns: 1fr;
+				}
+
+				.hero-section {
+					min-height: auto;
+				}
+
+				.hero-visual {
+					max-width: 42rem;
+				}
+
+				.pinned-copy,
+				.workflow-card {
+					position: static;
+				}
+
+				.workflow-stack {
+					padding-top: 0;
+				}
+
+				.bento-card,
+				.bento-card--wide,
+				.bento-card--compact,
+				.bento-card--medium,
+				.bento-card--tall {
+					grid-column: span 6;
+					grid-row: auto;
+					min-height: 18rem;
+				}
+
+				.ledger-grid {
+					display: grid;
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+
+				.ledger-item:nth-child(2n) {
+					border-right: none;
+				}
+
+				.footer p {
+					justify-self: start;
+					text-align: left;
+				}
 			}
 
-			body[data-motion="reduced"] .edges .edge {
-				stroke-dasharray: none;
-				stroke-dashoffset: 0;
+			@media (max-width: 640px) {
+				.nav-shell {
+					top: 0.5rem;
+					width: min(100% - 1rem, 92rem);
+					border-radius: 1.2rem;
+				}
+
+				.nav-actions a:first-child {
+					display: none;
+				}
+
+				.brand-mark {
+					font-size: 0.95rem;
+				}
+
+				.brand-mark__icon {
+					width: 2.1rem;
+					height: 2.1rem;
+				}
+
+				.hero-section,
+				.chapter,
+				.final-cta,
+				.footer {
+					width: min(100% - 1.2rem, 92rem);
+				}
+
+				.hero-copy h1 {
+					font-size: clamp(3rem, 16vw, 5rem);
+				}
+
+				.graph-window {
+					transform: none;
+				}
+
+				.graph-caption {
+					align-items: flex-start;
+					flex-direction: column;
+				}
+
+				.bento-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.bento-card,
+				.bento-card--wide,
+				.bento-card--compact,
+				.bento-card--medium,
+				.bento-card--tall {
+					grid-column: auto;
+				}
+
+				.ledger-title,
+				.ledger-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.ledger-item {
+					min-height: auto;
+					border-right: none;
+					border-bottom: 1px solid rgba(244, 240, 232, 0.08);
+				}
+
+				.final-cta {
+					padding: 2rem;
+				}
 			}
 		</style>
 	</body>

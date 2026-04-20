@@ -266,6 +266,51 @@ export async function generateFullGraphPNG(
         ctx.fillRect(0, 0, contentWidth, contentHeight);
     }
 
+    if (normalizedBackground.type !== 'transparent') {
+        const ambientA = ctx.createRadialGradient(
+            contentWidth * 0.18,
+            contentHeight * 0.14,
+            0,
+            contentWidth * 0.18,
+            contentHeight * 0.14,
+            Math.max(contentWidth, contentHeight) * 0.72
+        );
+        ambientA.addColorStop(0, hexToRgba(colors.foam, 0.2));
+        ambientA.addColorStop(0.58, hexToRgba(colors.foam, 0.08));
+        ambientA.addColorStop(1, hexToRgba(colors.foam, 0));
+        ctx.fillStyle = ambientA;
+        ctx.fillRect(0, 0, contentWidth, contentHeight);
+
+        const ambientB = ctx.createRadialGradient(
+            contentWidth * 0.86,
+            contentHeight * 0.18,
+            0,
+            contentWidth * 0.86,
+            contentHeight * 0.18,
+            Math.max(contentWidth, contentHeight) * 0.62
+        );
+        ambientB.addColorStop(0, hexToRgba(colors.gold, 0.18));
+        ambientB.addColorStop(0.68, hexToRgba(colors.gold, 0.06));
+        ambientB.addColorStop(1, hexToRgba(colors.gold, 0));
+        ctx.fillStyle = ambientB;
+        ctx.fillRect(0, 0, contentWidth, contentHeight);
+
+        ctx.strokeStyle = hexToRgba(colors.text, 0.055);
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= contentWidth; x += 28) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, contentHeight);
+            ctx.stroke();
+        }
+        for (let y = 0; y <= contentHeight; y += 28) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(contentWidth, y);
+            ctx.stroke();
+        }
+    }
+
     // Draw grid if needed
     if (normalizedBackground.type === 'grid') {
         const gridSize = 80;
@@ -295,7 +340,7 @@ export async function generateFullGraphPNG(
 
     // Draw title if provided
     if (title) {
-        ctx.font = 'bold 24px Inter, system-ui, sans-serif';
+        ctx.font = '800 24px Cabinet Grotesk, Inter, system-ui, sans-serif';
         ctx.fillStyle = colors.text;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -359,7 +404,7 @@ export async function generateFullGraphPNG(
                 ctx.lineTo(timelineX + 10, y);
                 ctx.stroke();
 
-                ctx.font = '10px Inter, system-ui, sans-serif';
+                ctx.font = '10px JetBrains Mono, SFMono-Regular, monospace';
                 ctx.fillStyle = colors.muted;
                 ctx.textAlign = 'end';
                 ctx.textBaseline = 'middle';
@@ -387,26 +432,35 @@ export async function generateFullGraphPNG(
         const toX = to.x + offsetX;
         const toY = to.y + offsetY;
 
-        ctx.strokeStyle = hexToRgba(color, 0.9);
-        ctx.lineWidth = strokeWidth;
-        ctx.beginPath();
-        ctx.moveTo(fromX, fromY);
+        const drawPath = () => {
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
 
-        if (layoutMode === 'horizontal' && Math.abs(fromY - toY) > 1) {
-            const midX = (fromX + toX) / 2;
-            ctx.bezierCurveTo(midX, fromY, midX, toY, toX, toY);
-        } else if (layoutMode !== 'radial' && Math.abs(fromX - toX) > 1) {
-            const midY = (fromY + toY) / 2;
-            ctx.bezierCurveTo(fromX, midY, toX, midY, toX, toY);
-        } else {
-            ctx.lineTo(toX, toY);
-        }
+            if (layoutMode === 'horizontal' && Math.abs(fromY - toY) > 1) {
+                const midX = (fromX + toX) / 2;
+                ctx.bezierCurveTo(midX, fromY, midX, toY, toX, toY);
+            } else if (layoutMode !== 'radial' && Math.abs(fromX - toX) > 1) {
+                const midY = (fromY + toY) / 2;
+                ctx.bezierCurveTo(fromX, midY, toX, midY, toX, toY);
+            } else {
+                ctx.lineTo(toX, toY);
+            }
+        };
+
+        ctx.strokeStyle = hexToRgba(colors.base, 0.72);
+        ctx.lineWidth = strokeWidth + 5.2;
+        drawPath();
+        ctx.stroke();
+
+        ctx.strokeStyle = hexToRgba(color, edge.isMerge ? 0.95 : 0.86);
+        ctx.lineWidth = strokeWidth;
+        drawPath();
         ctx.stroke();
     }
 
     // Draw branch labels
     if (includeLabels && graph) {
-        ctx.font = '600 12px Inter, system-ui, sans-serif';
+        ctx.font = '600 12px JetBrains Mono, SFMono-Regular, monospace';
         for (const [branchName, sha] of graph.heads) {
             const headNode = nodes.find(node => node.id === sha);
             if (!headNode) continue;
@@ -423,8 +477,8 @@ export async function generateFullGraphPNG(
             const pillRadius = 8;
 
             // Draw pill background
-            ctx.fillStyle = hexToRgba(colors.surface, 0.9);
-            ctx.strokeStyle = hexToRgba(color, 0.6);
+            ctx.fillStyle = hexToRgba(colors.base, 0.78);
+            ctx.strokeStyle = hexToRgba(color, 0.68);
             ctx.lineWidth = 1;
 
             ctx.beginPath();
@@ -449,6 +503,14 @@ export async function generateFullGraphPNG(
         const radius = isMerge ? NODE_RADIUS_MERGE : NODE_RADIUS;
         const cx = pos.x + offsetX;
         const cy = pos.y + offsetY;
+
+        const halo = ctx.createRadialGradient(cx, cy, radius * 0.7, cx, cy, radius * 2.3);
+        halo.addColorStop(0, hexToRgba(color, 0.18));
+        halo.addColorStop(1, hexToRgba(color, 0));
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 2.3, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.fillStyle = color;
         ctx.beginPath();
@@ -475,6 +537,10 @@ export async function generateFullGraphPNG(
             ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         }
         ctx.fill();
+
+        ctx.strokeStyle = hexToRgba(colors.base, 0.92);
+        ctx.lineWidth = 3;
+        ctx.stroke();
 
         // Inner highlight dot
         const highlightRadius = radius * 0.25;
