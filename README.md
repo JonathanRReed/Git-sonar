@@ -9,7 +9,7 @@ Visualize your Git history as a clean, interactive graph.
 ![Astro](https://img.shields.io/badge/Astro-5.x-purple?logo=astro)
 ![React](https://img.shields.io/badge/React-19-blue?logo=react)
 ![Canvas 2D](https://img.shields.io/badge/Canvas-2D-orange)
-![ESLint](https://img.shields.io/badge/ESLint-9.0-blue)
+![ESLint](https://img.shields.io/badge/ESLint-10.x-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -39,8 +39,8 @@ Visualize your Git history as a clean, interactive graph.
 
 ```bash
 # Clone repository
-git clone https://github.com/git-sonar/git-sonar.git
-cd git-sonar
+git clone https://github.com/JonathanRReed/Git-sonar.git
+cd Git-sonar
 
 # Install dependencies
 bun install
