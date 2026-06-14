@@ -1,6 +1,8 @@
 # build output
 dist/
 coverage/
+# fonts fetched at build (prebuild) — regenerated, not committed
+public/fonts/
 # generated types
 .astro/
 
@@ -23,3 +25,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# local Claude Code session state
+.claude/

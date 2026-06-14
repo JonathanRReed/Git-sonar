@@ -33,44 +33,75 @@ export function buildTopoOrder(commits: Map<string, CommitNode>): string[] {
         }
     }
 
-    // Find root commits (no parents in our set)
-    const queue: string[] = [];
+    // Ready set as a binary min-heap keyed by (authoredAt, id) so we always emit
+    // the oldest ready commit next — deterministically and in O(n log n), instead
+    // of re-sorting the whole queue on every insert (the old O(n² log n) hot path
+    // that stalled large repos at import time).
+    const ready = new MinHeap((a, b) => {
+        const ta = commits.get(a)?.authoredAt ?? 0;
+        const tb = commits.get(b)?.authoredAt ?? 0;
+        if (ta !== tb) return ta - tb;
+        return a < b ? -1 : a > b ? 1 : 0;
+    });
     for (const [id, degree] of inDegree) {
-        if (degree === 0) {
-            queue.push(id);
-        }
+        if (degree === 0) ready.push(id);
     }
 
-    // Sort queue by timestamp for deterministic order
-    queue.sort((a, b) => {
-        const commitA = commits.get(a);
-        const commitB = commits.get(b);
-        return (commitA?.authoredAt ?? 0) - (commitB?.authoredAt ?? 0);
-    });
-
     const result: string[] = [];
-
-    while (queue.length > 0) {
-        const id = queue.shift()!;
+    while (ready.size > 0) {
+        const id = ready.pop()!;
         result.push(id);
-
         const commitChildren = children.get(id) ?? [];
         for (const childId of commitChildren) {
             const newDegree = (inDegree.get(childId) ?? 1) - 1;
             inDegree.set(childId, newDegree);
-            if (newDegree === 0) {
-                queue.push(childId);
-                // Re-sort to maintain timestamp order
-                queue.sort((a, b) => {
-                    const commitA = commits.get(a);
-                    const commitB = commits.get(b);
-                    return (commitA?.authoredAt ?? 0) - (commitB?.authoredAt ?? 0);
-                });
-            }
+            if (newDegree === 0) ready.push(childId);
         }
     }
 
     return result;
+}
+
+/** Minimal binary min-heap used by topo ordering. */
+class MinHeap {
+    private readonly data: string[] = [];
+    constructor(private readonly cmp: (a: string, b: string) => number) {}
+    get size(): number {
+        return this.data.length;
+    }
+    push(v: string): void {
+        const d = this.data;
+        d.push(v);
+        let i = d.length - 1;
+        while (i > 0) {
+            const p = (i - 1) >> 1;
+            if (this.cmp(d[i], d[p]) >= 0) break;
+            [d[i], d[p]] = [d[p], d[i]];
+            i = p;
+        }
+    }
+    pop(): string | undefined {
+        const d = this.data;
+        if (d.length === 0) return undefined;
+        const top = d[0];
+        const last = d.pop()!;
+        if (d.length > 0) {
+            d[0] = last;
+            let i = 0;
+            const n = d.length;
+            for (;;) {
+                const l = 2 * i + 1;
+                const r = l + 1;
+                let m = i;
+                if (l < n && this.cmp(d[l], d[m]) < 0) m = l;
+                if (r < n && this.cmp(d[r], d[m]) < 0) m = r;
+                if (m === i) break;
+                [d[i], d[m]] = [d[m], d[i]];
+                i = m;
+            }
+        }
+        return top;
+    }
 }
 
 /**
@@ -292,6 +323,16 @@ export function buildRepoGraph(
     refs: Map<string, string> = new Map(),
     defaultBranch?: string
 ): RepoGraph {
+    // Clamp commit timestamps to a sane window at the single import funnel, so a
+    // forged/garbage committer date (year 9999, NaN, negative) can't blow up the
+    // downstream art pipeline (giant bucket arrays, thousands of year-rings).
+    const maxTs = Date.now() + 24 * 60 * 60 * 1000; // now + 1 day (clock-skew slack)
+    for (const c of commits.values()) {
+        if (!Number.isFinite(c.authoredAt) || c.authoredAt < 0 || c.authoredAt > maxTs) {
+            c.authoredAt = Number.isFinite(c.authoredAt) ? Math.max(0, Math.min(maxTs, c.authoredAt)) : maxTs;
+        }
+    }
+
     const topoOrder = buildTopoOrder(commits);
     const lanes = assignLanes(commits, topoOrder);
     const metrics = computeMetrics(commits);

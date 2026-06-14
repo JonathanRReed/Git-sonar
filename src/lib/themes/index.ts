@@ -220,10 +220,12 @@ export function saveTheme(themeId: ThemeId): void {
 }
 
 /**
- * Get theme by ID.
+ * Get theme by ID. Falls back to the default theme for unknown ids so a stale
+ * or hand-edited permalink can never produce an undefined theme (which would
+ * crash palette derivation downstream).
  */
 export function getTheme(id: ThemeId): Theme {
-    return THEMES[id];
+    return THEMES[id] ?? THEMES[DEFAULT_THEME];
 }
 
 /**

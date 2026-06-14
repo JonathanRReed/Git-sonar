@@ -118,6 +118,28 @@ async function handleQueryImport() {
         state.setViewMode(viewParam as ViewMode);
     }
 
+    // Deep-link a demo dataset (used by the landing gallery's "remix" links).
+    const demoParam = params.get('demo');
+    if (demoParam && !repoPath) {
+        state.setLoading(true);
+        state.setError(null);
+        try {
+            let graph;
+            if (demoParam === 'showcase') {
+                const { buildShowcaseGraph } = await import('@lib/demo-data/showcase');
+                graph = buildShowcaseGraph();
+            } else {
+                const { loadDemoDataset } = await import('@lib/demo-data');
+                graph = await loadDemoDataset(demoParam);
+            }
+            state.setGraph(graph);
+            state.setCurrentDemo(demoParam);
+        } catch (err) {
+            state.setError(err instanceof Error ? err.message : 'Failed to load demo');
+        }
+        return;
+    }
+
     if (!repoPath) return;
 
     const provider = githubRepo ? 'github' : gitlabRepo ? 'gitlab' : 'bitbucket';
