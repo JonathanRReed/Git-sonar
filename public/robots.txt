@@ -3,3 +3,5 @@ Allow: /
 
 # Block crawlers from demo data endpoints
 Disallow: /data/
+
+Sitemap: https://gitsonar.jonathanrreed.com/sitemap.xml
