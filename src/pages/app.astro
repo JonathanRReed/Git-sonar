@@ -11,12 +11,13 @@ import { TimelineScrubber } from "@components/TimelineScrubber";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 import { CommitSidebar } from "@components/CommitSidebar";
 import { CalendarView } from "@components/CalendarView";
+import { PosterStudio } from "@components/PosterStudio";
 import { AppShellController } from "@components/AppShellController";
 
 const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
 const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
 const siteUrl = "https://gitsonar.jonathanrreed.com";
-const socialImageUrl = `${siteUrl}/og-image.svg`;
+const socialImageUrl = `${siteUrl}/og-image.png`;
 ---
 
 <html lang="en">
@@ -27,11 +28,11 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
         <meta name="generator" content={Astro.generator} />
         <meta
             name="description"
-            content="Inspect Git history as an interactive graph. Import a repository and review commits, branches, and merges locally."
+            content="Turn any repo into a movie poster, album cover, or generative print from its commit history — in your browser, nothing uploaded."
         />
         <link rel="canonical" href={`${siteUrl}/app`} />
         <meta name="author" content="Jonathan Reed" />
-        <title>Git Sonar</title>
+        <title>Git Sonar — Poster Studio</title>
         {analyticsDomain && (
             <script is:inline defer data-domain={analyticsDomain} src={analyticsSrc}></script>
         )}
@@ -41,11 +42,11 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
         <meta property="og:url" content={`${siteUrl}/app`} />
         <meta
             property="og:title"
-            content="Git Sonar - Interactive Graph View"
+            content="Git Sonar — Poster Studio"
         />
         <meta
             property="og:description"
-            content="Inspect Git history as an interactive graph. Import a repository and review commits, branches, and merges locally."
+            content="Turn any repo into a movie poster, album cover, or generative print from its commit history — in your browser, nothing uploaded."
         />
         <meta property="og:image" content={socialImageUrl} />
 
@@ -54,11 +55,11 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
         <meta property="twitter:url" content={`${siteUrl}/app`} />
         <meta
             property="twitter:title"
-            content="Git Sonar - Interactive Graph View"
+            content="Git Sonar — Poster Studio"
         />
         <meta
             property="twitter:description"
-            content="Inspect Git history as an interactive graph."
+            content="Turn any repo into shareable, printable art from its commit history."
         />
         <meta property="twitter:image" content={socialImageUrl} />
 
@@ -76,6 +77,7 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
     </head>
 
             <body>
+                <a href="#main-content" class="skip-link">Skip to content</a>
                 <noscript>
                     <div class="noscript">
                         Git Sonar requires JavaScript to load repositories and render the graph. Please enable JavaScript to continue.
@@ -160,14 +162,14 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
             <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
             <!-- Main content -->
-            <main class="app-main" id="main-content" role="main" aria-label="Git visualization">
+            <main class="app-main" id="main-content" role="main" aria-label="Git visualization" tabindex="-1">
                 <!-- Import panel (shown when no graph) -->
                 <div class="import-container" id="import-container">
                     <div class="import-header">
-                        <h1>Inspect Git History</h1>
+                        <h1>Make a poster from your repo</h1>
                         <p>
-                            See your commits, branches, and merges as an
-                            interactive graph
+                            Load any repository and turn its commit history into a
+                            movie poster, album cover, or generative print.
                         </p>
                     </div>
                     <ImportPanel client:load />
@@ -190,6 +192,7 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
                         <ControlsOverlay client:load />
                         <TimelineScrubber client:load />
                         <CalendarView client:load />
+                        <PosterStudio client:load />
                         <LiveRegion client:load />
                     </div>
                 </div>
@@ -202,6 +205,29 @@ const socialImageUrl = `${siteUrl}/og-image.svg`;
                 </ErrorBoundary>
 
         <style>
+            /* Keyboard skip link — visually hidden until focused. */
+            .skip-link {
+                position: fixed;
+                top: 0.5rem;
+                left: 0.5rem;
+                z-index: 1000;
+                padding: 0.6rem 1rem;
+                border-radius: 999px;
+                background: var(--rp-gold);
+                color: #10110f;
+                font-weight: 800;
+                text-decoration: none;
+                transform: translateY(-150%);
+                transition: transform 0.15s ease;
+            }
+
+            .skip-link:focus-visible,
+            .skip-link:focus {
+                transform: translateY(0);
+                outline: 2px solid #10110f;
+                outline-offset: 2px;
+            }
+
             .app {
                 display: flex;
                 flex-direction: column;
