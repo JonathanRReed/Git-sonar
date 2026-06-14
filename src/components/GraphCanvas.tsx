@@ -1197,6 +1197,12 @@ export function GraphCanvas() {
         <div ref={containerRef} className={`graph-canvas ${isPosterMode ? 'graph-canvas--poster' : ''}`}>
             <canvas
                 ref={canvasRef}
+                role="img"
+                aria-label={
+                    nodes.length === 0
+                        ? 'Empty commit graph'
+                        : `Commit graph: ${nodes.length} commit${nodes.length === 1 ? '' : 's'}${graph && graph.heads.size ? ` across ${graph.heads.size} branch${graph.heads.size === 1 ? '' : 'es'}` : ''}. Use the commit list and search for keyboard navigation.`
+                }
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}

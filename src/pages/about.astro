@@ -16,7 +16,7 @@ const structuredData = JSON.stringify({
 	jobTitle: "Software developer",
 	knowsAbout: [
 		"Developer tools",
-		"Git visualization",
+		"Generative art",
 		"Local-first software",
 		"Frontend product design",
 	],
@@ -35,7 +35,7 @@ const structuredData = JSON.stringify({
 		<meta name="generator" content={Astro.generator} />
 		<meta
 			name="description"
-			content="About Jonathan Reed, software developer behind Git Sonar, a local-first browser tool for inspecting Git history."
+			content="About Jonathan Reed, software developer behind Git Sonar, a browser tool that turns any repo into shareable, printable art."
 		/>
 		<link rel="canonical" href={`${siteUrl}/about`} />
 		<meta name="author" content="Jonathan Reed" />
@@ -49,7 +49,7 @@ const structuredData = JSON.stringify({
 		<meta property="og:title" content="About Jonathan Reed, Git Sonar" />
 		<meta
 			property="og:description"
-			content="Jonathan Reed builds Git Sonar, a private Git history inspection app for the browser."
+			content="Jonathan Reed builds Git Sonar, a browser app that turns any repo into shareable, printable art."
 		/>
 		<meta property="og:image" content={socialImageUrl} />
 
@@ -58,7 +58,7 @@ const structuredData = JSON.stringify({
 		<meta property="twitter:title" content="About Jonathan Reed, Git Sonar" />
 		<meta
 			property="twitter:description"
-			content="Jonathan Reed builds Git Sonar, a private browser app for inspecting Git history."
+			content="Jonathan Reed builds Git Sonar, a browser app that turns any repo into art."
 		/>
 		<meta property="twitter:image" content={socialImageUrl} />
 
@@ -105,7 +105,7 @@ const structuredData = JSON.stringify({
 					<p class="eyebrow">About</p>
 					<h1 id="about-title">Jonathan Reed builds Git Sonar.</h1>
 					<p>
-						Git Sonar is a browser app for inspecting repository history without uploading private code.
+						Git Sonar turns any repository’s commit history into shareable, printable art — movie posters, album covers, and generative prints — right in the browser, without uploading your code.
 					</p>
 				</div>
 
@@ -130,14 +130,14 @@ const structuredData = JSON.stringify({
 					<span>02</span>
 					<h2>Git Sonar</h2>
 					<p>
-						The app maps commits, branches, authors, and merges from a local archive or hosted repository URL.
+						It reads commits, branches, authors, and cadence from a local archive or a repo URL, then renders them as a poster.
 					</p>
 				</article>
 				<article>
 					<span>03</span>
 					<h2>Output</h2>
 					<p>
-						The graph can be inspected in the app or exported for documentation and release review.
+						Export a high-resolution PNG, a vector SVG, or a print-dimensioned PDF — or share a permalink.
 					</p>
 				</article>
 			</section>

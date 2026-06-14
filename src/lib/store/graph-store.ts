@@ -3,6 +3,10 @@ import type { RepoGraph, PositionedNode, CommitEdge, BackgroundStyle } from '@li
 import type { Theme, ThemeId } from '@lib/themes';
 import { generatePositionedNodes, generateEdges } from '@lib/git/graph';
 import { getTheme, applyThemeToCSS, getSavedTheme, saveTheme } from '@lib/themes';
+import {
+    type PosterConfig,
+    makePosterConfig,
+} from '@lib/art/poster-config';
 
 const AUTH_TOKEN_STORAGE_KEY = 'git-sonar-auth-token';
 
@@ -76,6 +80,8 @@ interface GraphState {
     hasMoreCommits: boolean;
     /** Current repo path for reloading (e.g., "owner/repo") */
     currentRepoPath: string | null;
+    /** Active demo dataset id (e.g. "showcase"), so share links can reload it. */
+    currentDemo: string | null;
     /** Current repo provider (GitHub/GitLab/Bitbucket) */
     currentRepoProvider: 'github' | 'gitlab' | 'bitbucket' | null;
     /** Optional auth token for imports */
@@ -96,6 +102,8 @@ interface GraphState {
     showSignature: boolean;
     /** Whether to show heatmap overlay */
     showHeatmap: boolean;
+    /** Structured poster/art studio configuration (template, palette, encoding, size, seed…) */
+    posterConfig: PosterConfig;
 }
 
 /** Store actions */
@@ -134,6 +142,8 @@ interface GraphActions {
     setError: (error: string | null) => void;
     /** Set current repo path for potential reload */
     setRepoPath: (path: string | null, provider: 'github' | 'gitlab' | 'bitbucket' | null, hasMore: boolean) => void;
+    /** Record which demo dataset is active (for shareable demo permalinks). */
+    setCurrentDemo: (demo: string | null) => void;
     /** Set auth token for imports */
     setAuthToken: (token: string | null, remember?: boolean) => void;
     /** Set poster title */
@@ -150,6 +160,12 @@ interface GraphActions {
     toggleTimeline: () => void;
     /** Toggle date guide lines on the canvas */
     toggleDatelines: () => void;
+    /** Replace the entire poster config (e.g. from a permalink). */
+    setPosterConfig: (config: PosterConfig) => void;
+    /** Merge a partial update into the poster config. */
+    updatePosterConfig: (patch: Partial<PosterConfig>) => void;
+    /** Reset poster config to defaults (keeps any title already typed). */
+    resetPosterConfig: () => void;
     /** Zoom control callbacks - set by GraphCanvas */
     zoomIn: () => void;
     zoomOut: () => void;
@@ -185,6 +201,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         hasMoreCommits: false,
         currentRepoPath: null,
         currentRepoProvider: null,
+        currentDemo: null,
         authToken: savedAuthToken,
         loadedCommitCount: 0,
         posterTitle: '',
@@ -194,6 +211,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         showWatermark: true,
         showSignature: true,
         showHeatmap: false,
+        posterConfig: makePosterConfig({ themeId: savedThemeId }),
         setGraph: (graph) => {
             const nodes = generatePositionedNodes(graph);
             const edges = generateEdges(graph);
@@ -205,6 +223,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
                 error: null,
                 isLoading: false,
                 loadedCommitCount: graph.commits.size,
+                currentDemo: null,
             });
         },
         clearGraph: () => {
@@ -220,10 +239,16 @@ export const useGraphStore = create<GraphStore>((set, get) => {
                 hasMoreCommits: false,
                 currentRepoPath: null,
                 currentRepoProvider: null,
+                currentDemo: null,
                 loadedCommitCount: 0,
                 posterTitle: '',
+                posterSubtitle: '',
                 showTimeline: false,
                 showDatelines: true,
+                showWatermark: true,
+                showSignature: true,
+                showHeatmap: false,
+                posterConfig: makePosterConfig({ themeId: get().themeId }),
             });
         },
         selectCommit: (id) => {
@@ -309,7 +334,11 @@ export const useGraphStore = create<GraphStore>((set, get) => {
             const newTheme = getTheme(newThemeId);
             applyThemeToCSS(newTheme);
             saveTheme(newThemeId);
-            set({ themeId: newThemeId, theme: newTheme });
+            set((state) => ({
+                themeId: newThemeId,
+                theme: newTheme,
+                posterConfig: makePosterConfig({ ...state.posterConfig, themeId: newThemeId }),
+            }));
         },
         setReducedMotion: (enabled) => {
             set({ reducedMotion: enabled });
@@ -330,7 +359,10 @@ export const useGraphStore = create<GraphStore>((set, get) => {
             set({ error, isLoading: false });
         },
         setRepoPath: (path, provider, hasMore) => {
-            set({ currentRepoPath: path, currentRepoProvider: provider, hasMoreCommits: hasMore });
+            set({ currentRepoPath: path, currentRepoProvider: provider, hasMoreCommits: hasMore, currentDemo: null });
+        },
+        setCurrentDemo: (demo) => {
+            set({ currentDemo: demo });
         },
         setAuthToken: (token, remember = false) => {
             saveAuthToken(token, remember);
@@ -356,6 +388,17 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         },
         toggleDatelines: () => {
             set((state) => ({ showDatelines: !state.showDatelines }));
+        },
+        setPosterConfig: (config) => {
+            set({ posterConfig: config });
+        },
+        updatePosterConfig: (patch) => {
+            set((state) => ({ posterConfig: makePosterConfig({ ...state.posterConfig, ...patch }) }));
+        },
+        resetPosterConfig: () => {
+            set((state) => ({
+                posterConfig: makePosterConfig({ themeId: state.themeId, title: state.posterConfig.title }),
+            }));
         },
         // Zoom control callbacks - initialized as no-ops, registered by GraphCanvas
         zoomIn: () => {},
