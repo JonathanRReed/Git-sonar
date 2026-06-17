@@ -180,7 +180,7 @@ export function buildGraphScene(
     };
 
     const sizeFor = (n: PositionedNode): number => {
-        let s = baseRadius;
+        let s: number;
         switch (sizeMode) {
             case 'churn':
                 s = baseRadius * (0.7 + 1.5 * churnNorm(n, signals.maxChurn));
