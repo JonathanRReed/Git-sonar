@@ -32,7 +32,7 @@ export function buildShowcaseGraph(seed = 0xC0FFEE, trunkLen = 70): RepoGraph {
     const start = Date.UTC(2022, 2, 1); // Mar 2022
     let t = start;
     let n = 0;
-    let lastMain = '';
+    let lastMain: string;
 
     const sha = (i: number) => `c${i.toString(36).padStart(7, '0')}`;
     const author = () => AUTHORS[Math.floor(rnd() * AUTHORS.length)];
