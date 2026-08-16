@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Cite the exact Git Sonar release or Git commit used."
+title: "Git Sonar: Git History as Interactive and Printable Art"
+type: software
+authors:
+  - family-names: Reed
+    given-names: "Jonathan R."
+repository-code: "https://github.com/JonathanRReed/Git-sonar"
+url: "https://gitsonar.jonathanrreed.com/"
+version: 0.1.0
+license: MIT
+abstract: >-
+  Git Sonar is a browser-based tool for exploring commit history and turning
+  repository data into deterministic movie posters, album covers, generative
+  prints, and data visualizations. It supports local Git archives, public
+  repository URLs, interactive graph navigation, and PNG, SVG, and PDF export.
+keywords:
+  - Git visualization
+  - generative art
+  - developer tools
+  - local-first
+  - data visualization
