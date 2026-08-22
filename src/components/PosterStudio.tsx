@@ -278,18 +278,18 @@ export function PosterStudio() {
 
                 <Section title="Look">
                     <Row label="Theme">
-                        <select value={themeId} onChange={(e) => setTheme(e.target.value as typeof themeId)}>
+                        <select aria-label="Theme" value={themeId} onChange={(e) => setTheme(e.target.value as typeof themeId)}>
                             {THEMES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                         </select>
                     </Row>
                     <Row label="Palette">
-                        <select value={cfg.paletteMood} onChange={(e) => update({ paletteMood: e.target.value as PaletteMood })}>
+                        <select aria-label="Palette" value={cfg.paletteMood} onChange={(e) => update({ paletteMood: e.target.value as PaletteMood })}>
                             {MOODS.map((m) => <option key={m} value={m}>{m}</option>)}
                         </select>
                     </Row>
                     {showCtl('layout') && (
                         <Row label="Layout">
-                            <select value={cfg.layout} onChange={(e) => update({ layout: e.target.value as LayoutMode })}>
+                            <select aria-label="Layout" value={cfg.layout} onChange={(e) => update({ layout: e.target.value as LayoutMode })}>
                                 {LAYOUTS.map((l) => <option key={l} value={l}>{l}</option>)}
                             </select>
                         </Row>
@@ -300,40 +300,40 @@ export function PosterStudio() {
                     <Section title="Encoding">
                         {showCtl('hue') && (
                             <Row label="Color by">
-                                <select value={enc.hue} onChange={(e) => update({ encoding: { ...enc, hue: e.target.value as HueSignal } })}>
+                                <select aria-label="Color by" value={enc.hue} onChange={(e) => update({ encoding: { ...enc, hue: e.target.value as HueSignal } })}>
                                     {HUES.map((h) => <option key={h} value={h}>{h}</option>)}
                                 </select>
                             </Row>
                         )}
                         {showCtl('size') && (
                             <Row label="Size by">
-                                <select value={enc.size} onChange={(e) => update({ encoding: { ...enc, size: e.target.value as SizeSignal } })}>
+                                <select aria-label="Size by" value={enc.size} onChange={(e) => update({ encoding: { ...enc, size: e.target.value as SizeSignal } })}>
                                     {SIZES_FIELD.map((s) => <option key={s} value={s}>{s}</option>)}
                                 </select>
                             </Row>
                         )}
-                        {showCtl('sizeScale') && <Slider label="Node size" value={enc.sizeScale} min={0.4} max={2.5} step={0.05} onChange={(v) => update({ encoding: { ...enc, sizeScale: v } })} />}
-                        {showCtl('weightScale') && <Slider label="Line weight" value={enc.weightScale} min={0.4} max={2.5} step={0.05} onChange={(v) => update({ encoding: { ...enc, weightScale: v } })} />}
-                        {showCtl('turbulence') && <Slider label="Turbulence" value={enc.turbulence} min={0} max={1} step={0.02} onChange={(v) => update({ encoding: { ...enc, turbulence: v } })} />}
-                        {showCtl('densityAmount') && <Slider label="Density" value={enc.densityAmount} min={0.05} max={1} step={0.02} onChange={(v) => update({ encoding: { ...enc, densityAmount: v } })} />}
-                        {showCtl('glow') && <Slider label="Glow" value={enc.glow} min={0} max={1} step={0.02} onChange={(v) => update({ encoding: { ...enc, glow: v } })} />}
+                        {showCtl('sizeScale') && <Slider aria-label="Node size" value={enc.sizeScale} min={0.4} max={2.5} step={0.05} onChange={(v) => update({ encoding: { ...enc, sizeScale: v } })} />}
+                        {showCtl('weightScale') && <Slider aria-label="Line weight" value={enc.weightScale} min={0.4} max={2.5} step={0.05} onChange={(v) => update({ encoding: { ...enc, weightScale: v } })} />}
+                        {showCtl('turbulence') && <Slider aria-label="Turbulence" value={enc.turbulence} min={0} max={1} step={0.02} onChange={(v) => update({ encoding: { ...enc, turbulence: v } })} />}
+                        {showCtl('densityAmount') && <Slider aria-label="Density" value={enc.densityAmount} min={0.05} max={1} step={0.02} onChange={(v) => update({ encoding: { ...enc, densityAmount: v } })} />}
+                        {showCtl('glow') && <Slider aria-label="Glow" value={enc.glow} min={0} max={1} step={0.02} onChange={(v) => update({ encoding: { ...enc, glow: v } })} />}
                     </Section>
                 )}
 
                 <Section title="Format">
                     <Row label="Size">
-                        <select value={cfg.size} onChange={(e) => update({ size: e.target.value as PosterSizeId })}>
+                        <select aria-label="Size" value={cfg.size} onChange={(e) => update({ size: e.target.value as PosterSizeId })}>
                             {SIZE_IDS.map((s) => <option key={s} value={s}>{POSTER_SIZES[s].name}</option>)}
                         </select>
                     </Row>
                     <Row label="Orientation">
-                        <select value={cfg.orientation} onChange={(e) => update({ orientation: e.target.value as Orientation })}>
+                        <select aria-label="Orientation" value={cfg.orientation} onChange={(e) => update({ orientation: e.target.value as Orientation })}>
                             <option value="portrait">Portrait</option>
                             <option value="landscape">Landscape</option>
                         </select>
                     </Row>
                     <Row label="Quality">
-                        <select value={cfg.dpi} onChange={(e) => update({ dpi: Number(e.target.value) as 1 | 2 | 4 })}>
+                        <select aria-label="Quality" value={cfg.dpi} onChange={(e) => update({ dpi: Number(e.target.value) as 1 | 2 | 4 })}>
                             <option value={1}>1× web</option>
                             <option value={2}>2× sharp</option>
                             <option value={4}>4× print</option>
@@ -387,11 +387,11 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     );
 }
 
-function Slider({ label, value, min, max, step, onChange }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void }) {
+function Slider({ 'aria-label': label, value, min, max, step, onChange }: { 'aria-label': string; value: number; min: number; max: number; step: number; onChange: (v: number) => void }) {
     return (
         <label className="ps-slider">
             <span>{label}<em>{value.toFixed(2)}</em></span>
-            <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} />
+            <input aria-label={label} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} />
         </label>
     );
 }

@@ -1,9 +1,8 @@
 import { useCallback, useState, useRef, type DragEvent, type ChangeEvent, type KeyboardEvent, type SubmitEvent } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
-import { parseGitZip, parseGitHubRepo, parseGitLabRepo, parseBitbucketRepo } from '@lib/git/import-git';
-import { getDemoDatasets, loadDemoDataset } from '@lib/demo-data';
+import { getDemoDatasets } from '@lib/demo-data/catalog';
 import { debugError } from '@lib/utils/debug';
-import { FileText, GitBranch, Network, Package, AlertTriangle, Link } from 'lucide-react';
+import { FileText, GitBranch, Network, Package, AlertTriangle, Link as LinkIcon } from 'lucide-react';
 
 const DEFAULT_MAX_COMMITS = 1000;
 const DEMO_SIZE_PRESETS = {
@@ -43,6 +42,7 @@ export function ImportPanel() {
     setLoading(true);
     setError(null);
     try {
+      const { loadDemoDataset } = await import('@lib/demo-data');
       const graph = await loadDemoDataset(key);
       setGraph(graph);
     } catch (err) {
@@ -58,6 +58,7 @@ export function ImportPanel() {
       try {
         if (file.name.endsWith('.zip')) {
           // ZIP file containing .git folder
+          const { parseGitZip } = await import('@lib/git/import-git');
           const graph = await parseGitZip(file);
           setGraph(graph);
         } else if (file.name.endsWith('.json')) {
@@ -129,17 +130,18 @@ export function ImportPanel() {
       try {
         const trimmedUrl = githubUrl.trim();
         const authTokenValue = tokenInput.trim() || undefined;
+        const imports = await import('@lib/git/import-git');
         let graph;
         let provider: 'github' | 'gitlab' | 'bitbucket' = 'github';
 
         if (trimmedUrl.includes('gitlab.com')) {
           provider = 'gitlab';
-          graph = await parseGitLabRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
+          graph = await imports.parseGitLabRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
         } else if (trimmedUrl.includes('bitbucket.org')) {
           provider = 'bitbucket';
-          graph = await parseBitbucketRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
+          graph = await imports.parseBitbucketRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
         } else {
-          graph = await parseGitHubRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
+          graph = await imports.parseGitHubRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
         }
 
         setAuthToken(authTokenValue ?? null, rememberToken);
@@ -194,31 +196,39 @@ export function ImportPanel() {
 
         {/* Git hosting URL input */}
         <form onSubmit={handleGitHubSubmit} className="github-form">
-          <div className="github-form__header">
-            <span className="github-form__icon"><Link size={20} /></span>
+          <label className="github-form__header" htmlFor="repository-url">
+            <span className="github-form__icon"><LinkIcon aria-hidden="true" size={20} /></span>
             <span className="github-form__label">Import from GitHub / GitLab / Bitbucket</span>
-          </div>
+          </label>
           <div className="github-form__input-row">
             <input
+              id="repository-url"
+              name="repository-url"
               type="text"
+              autoComplete="url"
               value={githubUrl}
               onChange={(e) => setGithubUrl(e.target.value)}
               placeholder="https://github.com/owner/repo or https://gitlab.com/owner/repo"
               className="github-form__input"
               disabled={isLoading}
+              aria-label="Repository URL"
             />
             <button
               type="submit"
               disabled={isLoading || !githubUrl.trim()}
               className="github-form__submit"
+              aria-busy={isLoading}
             >
-              Import
+              {isLoading ? 'Importing...' : 'Import'}
             </button>
           </div>
           <div className="github-form__token">
             <div className="github-form__token-row">
               <input
+                id="repository-access-token"
+                name="repository-access-token"
                 type={showToken ? "text" : "password"}
+                autoComplete="off"
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 placeholder="Access token (optional)"
@@ -242,6 +252,7 @@ export function ImportPanel() {
             </span>
             <label className="github-form__remember">
               <input
+                name="remember-repository-token"
                 type="checkbox"
                 checked={rememberToken}
                 onChange={(e) => setRememberToken(e.target.checked)}
@@ -266,9 +277,12 @@ export function ImportPanel() {
         >
           <input
             ref={zipInputRef}
+            id="repository-archive"
+            name="repository-archive"
             type="file"
             accept=".zip,.json"
             onChange={handleZipSelect}
+            aria-label="Repository archive"
             style={{ display: 'none' }}
           />
           <span className="dropzone__icon"><Package size={32} /></span>

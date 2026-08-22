@@ -1,17 +1,11 @@
 import type { RepoGraph } from '@lib/git/types';
 
-interface DemoDataset {
-    name: string;
-    description: string;
-    iconName: 'file-text' | 'git-branch' | 'network';
+interface DemoDatasetLoader {
     load: () => Promise<RepoGraph>;
 }
 
-const DEMO_DATASETS: Record<string, DemoDataset> = {
+const DEMO_DATASET_LOADERS: Record<string, DemoDatasetLoader> = {
     simple: {
-        name: 'Simple',
-        description: 'Linear history, perfect for beginners',
-        iconName: 'file-text',
         async load() {
             const response = await fetch('/data/simple.json');
             if (!response.ok) throw new Error('Failed to load simple demo data');
@@ -21,9 +15,6 @@ const DEMO_DATASETS: Record<string, DemoDataset> = {
         },
     },
     branching: {
-        name: 'Branching',
-        description: 'Multiple feature branches merging into main',
-        iconName: 'git-branch',
         async load() {
             const response = await fetch('/data/branching.json');
             if (!response.ok) throw new Error('Failed to load branching demo data');
@@ -33,9 +24,6 @@ const DEMO_DATASETS: Record<string, DemoDataset> = {
         },
     },
     complex: {
-        name: 'Complex',
-        description: 'Multiple features and bugfix branches',
-        iconName: 'network',
         async load() {
             const response = await fetch('/data/complex.json');
             if (!response.ok) throw new Error('Failed to load complex demo data');
@@ -46,14 +34,13 @@ const DEMO_DATASETS: Record<string, DemoDataset> = {
     },
 };
 
-export function getDemoDatasets() {
-    return DEMO_DATASETS;
-}
+export { getDemoDatasets } from './catalog';
 
 export async function loadDemoDataset(key: string): Promise<RepoGraph> {
-    const dataset = DEMO_DATASETS[key];
+    const dataset = DEMO_DATASET_LOADERS[key];
     if (!dataset) {
         throw new Error(`Demo dataset "${key}" not found`);
     }
+
     return dataset.load();
 }

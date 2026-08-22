@@ -216,7 +216,25 @@
     transition: all 0.2s ease;
 }
 
+.error-boundary__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.error-boundary__button--secondary {
+    background: transparent;
+    color: var(--rp-text);
+    border: 1px solid var(--rp-highlight-high);
+}
+
 .error-boundary__button:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(235, 111, 146, 0.4);
+}
+
+.error-boundary__button--secondary:hover {
+    border-color: var(--rp-foam);
+    box-shadow: none;
 }

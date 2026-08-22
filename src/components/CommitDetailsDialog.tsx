@@ -88,10 +88,16 @@ export function CommitDetailsDialog() {
     const laneColor = laneColors[lane % laneColors.length];
 
     return (
-        <dialog ref={dialogRef} className="commit-dialog" aria-labelledby="commit-title">
-            {/* Backdrop blur overlay */}
-            <div className="commit-dialog__backdrop" onClick={toggleDetails}></div>
-
+        <dialog
+            ref={dialogRef}
+            className="commit-dialog"
+            aria-labelledby="commit-title"
+            onClick={(event) => {
+                if (event.target === event.currentTarget) {
+                    toggleDetails();
+                }
+            }}
+        >
             <div className="commit-dialog__content">
                 <div className="commit-dialog__header">
                     <div className="commit-icon" style={{ background: laneColor }}>
@@ -253,12 +259,9 @@ export function CommitDetailsDialog() {
           z-index: 1000;
         }
 
-        .commit-dialog__backdrop {
-          position: fixed;
-          inset: 0;
+        .commit-dialog::backdrop {
           background: rgba(var(--rp-base-rgb), 0.8);
           backdrop-filter: blur(8px);
-          z-index: 999;
         }
 
         .commit-dialog__content {

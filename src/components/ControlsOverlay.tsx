@@ -1,8 +1,7 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useRef, useState, type ReactNode } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
 import { downloadVectorSVG, openPrintableSVG, type ExportSize } from '@lib/export/svg-generator';
 import { downloadFullGraphPNG } from '@lib/export/png-generator';
-import { parseGitHubRepo, parseGitLabRepo, parseBitbucketRepo } from '@lib/git/import-git';
 import { THEMES } from '@lib/themes';
 import type { BackgroundStyle } from '@lib/git/types';
 import { generateShareableUrl, copyToClipboard, type ShareableState } from '@lib/utils/url-state';
@@ -58,6 +57,47 @@ const EXPORT_LAYOUTS = {
         labelOffset: 70,
     },
 } as const;
+
+function OverlayDialog({
+    labelledBy,
+    onClose,
+    panelClassName,
+    children,
+}: {
+    labelledBy: string;
+    onClose: () => void;
+    panelClassName: string;
+    children: ReactNode;
+}) {
+    const dialogRef = useRef<HTMLDialogElement>(null);
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+
+        dialog.showModal();
+        return () => {
+            if (dialog.open) dialog.close();
+        };
+    }, []);
+
+    return (
+        <dialog
+            ref={dialogRef}
+            className="help-dialog"
+            aria-labelledby={labelledBy}
+            onCancel={(event) => {
+                event.preventDefault();
+                onClose();
+            }}
+            onClick={(event) => {
+                if (event.target === event.currentTarget) onClose();
+            }}
+        >
+            <div className={panelClassName}>{children}</div>
+        </dialog>
+    );
+}
 
 export function ControlsOverlay() {
     const [exportDPI, setExportDPI] = useState<1 | 2 | 4>(1);
@@ -309,14 +349,15 @@ export function ControlsOverlay() {
         setLoading(true);
         setError(null);
         try {
+            const imports = await import('@lib/git/import-git');
             let graph;
             const authTokenValue = authToken ?? undefined;
             if (currentRepoProvider === 'gitlab') {
-                graph = await parseGitLabRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseGitLabRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
             } else if (currentRepoProvider === 'bitbucket') {
-                graph = await parseBitbucketRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseBitbucketRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
             } else {
-                graph = await parseGitHubRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseGitHubRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
             }
             setGraph(graph);
         } catch (err) {
@@ -708,13 +749,11 @@ export function ControlsOverlay() {
 
             {/* Teaching overlay */}
             {showTeaching && (
-                <div
-                    className="help-overlay teaching-overlay"
-                    role="dialog"
-                    aria-labelledby="teaching-title"
-                    onClick={toggleTeaching}
+                <OverlayDialog
+                    labelledBy="teaching-title"
+                    onClose={toggleTeaching}
+                    panelClassName="help-panel teaching-panel"
                 >
-                    <div className="help-panel teaching-panel" onClick={(e) => e.stopPropagation()}>
                         <div className="help-header">
                             <h2 id="teaching-title">Teaching Mode</h2>
                             <button
@@ -744,19 +783,16 @@ export function ControlsOverlay() {
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                </div>
+                </OverlayDialog>
             )}
 
             {/* Help overlay */}
             {showHelp && (
-                <div
-                    className="help-overlay"
-                    role="dialog"
-                    aria-labelledby="help-title"
-                    onClick={toggleHelp}
+                <OverlayDialog
+                    labelledBy="help-title"
+                    onClose={toggleHelp}
+                    panelClassName="help-panel help-panel--wide"
                 >
-                    <div className="help-panel help-panel--wide" onClick={(e) => e.stopPropagation()}>
                         <div className="help-header">
                             <h2 id="help-title">Keyboard Shortcuts</h2>
                             <button
@@ -808,8 +844,7 @@ export function ControlsOverlay() {
                                 <span>Drag to pan, scroll to zoom, and click commits to select.</span>
                             </div>
                         </div>
-                    </div>
-                </div>
+                </OverlayDialog>
             )}
 
             <style>{`
@@ -1181,14 +1216,23 @@ export function ControlsOverlay() {
           white-space: nowrap;
         }
 
-.help-overlay {
+        .help-dialog {
           position: fixed;
           inset: 0;
+          width: min(580px, calc(100vw - 2rem));
+          max-width: none;
+          max-height: calc(100dvh - 2rem);
+          margin: auto;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: var(--rp-text);
+          overflow: visible;
+        }
+
+        .help-dialog::backdrop {
           background: rgba(0, 0, 0, 0.6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 100;
+          backdrop-filter: blur(8px);
         }
 
         .help-panel {
@@ -1257,6 +1301,14 @@ export function ControlsOverlay() {
         .help-panel--wide {
           max-width: 580px;
           padding: 1.5rem 2rem;
+        }
+
+        .help-dialog > .help-panel {
+          width: 100%;
+          max-width: 100%;
+          max-height: calc(100dvh - 2rem);
+          margin: 0;
+          overflow-y: auto;
         }
 
         .help-close svg {

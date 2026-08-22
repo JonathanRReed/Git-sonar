@@ -27,6 +27,10 @@ export class ErrorBoundary extends Component<Props, State> {
         debugError('ErrorBoundary', 'caught an error:', error, errorInfo);
     }
 
+    private resetErrorBoundary = () => {
+        this.setState({ hasError: false, error: null });
+    };
+
     public render() {
         if (this.state.hasError) {
             return (
@@ -36,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             <span className="error-boundary__icon"><AlertTriangle size={32} /></span>
                             <h2 className="error-boundary__title">Something went wrong</h2>
                             <p className="error-boundary__message">
-                                An unexpected error occurred. Please try refreshing the page.
+                                An unexpected error interrupted this view. Try again, or reload the page if the problem continues.
                             </p>
                             {this.state.error && (
                                 <details className="error-boundary__details">
@@ -46,12 +50,22 @@ export class ErrorBoundary extends Component<Props, State> {
                                     </pre>
                                 </details>
                             )}
-                            <button
-                                className="error-boundary__button"
-                                onClick={() => window.location.reload()}
-                            >
-                                Refresh Page
-                            </button>
+                            <div className="error-boundary__actions">
+                                <button
+                                    type="button"
+                                    className="error-boundary__button"
+                                    onClick={this.resetErrorBoundary}
+                                >
+                                    Try again
+                                </button>
+                                <button
+                                    type="button"
+                                    className="error-boundary__button error-boundary__button--secondary"
+                                    onClick={() => window.location.reload()}
+                                >
+                                    Reload page
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )

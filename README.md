@@ -6,10 +6,10 @@ Turn any Git repository into shareable, printable **art** — movie posters, alb
 
 [Features](#features) | [Quick Start](#quick-start) | [Usage](#usage) | [Tech Stack](#tech-stack) | [Keyboard Shortcuts](#keyboard-shortcuts)
 
-![Astro](https://img.shields.io/badge/Astro-6.x-purple?logo=astro)
+![Astro](https://img.shields.io/badge/Astro-7.x-purple?logo=astro)
 ![React](https://img.shields.io/badge/React-19-blue?logo=react)
 ![Canvas 2D](https://img.shields.io/badge/Canvas-2D-orange)
-![ESLint](https://img.shields.io/badge/ESLint-8.x-blue)
+![ESLint](https://img.shields.io/badge/ESLint-10.x-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---

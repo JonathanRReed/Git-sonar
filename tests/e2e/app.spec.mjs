@@ -55,7 +55,9 @@ test.describe('Git Sonar app', () => {
         
         // Press ? to open help
         await page.keyboard.press('?');
-        await expect(page.getByRole('heading', { name: 'Keyboard Shortcuts' })).toBeVisible();
+        const helpDialog = page.getByRole('dialog', { name: 'Keyboard Shortcuts' });
+        await expect(helpDialog).toBeVisible();
+        await expect(helpDialog).toHaveJSProperty('open', true);
         
         // Press Escape to close
         await page.keyboard.press('Escape');

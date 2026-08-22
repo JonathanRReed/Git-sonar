@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImportPanel } from '@components/ImportPanel';
 import { useGraphStore } from '@lib/store/graph-store';
@@ -6,7 +6,7 @@ import type { RepoGraph } from '@lib/git/types';
 
 const loadDemoDataset = vi.fn(async (key: string) => makeGraph(key));
 
-vi.mock('@lib/demo-data', () => ({
+vi.mock('@lib/demo-data/catalog', () => ({
     getDemoDatasets: () => ({
         simple: {
             name: 'Simple',
@@ -24,6 +24,9 @@ vi.mock('@lib/demo-data', () => ({
             iconName: 'network',
         },
     }),
+}));
+
+vi.mock('@lib/demo-data', () => ({
     loadDemoDataset: (key: string) => loadDemoDataset(key),
 }));
 
@@ -76,11 +79,19 @@ function makeGraph(key: string): RepoGraph {
 }
 
 afterEach(() => {
+    cleanup();
     useGraphStore.getState().clearGraph();
     loadDemoDataset.mockClear();
 });
 
 describe('ImportPanel', () => {
+    it('gives repository and archive inputs persistent accessible names', () => {
+        render(<ImportPanel />);
+
+        expect(screen.getByLabelText('Repository URL').getAttribute('name')).toBe('repository-url');
+        expect(screen.getByLabelText('Repository archive').getAttribute('name')).toBe('repository-archive');
+    });
+
     it('loads the selected demo when Load Demo is pressed', async () => {
         render(<ImportPanel />);
 
