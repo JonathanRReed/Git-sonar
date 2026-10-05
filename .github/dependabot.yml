@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # typescript-eslint 8.71 requires the TypeScript 6 API.
+      - dependency-name: "typescript"
+        versions: [">=7.0.0 <8.0.0"]
     groups:
       app-dependencies:
         patterns:
