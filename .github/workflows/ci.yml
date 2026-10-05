@@ -36,7 +36,6 @@ jobs:
       - run: bun run build
 
   full-browser:
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -49,5 +48,7 @@ jobs:
           bun-version: 1.4.0
       - run: bun install --frozen-lockfile
       - run: bun run test:coverage
+      - name: Generate poster assets and export fonts
+        run: bun run prebuild
       - run: bunx playwright install --with-deps
       - run: bun run test:e2e
