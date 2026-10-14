@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Browser tool for exploring Git history and turning commit data into shareable, printable art",
   "license": "MIT",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.3",
   "author": {
     "name": "Jonathan R. Reed",
     "url": "https://jonathanrreed.com/about/"
@@ -20,7 +20,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "typecheck": "astro check && tsc --noEmit -p tsconfig.tools.json",
+    "typecheck": "astro check && bun --check --tsconfig-override=tsconfig.tools.json",
     "check": "bun run lint && bun run typecheck && bun run test:run && bun run test:coverage && bun run build && bun run test:e2e",
     "test": "vitest",
     "test:run": "vitest run",
@@ -28,7 +28,8 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test:e2e": "playwright test",
-    "audit:shadscan": "bunx @shadscan/cli@0.17.0 --json --no-interactive --no-roast"
+    "audit:shadscan": "bunx @shadscan/cli@0.17.0 --json --no-interactive --no-roast",
+    "typecheck:tsc": "astro check && tsc --noEmit -p tsconfig.tools.json"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.1",
