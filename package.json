@@ -20,7 +20,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "typecheck": "astro check && bun --check --tsconfig-override=tsconfig.tools.json",
+    "typecheck": "astro check && node scripts/bun-check.mjs --tsconfig-override=tsconfig.tools.json",
     "check": "bun run lint && bun run typecheck && bun run test:run && bun run test:coverage && bun run build && bun run test:e2e",
     "test": "vitest",
     "test:run": "vitest run",
