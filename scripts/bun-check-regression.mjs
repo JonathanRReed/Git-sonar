@@ -3,7 +3,7 @@
 // exits 0 for `bun --check`, so an unguarded typecheck can pass without checking
 // anything. Run with: node --test scripts/bun-check-regression.mjs
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
@@ -138,3 +138,56 @@ test("real Bun: a clean project passes and a deliberate type error fails", { ski
   assert.notEqual(broken.status, 0);
   assert.match(broken.stdout + broken.stderr, /TS2322/);
 });
+
+
+
+for (const { compilerExit, summary } of [
+  { compilerExit: 0, summary: false },
+  { compilerExit: 2, summary: false },
+  { compilerExit: 0, summary: true },
+]) {
+  test(`slow consumers receive all diagnostics (exit ${compilerExit}, summary ${summary})`, { skip: !unix, timeout: 10000 }, async () => {
+    const dir = tempDir();
+    const bin = join(dir, "bun");
+    const bytes = 2 * 1024 * 1024;
+    writeFileSync(bin, `#!${process.execPath}
+if (process.argv[2] === "--version") {
+  console.log("${PIN}");
+} else {
+  process.stdout.write("o".repeat(${bytes}));
+  process.stderr.write("e".repeat(${bytes}));
+  ${summary ? 'process.stdout.write("No type errors in "); setImmediate(() => process.stdout.write("3 files"));' : ''}
+  process.exitCode = ${compilerExit};
+}
+`);
+    chmodSync(bin, 0o755);
+    const child = spawn(process.execPath, [GUARD], {
+      cwd: project(),
+      env: { ...process.env, PATH: `${dir}${delimiter}${process.env.PATH}` },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const stdout = [];
+    const stderr = [];
+    const result = new Promise((resolve, reject) => {
+      child.once("error", reject);
+      child.once("close", (code) => resolve(code));
+    });
+    const timer = setTimeout(() => {
+      child.stdout.on("data", chunk => stdout.push(chunk));
+      child.stderr.on("data", chunk => stderr.push(chunk));
+    }, 300);
+    try {
+      assert.equal(await result, compilerExit || (summary ? 0 : 1));
+      const expectedOutput = "o".repeat(bytes) + (summary ? "No type errors in 3 files" : "");
+      assert.equal(Buffer.concat(stdout).length, expectedOutput.length);
+      assert.ok(Buffer.concat(stdout).equals(Buffer.from(expectedOutput)));
+      const errors = Buffer.concat(stderr).toString();
+      assert.ok(errors.startsWith("e".repeat(bytes)), `forwarded only ${errors.length} stderr bytes`);
+      if (compilerExit === 0 && !summary) assert.match(errors.slice(bytes), /without reporting checked files/);
+      else assert.equal(errors.length, bytes);
+    } finally {
+      clearTimeout(timer);
+      child.kill();
+    }
+  });
+}
