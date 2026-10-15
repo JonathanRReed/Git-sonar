@@ -146,7 +146,7 @@ for (const { compilerExit, summary } of [
   { compilerExit: 2, summary: false },
   { compilerExit: 0, summary: true },
 ]) {
-  test(`slow consumers receive all diagnostics (exit ${compilerExit}, summary ${summary})`, { skip: !unix, timeout: 10000 }, async () => {
+  test(`slow consumers receive all diagnostics (exit ${compilerExit}, summary ${summary})`, { skip: !unix, timeout: 10000 }, async (t) => {
     const dir = tempDir();
     const bin = join(dir, "bun");
     const bytes = 2 * 1024 * 1024;
@@ -165,8 +165,17 @@ if (process.argv[2] === "--version") {
       cwd: project(),
       env: { ...process.env, PATH: `${dir}${delimiter}${process.env.PATH}` },
       stdio: ["ignore", "pipe", "pipe"],
+        detached: true,
     });
-    const stdout = [];
+    const stopChild = () => {
+        try {
+          process.kill(-child.pid, "SIGKILL");
+        } catch (error) {
+          if (error.code !== "ESRCH") throw error;
+        }
+      };
+      t.signal.addEventListener("abort", stopChild, { once: true });
+      const stdout = [];
     const stderr = [];
     const result = new Promise((resolve, reject) => {
       child.once("error", reject);
@@ -187,7 +196,8 @@ if (process.argv[2] === "--version") {
       else assert.equal(errors.length, bytes);
     } finally {
       clearTimeout(timer);
-      child.kill();
+      t.signal.removeEventListener("abort", stopChild);
+        stopChild();
     }
   });
 }
