@@ -6,10 +6,16 @@ Explore Git history as a graph, then turn it into a poster, album cover, or gene
 
 ## Run locally
 
+Use Node.js 24.22.1 (pinned in `.nvmrc`) and Bun 1.4.4 (pinned in
+`package.json`). This project supports Node.js >=24.22.1 <25 to match the
+pinned LTS runtime and its tooling dependencies. Both CI jobs read these same
+version files.
+
 ```bash
 git clone https://github.com/JonathanRReed/Git-sonar.git
 cd Git-sonar
-bun install
+nvm use
+bun install --frozen-lockfile
 bun run dev
 ```
 
@@ -67,11 +73,17 @@ Copy link encodes settings in `#p=…`. Public-repository and demo links can rep
 ## Develop
 
 ```bash
+bun run check
 bun run lint
 bun run lint:fix
 bun run build
 bun run preview
 ```
+
+`bun run check` includes lint, guarded tool typechecking, unit tests, coverage,
+a production build, and Playwright browser tests. Install browser dependencies
+first with `bunx playwright install --with-deps`. TypeScript stays on version 6
+because the current typescript-eslint release requires its API.
 
 The app uses Astro, React, Canvas 2D, Tailwind CSS, Zustand, fflate, and culori. resvg and sharp rasterize posters at build time. Theme credits include [Rosé Pine](https://rosepinetheme.com/).
 

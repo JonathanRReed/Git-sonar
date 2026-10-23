@@ -4,7 +4,10 @@
   "version": "0.1.0",
   "description": "Browser tool for exploring Git history and turning commit data into shareable, printable art",
   "license": "MIT",
-  "packageManager": "bun@1.4.3",
+  "packageManager": "bun@1.4.4",
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
   "author": {
     "name": "Jonathan R. Reed",
     "url": "https://jonathanrreed.com/about/"
