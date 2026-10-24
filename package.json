@@ -73,5 +73,11 @@
     "typescript": "^6.0.3",
     "vite": "8.3.4",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "zod": "4.6.7",
+    "unifont": {
+      "undici": "8.12.3"
+    }
   }
 }
