@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImportPanel } from '@components/ImportPanel';
 import { useGraphStore } from '@lib/store/graph-store';
@@ -121,6 +121,45 @@ describe('ImportPanel', () => {
 
         expect(document.activeElement).toBe(screen.getByLabelText('Repository URL'));
         expect(useGraphStore.getState().isLoading).toBe(false);
+    });
+});
+
+describe('the earlier-moment form', () => {
+    it('shows no cutoff once the store has dropped it', () => {
+        render(<ImportPanel />);
+        const day = screen.getByLabelText('The day') as HTMLInputElement;
+        const label = screen.getByLabelText('What happened') as HTMLInputElement;
+
+        fireEvent.change(day, { target: { value: '2024-03-03' } });
+        fireEvent.change(label, { target: { value: 'Reached 1,000 stars' } });
+        expect(useGraphStore.getState().moment).toMatchObject({ date: '2024-03-03', label: 'Reached 1,000 stars' });
+
+        // "Change repo" clears the store while this form stays mounted.
+        act(() => useGraphStore.getState().clearGraph());
+
+        expect(useGraphStore.getState().moment).toBeNull();
+        expect(day.value).toBe('');
+        expect(label.value).toBe('');
+    });
+
+    it('keeps a trailing space while the label is being typed', () => {
+        render(<ImportPanel />);
+        fireEvent.change(screen.getByLabelText('The day'), { target: { value: '2024-03-03' } });
+        const label = screen.getByLabelText('What happened') as HTMLInputElement;
+
+        fireEvent.change(label, { target: { value: 'Reached ' } });
+
+        expect(label.value).toBe('Reached ');
+        expect(useGraphStore.getState().moment?.label).toBe('Reached');
+    });
+
+    it('picks up a moment set from a shared link', () => {
+        render(<ImportPanel />);
+
+        act(() => useGraphStore.getState().setMoment({ untilMs: Date.parse('2023-06-01T23:59:59.999Z'), date: '2023-06-01', label: 'Launch day' }));
+
+        expect((screen.getByLabelText('The day') as HTMLInputElement).value).toBe('2023-06-01');
+        expect((screen.getByLabelText('What happened') as HTMLInputElement).value).toBe('Launch day');
     });
 });
 

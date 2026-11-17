@@ -134,6 +134,26 @@ test.describe('Git Sonar app', () => {
         await expect(page.getByPlaceholder('Search commits...')).toBeVisible();
     });
 
+    test('the history graph survives a trip to the poster and back', async ({ page }) => {
+        // Count the bright pixels on the graph's canvas: its lines and commit
+        // dots. The dark wash behind them doesn't count.
+        const inked = () => page.evaluate(() => {
+            const canvas = document.querySelector('.graph-canvas canvas');
+            const { data } = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+            let n = 0;
+            for (let i = 0; i < data.length; i += 4) if (data[i] + data[i + 1] + data[i + 2] > 380) n++;
+            return n;
+        });
+        await loadBranchingDemo(page);
+        await expect.poll(inked).toBeGreaterThan(300);
+
+        await page.getByRole('button', { name: 'Poster', exact: true }).click();
+        await expect(page.locator('.ps-canvas')).toBeVisible({ timeout: 8000 });
+        await page.getByRole('button', { name: 'History', exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'Commits' })).toBeVisible();
+        await expect.poll(inked).toBeGreaterThan(300);
+    });
+
     test('keyboard shortcuts work', async ({ page }) => {
         await loadBranchingDemo(page);
         
