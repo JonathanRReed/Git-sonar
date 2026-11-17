@@ -266,7 +266,7 @@ function build(ctx: TemplateContext): Scene {
 
 export const transitMapTemplate: PosterTemplate = {
     id: 'transit-map',
-    name: 'Transit Map',
+    name: 'Transit map',
     group: 'data',
     description: 'A metro network: branches are lines, commits are stations, merges are interchanges.',
     defaultAspect: 18 / 24,

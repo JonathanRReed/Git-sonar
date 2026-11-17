@@ -121,7 +121,7 @@ function text(
 
 export const movieOneSheetTemplate: PosterTemplate = {
     id: 'movie-one-sheet',
-    name: 'Movie Poster',
+    name: 'Movie poster',
     group: 'cinematic',
     description: 'Key-art graph, cinematic title, and an auto-generated billing block of contributors & stats.',
     defaultAspect: 24 / 36,

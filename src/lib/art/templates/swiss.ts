@@ -117,7 +117,7 @@ function text(
 
 export const swissTemplate: PosterTemplate = {
     id: 'swiss',
-    name: 'Swiss Grid',
+    name: 'Swiss grid',
     group: 'data',
     description: 'Strict-grid minimalist typographic print foregrounding the repo stats.',
     defaultAspect: 18 / 24,

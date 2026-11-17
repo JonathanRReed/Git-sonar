@@ -134,7 +134,7 @@ function build(ctx: TemplateContext): Scene {
 
 export const coreSampleTemplate: PosterTemplate = {
     id: 'core-sample',
-    name: 'Core Sample',
+    name: 'Core sample',
     group: 'data',
     description: 'A drilled column of strata: one layer per month, coloured by who led it.',
     defaultAspect: 24 / 36,

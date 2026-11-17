@@ -150,12 +150,12 @@ test.describe('Git Sonar app', () => {
 
         // The studio preview canvas and the style rail should appear.
         await expect(page.locator('.ps-canvas')).toBeVisible({ timeout: 5000 });
-        await expect(page.getByRole('button', { name: /Flow Field/ })).toBeVisible();
+        await expect(page.getByRole('button', { name: /Flow field/ })).toBeVisible();
 
         // Switching styles should keep the preview mounted and mark the pick.
-        await page.getByRole('button', { name: /Flow Field/ }).click();
+        await page.getByRole('button', { name: /Flow field/ }).click();
         await expect(page.locator('.ps-canvas')).toBeVisible();
-        await expect(page.getByRole('button', { name: /Flow Field/ })).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.getByRole('button', { name: /Flow field/ })).toHaveAttribute('aria-pressed', 'true');
 
         // Shuffling deals a second roll into the tray, and undo takes it back.
         await expect(page.locator('.ps-vars button')).toHaveCount(1);
@@ -215,7 +215,7 @@ test.describe('Git Sonar app', () => {
     test('on a wall hangs the poster framed, to scale, over a bench', async ({ page }) => {
         await page.goto('/app?demo=showcase');
         await expect(page.locator('.ps-canvas')).toBeVisible({ timeout: 8000 });
-        await page.getByRole('button', { name: /Transit Map/ }).click();
+        await page.getByRole('button', { name: /Transit map/ }).click();
         await page.getByRole('button', { name: 'On a wall' }).click();
         await page.selectOption('select[aria-label="Paper size"]', '24x36');
         await expect(page.locator('.ps-bench')).toBeVisible();

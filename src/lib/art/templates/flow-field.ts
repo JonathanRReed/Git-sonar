@@ -212,7 +212,7 @@ function text(
 
 export const flowFieldTemplate: PosterTemplate = {
     id: 'flow-field',
-    name: 'Flow Field',
+    name: 'Flow field',
     group: 'generative',
     description: 'Fidenza-style noise field traced by hundreds of curved commit ribbons, colored by author and weighted by churn.',
     defaultAspect: 24 / 36,

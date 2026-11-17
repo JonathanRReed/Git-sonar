@@ -59,19 +59,19 @@ The studio opens as soon as a repository loads. Pick a style from the rail (each
 | Style | Draws |
 | --- | --- |
 | Pulsar | Commit cadence as stacked ridgelines |
-| Flow Field | Authors as seeded currents |
-| Growth Rings | One ring per week, thick where the work was heavy |
-| Transit Map | Branches as lines, commits as stations, merges as interchanges |
-| Core Sample | One layer per month, coloured by who led it |
+| Flow field | Authors as seeded currents |
+| Growth rings | One ring per week, thick where the work was heavy |
+| Transit map | Branches as lines, commits as stations, merges as interchanges |
+| Core sample | One layer per month, coloured by who led it |
 | Weave | A row per week, dyed by its lead author |
-| Punch Card | Commits by weekday and hour, with the busiest slot named |
+| Punch card | Commits by weekday and hour, with the busiest slot named |
 | Receipt | The history itemised by author, with a barcode from the head commit |
-| Year in Code | A radial year-ring spiral |
+| Year in code | A radial year-ring spiral |
 | Album | Cover art and commits as tracks |
-| Movie Poster | Commit graph and a generated billing block |
+| Movie poster | Commit graph and a generated billing block |
 | Constellation | Each month as its own constellation |
 | Festival | Contributors arranged as a festival bill |
-| Swiss Grid | A typographic data print |
+| Swiss grid | A typographic data print |
 
 Colour themes are Night, Dawn, Gallery Paper, Riso, Blueprint, GitHub, Nord, and Dracula, each with full, two-tone, one-ink, and vivid palettes (OKLCH).
 

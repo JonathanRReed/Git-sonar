@@ -126,7 +126,7 @@ function build(ctx: TemplateContext): Scene {
 
 export const growthRingsTemplate: PosterTemplate = {
     id: 'growth-rings',
-    name: 'Growth Rings',
+    name: 'Growth rings',
     group: 'generative',
     description: 'A tree cross-section: one ring per week, thick where the work was heavy.',
     defaultAspect: 18 / 24,

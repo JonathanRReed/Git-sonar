@@ -119,7 +119,8 @@ function hang(
     const outer = { w: inches.w + (matIn + frameIn) * 2, h: inches.h + (matIn + frameIn) * 2 };
     const floorY = Math.max(1, stageH - TRAY_H - WALL.floorPx);
     const ppi = Math.max(0.1, Math.min(
-        (floorY - 28) / (WALL.centre + outer.h / 2 + 3),
+        // 84 px keeps the frame clear of the controls mounted at the top of the stage.
+        (floorY - 84) / (WALL.centre + outer.h / 2 + 3),
         (stageW * 0.84) / Math.max(WALL.bench.w, outer.w + 22)
     ));
     return { inches, matIn, frameIn, outer, floorY, ppi, centreY: floorY - WALL.centre * ppi, framed, spec };
@@ -696,7 +697,7 @@ export function PosterStudio() {
     const benchW = Math.min(fit.stageW - 56, (fit.stageH - TRAY_H - STAGE_TOP - 52) * fit.aspect);
     const plaqueFits = (fit.stageW - benchW) / 2 >= 250;
     const benchH = benchW / fit.aspect;
-    const ledge = Math.max(18, (fit.stageH - TRAY_H - STAGE_TOP - benchH) / 2 + Math.min(22, benchH * 0.03));
+    const ledge = Math.max(18, (fit.stageH - TRAY_H - STAGE_TOP - benchH) / 2 + Math.min(46, benchH * 0.07));
 
     // "On a wall": a gallery elevation at true scale. The sheet hangs with its
     // centre 57 in above the floor, over a museum bench for a sense of size.
@@ -724,7 +725,9 @@ export function PosterStudio() {
             <h2 className="sr-only">Poster studio</h2>
 
             <nav className="ps-rail" aria-label="Poster style">
-                <p className="ps-h">Style</p>
+                <p className="ps-h">
+                    Style <span className="ps-rail__count">{TEMPLATE_LIST.length} to swipe through</span>
+                </p>
                 <div className="ps-thumbs">
                     {TEMPLATE_LIST.map((t) => (
                         <button

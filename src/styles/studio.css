@@ -122,8 +122,8 @@ html[data-lights="off"] .ps-thumb__art {
 .ps-vars button[aria-pressed="true"]::after {
   content: "";
   position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
+  top: 0.5rem;
+  right: 0.5rem;
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
@@ -138,6 +138,12 @@ html[data-lights="off"] .ps-thumb__art {
   overflow: hidden;
   background: linear-gradient(180deg, var(--booth-hi), var(--booth-lo));
   transition: background 0.5s ease;
+}
+
+/* After hours the booth drops to a mid grey: still neutral, no longer the brightest thing in the room. */
+html[data-lights="off"] .ps-stage {
+  --booth-hi: #8c8e8a;
+  --booth-lo: #767874;
 }
 
 .ps-where {
@@ -157,22 +163,28 @@ html[data-lights="off"] .ps-thumb__art {
   transition: transform 0.65s var(--ease-out);
 }
 
-/* "On the bench": the sheet stands on a pale ledge, leaning on the back wall.
-   The ledge's edge sits just above the sheet's foot, so the two meet. */
+/* "On the bench": the sheet stands on the framer's oak worktop, leaning on the
+   back wall. The worktop's back edge sits just above the sheet's foot, so the two meet. */
 .ps-stage::before {
   content: "";
   position: absolute;
   inset: auto 0 5.5rem 0;
   height: var(--ledge, 2.5rem);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 2px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.16));
-  box-shadow: 0 -1px 0 rgba(20, 22, 24, 0.2);
-  transition: opacity 0.4s ease;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 2px),
+    repeating-linear-gradient(90deg, rgba(90, 60, 30, 0.05) 0 2px, transparent 2px 9px, rgba(90, 60, 30, 0.035) 9px 10px, transparent 10px 23px),
+    linear-gradient(180deg, #caa477, #b98f5f);
+  /* The shadow the wall casts at the back, and the worktop's front edge facing you. */
+  box-shadow: 0 -1px 0 rgba(20, 22, 24, 0.35), inset 0 -0.6rem 0 #8e6a42, inset 0 calc(-0.6rem - 1px) 0 rgba(255, 240, 214, 0.55);
+  transition: opacity 0.4s ease, filter 0.5s ease;
 }
 
 .is-wall .ps-stage::before {
   opacity: 0;
+}
+
+html[data-lights="off"] .ps-stage::before {
+  filter: brightness(0.72);
 }
 
 /* The sheet leans a few degrees toward the pointer, and light slides across it. */
@@ -181,6 +193,27 @@ html[data-lights="off"] .ps-thumb__art {
   line-height: 0;
   transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition: transform 0.25s var(--ease-out);
+}
+
+/* Where the sheet's foot meets the worktop. */
+.ps-sheet::before {
+  content: "";
+  position: absolute;
+  left: 1.5%;
+  right: 1.5%;
+  bottom: -0.45rem;
+  height: 0.9rem;
+  z-index: -1;
+  background: radial-gradient(ellipse closest-side, rgba(40, 24, 8, 0.6), transparent);
+  transition: opacity 0.3s ease;
+}
+
+.is-wall .ps-sheet::before {
+  opacity: 0;
+}
+
+.ps-rail__count {
+  display: none;
 }
 
 .ps-sheet::after {
@@ -437,7 +470,7 @@ html[data-lights="off"] .is-wall .ps-stage {
 
 .ps-corner--white {
   border-color: #fff;
-  filter: drop-shadow(0 0 0.5px rgba(20, 22, 24, 0.9));
+  filter: drop-shadow(0 0 0.6px rgba(20, 22, 24, 1)) drop-shadow(0 0 0.6px rgba(20, 22, 24, 1));
 }
 
 .ps-corner--none {
@@ -707,7 +740,7 @@ html[data-lights="off"] .ps-floor {
 
 .ps-vars button {
   position: relative;
-  height: 3.9rem;
+  height: 3.1rem;
   padding: 0;
   background: none;
 }
@@ -778,6 +811,7 @@ html[data-lights="off"] .ps-floor {
 
 .ps-download {
   flex: 1;
+  min-height: 2.9rem;
   border-radius: 0.5rem;
 }
 
@@ -785,8 +819,8 @@ html[data-lights="off"] .ps-floor {
   display: grid;
   place-items: center;
   flex: none;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.9rem;
+  height: 2.9rem;
   border-radius: 0.5rem;
   background: var(--raised);
   color: var(--ink);
@@ -806,12 +840,25 @@ html[data-lights="off"] .ps-floor {
 }
 
 .ps-icon:disabled svg {
-  opacity: 0.3;
+  opacity: 0.22;
 }
 
 .ps-icon svg {
   width: 1.1rem;
   height: 1.1rem;
+}
+
+/* After hours the buttons need a brighter edge and arrow to read at all. */
+html[data-lights="off"] .ps-icon {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34);
+}
+
+html[data-lights="off"] .ps-icon:disabled {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+html[data-lights="off"] .ps-icon:disabled svg {
+  opacity: 0.45;
 }
 
 .ps-pop {
@@ -957,7 +1004,12 @@ html[data-lights="off"] .ps-swatches button {
   flex-wrap: wrap;
 }
 
+.ps-panel .g-seg {
+  display: flex;
+}
+
 .ps-panel .g-seg button {
+  flex: 1;
   padding: 0 0.6rem;
 }
 
@@ -1155,23 +1207,46 @@ html[data-lights="off"] .ps-checks input:checked::after {
     align-items: flex-start;
   }
 
-  .ps-vars__label {
-    display: none;
-  }
-
   /* Shuffle and Listen sit together; the rolls keep the right edge. */
   .ps-listen {
     margin-left: 0;
+  }
+
+  .ps-vars__label {
+    display: none;
   }
 
   .ps-vars {
     margin-left: auto;
   }
 
-  /* Sized so a fifth style always peeks in from the right. */
   .ps-thumb {
     flex: none;
     width: 4.7rem;
+  }
+
+  /* The strip fades out at the right edge, so the cut-off style reads as "more this way". */
+  .ps-thumbs {
+    padding-bottom: 1rem;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 3.2rem), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 3.2rem), transparent);
+  }
+
+  .ps-tray {
+    padding-inline: 1.1rem;
+  }
+
+  .ps-rail .ps-h {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .ps-rail__count {
+    display: inline;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-2);
   }
 
   .ps-thumb__name {

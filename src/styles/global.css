@@ -124,8 +124,8 @@ html[data-lights="off"] {
   --rp-overlay-rgb: 38, 43, 41;
   --rp-text-rgb: 241, 240, 236;
   --ink: #f1f0ec;
-  --ink-2: #c4c6c1;
-  --ink-3: #9a9d98;
+  --ink-2: #d6d8d3;
+  --ink-3: #b0b3ae;
   --line: #2a302e;
   --line-2: #3b423f;
   --spot: rgba(255, 240, 214, 0.26);
@@ -420,10 +420,10 @@ select {
 /* After hours a black frame would vanish into the wall; it stays black but
    takes a rim of light from the picture lamp. */
 html[data-lights="off"] .g-frame:not(.g-frame--oak) {
-  background: #2a2d2f;
+  background: linear-gradient(180deg, #44484a, #2c2f31 30%, #2a2d2f);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
     calc(var(--lx, 0) * -0.7rem) calc(1.4rem + var(--ly, 0) * -0.5rem) 2.4rem rgba(0, 0, 0, 0.6),
     0 0.2rem 0.5rem rgba(0, 0, 0, 0.5);
 }
@@ -493,21 +493,29 @@ html[data-lights="off"] .g-frame:not(.g-frame--oak) {
 }
 
 /* The red button has depth: it sits proud of the page and goes down when pressed. */
+/* A key with travel: the face sits above a darker lip, both inside the box so
+   the button lines up with a field beside it. Pressed, the face drops onto the lip. */
 .g-btn--red {
-  background: var(--dot);
+  --face: var(--dot);
+  --lip: 0.22rem;
+  padding-bottom: var(--lip);
+  background:
+    linear-gradient(var(--face), var(--face)) top / 100% calc(100% - var(--lip)) no-repeat,
+    #8f1814;
   color: #fff;
-  box-shadow: 0 0.22rem 0 #8f1814;
-  translate: 0 -0.11rem;
-  transition: translate 0.07s ease-out, box-shadow 0.07s ease-out, background-color 0.15s ease;
+  transition: padding 0.07s ease-out, background-position 0.07s ease-out;
 }
 
 .g-btn--red:hover:not(:disabled) {
-  background: #e23a34;
+  --face: #e23a34;
 }
 
 .g-btn--red:active:not(:disabled) {
-  box-shadow: 0 0 0 #8f1814;
-  translate: 0 0.11rem;
+  padding-top: var(--lip);
+  padding-bottom: 0;
+  background:
+    linear-gradient(var(--face), var(--face)) bottom / 100% calc(100% - var(--lip)) no-repeat,
+    transparent;
   transform: none;
 }
 

@@ -88,15 +88,47 @@ const { current } = Astro.props;
 	.site-nav__lights {
 		margin-right: -0.9rem;
 		font-family: var(--font-serif);
-		font-size: 0.85rem;
+		font-size: 0.95rem;
 		font-style: italic;
+		font-weight: 500;
 		color: var(--ink);
 	}
 
+	/* On a phone the page links drop to a quiet second row under the wordmark. */
 	@media (max-width: 720px) {
-		.site-nav__links a:not(.site-nav__cta),
+		.site-nav {
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			gap: 0.4rem 1.3rem;
+		}
+
+		/* Forces the page links onto their own row. */
+		.site-nav::after {
+			content: "";
+			order: 2;
+			flex-basis: 100%;
+		}
+
+		.site-nav__links {
+			display: contents;
+		}
+
+		.site-nav__brand {
+			margin-right: auto;
+		}
+
+		.site-nav__links a:not(.site-nav__cta) {
+			order: 3;
+			font-size: 0.9rem;
+		}
+
+		.site-nav__links a[target="_blank"],
 		.site-nav__lights {
 			display: none;
+		}
+
+		.site-nav__cta + .site-nav__lights + .g-switch {
+			margin-left: 0.6rem;
 		}
 	}
 </style>

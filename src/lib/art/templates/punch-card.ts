@@ -131,7 +131,7 @@ function build(ctx: TemplateContext): Scene {
 
 export const punchCardTemplate: PosterTemplate = {
     id: 'punch-card',
-    name: 'Punch Card',
+    name: 'Punch card',
     group: 'data',
     description: 'When the work happens: a punched slot for every weekday and hour with commits.',
     defaultAspect: 24 / 36,

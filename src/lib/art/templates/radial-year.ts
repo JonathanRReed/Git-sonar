@@ -232,7 +232,7 @@ function text(
 
 export const radialYearTemplate: PosterTemplate = {
     id: 'radial-year',
-    name: 'Year in Code',
+    name: 'Year in code',
     group: 'generative',
     description: 'A radial spiral of commits — one concentric ring per year, dotted around a record-label title.',
     defaultAspect: 1,
