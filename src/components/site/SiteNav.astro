@@ -17,6 +17,7 @@ const { current } = Astro.props;
 		<a href="/about" aria-current={current === "about" ? "page" : undefined}>About</a>
 		<a href={BRAND.repoUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
 		<a class="site-nav__cta" href="/app">Open the studio</a>
+		<span class="site-nav__lights">Lights</span>
 		<button class="g-switch" type="button" data-light-switch aria-pressed="true" aria-label="Gallery lights" title="Gallery lights"></button>
 	</div>
 </nav>
@@ -75,8 +76,17 @@ const { current } = Astro.props;
 		align-items: center;
 	}
 
+	.site-nav__lights {
+		margin-right: -0.9rem;
+		font-family: var(--font-serif);
+		font-size: 0.85rem;
+		font-style: italic;
+		color: var(--ink-2);
+	}
+
 	@media (max-width: 720px) {
-		.site-nav__links a:not(.site-nav__cta) {
+		.site-nav__links a:not(.site-nav__cta),
+		.site-nav__lights {
 			display: none;
 		}
 	}

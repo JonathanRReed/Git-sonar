@@ -946,8 +946,9 @@ html[data-lights="off"] .ps-checks input:checked {
   }
 
   /* Short enough that the style strip and the first controls show beneath it. */
+  /* Sized so the first screen is whole: stage, style strip, then the bar. */
   .ps-stage {
-    height: 57dvh;
+    height: calc(100dvh - 21.4rem);
     min-height: 20rem;
   }
 
@@ -964,7 +965,7 @@ html[data-lights="off"] .ps-checks input:checked {
     overflow-x: auto;
     padding: 0.4rem 0.4rem 0.6rem;
     margin: 0 -0.4rem;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
   .ps-thumb {
@@ -1019,16 +1020,8 @@ html[data-lights="off"] .ps-checks input:checked {
     border-bottom: 0;
   }
 
-  /* Whatever scrolls beneath the bar fades out instead of being sliced. */
-  .ps-actions::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(100% + 1px);
-    height: 2.5rem;
-    background: linear-gradient(rgba(var(--paper-rgb), 0), var(--paper));
-    pointer-events: none;
+  .ps-actions {
+    box-shadow: 0 -0.6rem 1.2rem rgba(20, 22, 24, 0.1);
   }
 
   .ps-pop {

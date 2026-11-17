@@ -152,13 +152,12 @@ const papers = [
 									<label for="yours-repo">Paste a repo link to see it hung.</label>
 									<input class="g-field" id="yours-repo" name="github" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="you/your-repo" />
 									<button class="g-btn g-btn--red" type="submit">Make my poster</button>
-									<a class="yours__alt" href="/app?demo=showcase">or start with the sample repo</a>
 								</form>
 							</div>
 							<div class="g-label yours__label">
 								<b>Untitled</b>
-								<i>Yours</i>
-								Waiting for a repo
+								<i>Yours, once you paste a repo</i>
+								<a class="yours__alt" href="/app?demo=showcase">or start with the sample repo</a>
 							</div>
 						</div>
 					</div>
@@ -205,7 +204,7 @@ const papers = [
 				<ol class="steps">
 					{steps.map((step, i) => (
 						<li>
-							<span class="steps__n" aria-hidden="true">{i + 1}</span>
+							<small aria-hidden="true">No. {i + 1}</small>
 							<h3>{step.title}</h3>
 							<p>{step.text}</p>
 						</li>
@@ -252,7 +251,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					</ul>
 					<div class="elevation__bench" aria-hidden="true"><i></i><i></i></div>
 				</div>
-				<p class="elevation__scale">Drawn to one scale, with a 5 ft gallery bench for size.</p>
+				<p class="elevation__scale">A 5 ft gallery bench, drawn to the same scale</p>
 				<p class="sizes__formats">PNG for screens. SVG for the README. PDF for the print shop.</p>
 			</section>
 
@@ -367,25 +366,36 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				color: var(--ink-2);
 			}
 
-			/* One hang line: every frame sits on the same bottom edge, with its
-			   label the same drop below, so the three labels read as one row. */
+			/* One hang line: three frames of the same size, level top and bottom,
+			   each with its label the same drop below. */
 			.hero__pieces {
 				display: grid;
-				grid-template-columns: 30fr 28fr 34fr;
-				grid-template-rows: auto auto;
-				gap: 1.4rem clamp(0.9rem, 2vw, 1.8rem);
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: clamp(0.9rem, 2vw, 1.8rem);
+				align-items: start;
 			}
 
 			.piece {
 				position: relative;
-				display: grid;
-				grid-row: span 2;
-				grid-template-rows: subgrid;
 				margin: 0;
 			}
 
 			.piece > .g-frame {
-				align-self: end;
+				display: flex;
+				flex-direction: column;
+				aspect-ratio: 3 / 4;
+			}
+
+			.piece > .g-frame > .g-mat {
+				flex: 1;
+				min-height: 0;
+			}
+
+			.piece > .g-frame img {
+				flex: 1;
+				min-height: 0;
+				height: 100%;
+				object-fit: cover;
 			}
 
 			/* A spotlight on the plaster behind each piece. */
@@ -445,8 +455,8 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.piece .g-label {
-				align-self: start;
 				max-width: none;
+				margin-top: 1.4rem;
 			}
 
 			.yours {
@@ -458,13 +468,12 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				flex-direction: column;
 				justify-content: center;
 				gap: 0.7rem;
-				aspect-ratio: 2 / 3;
 				margin: 0;
 				padding: clamp(0.9rem, 9%, 1.6rem);
 			}
 
 			.yours__mat h2 {
-				font-size: clamp(1.5rem, 2.3vw, 2.1rem);
+				font-size: clamp(1.4rem, 2vw, 1.8rem);
 				font-stretch: 100%;
 				font-weight: 700;
 				letter-spacing: -0.01em;
@@ -484,10 +493,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.yours__alt {
-				font-family: var(--font-serif);
-				font-size: 0.92rem;
-				font-style: italic;
-				color: var(--ink-2);
+				color: var(--ink);
 				text-underline-offset: 0.2em;
 			}
 
@@ -592,23 +598,27 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			.steps li {
 				--ink: #16181a;
 				--ink-2: #43494c;
+				position: relative;
 				padding: clamp(1.2rem, 2.2vw, 1.9rem);
 				background: var(--card);
 				color: var(--ink);
 				box-shadow: var(--shadow-label);
 			}
 
-			.steps__n {
-				display: block;
-				font-size: clamp(2.6rem, 4vw, 3.6rem);
-				font-weight: 800;
-				font-stretch: 75%;
-				line-height: 0.9;
+			.steps small {
+				position: absolute;
+				top: clamp(1.2rem, 2.2vw, 1.9rem);
+				right: clamp(1.2rem, 2.2vw, 1.9rem);
+				font-size: 0.8rem;
+				font-weight: 600;
+				font-variant-numeric: tabular-nums;
+				color: var(--ink-2);
 			}
 
 			.steps h3 {
-				margin: 0.9rem 0 0;
-				font-size: clamp(1.3rem, 1.9vw, 1.65rem);
+				margin: 0;
+				padding-right: 3rem;
+				font-size: clamp(1.4rem, 2.1vw, 1.85rem);
 				font-weight: 700;
 				letter-spacing: -0.01em;
 				line-height: 1.1;
@@ -616,11 +626,11 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			.steps p {
 				max-width: 26rem;
-				margin: 0.6rem 0 0;
+				margin: 0.7rem 0 0;
 				font-family: var(--font-serif);
-				font-size: 1.12rem;
+				font-size: 1.14rem;
 				line-height: 1.5;
-				color: var(--ink-2);
+				color: #2f3437;
 			}
 
 			/* ---------- Privacy: the night room ---------- */
@@ -804,6 +814,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				font-size: 0.95rem;
 				font-style: italic;
 				color: var(--ink-2);
+				text-align: center;
 			}
 
 			.sizes__formats {
@@ -862,8 +873,11 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				}
 
 				.yours__mat {
-					aspect-ratio: auto;
 					padding: 1.4rem;
+				}
+
+				.piece > .g-frame {
+					aspect-ratio: auto;
 				}
 
 				.salon {

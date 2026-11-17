@@ -814,7 +814,7 @@ export function PosterStudio() {
 
             <aside className="ps-panel" aria-label="Poster controls">
                 <div className="ps-actions" ref={popRef}>
-                    <button type="button" className="g-btn g-btn--ink ps-download" disabled={busy || !graph} aria-expanded={popOpen} aria-haspopup="true" onClick={() => setPopOpen((v) => !v)}>
+                    <button type="button" className="g-btn g-btn--red ps-download" disabled={busy || !graph} aria-expanded={popOpen} aria-haspopup="true" onClick={() => setPopOpen((v) => !v)}>
                         {busy ? 'Working' : 'Download'}
                     </button>
                     <button type="button" className="ps-icon" onClick={undo} disabled={history.past.length === 0} aria-label="Undo" title="Undo (Cmd/Ctrl Z)">

@@ -318,6 +318,17 @@ select {
   pointer-events: none;
 }
 
+/* Matted (light) work takes a fuller reflection; bare dark sheets stay clear. */
+.g-frame:has(.g-mat)::after {
+  background-image: linear-gradient(
+    112deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.2) 44%,
+    rgba(255, 255, 255, 0.05) 52%,
+    transparent 62%
+  );
+}
+
 .g-frame img,
 .g-frame canvas {
   display: block;
