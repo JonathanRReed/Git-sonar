@@ -59,6 +59,17 @@ test.describe('Git Sonar app', () => {
         await expect(page.getByRole('button', { name: 'Make my poster' })).toBeVisible();
     });
 
+    test('every page opts in to the frame transition inline', async ({ page }) => {
+        // From a linked stylesheet the opt-in arrives too late and the built
+        // site skips the transition, so it has to be a <style> in the head.
+        for (const route of ['/', '/app', '/about']) {
+            await page.goto(route);
+            const inline = await page.evaluate(() =>
+                [...document.head.querySelectorAll('style')].some((s) => s.textContent.includes('@view-transition')));
+            expect(inline, route).toBe(true);
+        }
+    });
+
     test('the empty frame sends a pasted repo to the studio', async ({ page }) => {
         await page.route('https://api.github.com/**', (route) => route.abort());
         await page.goto('/');

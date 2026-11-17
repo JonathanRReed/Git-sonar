@@ -47,6 +47,19 @@ const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.
 	} catch (e) {}
 </script>
 
+<!--
+	Let the empty frame travel from the landing page into the studio. This has to
+	be inline: from a linked stylesheet it arrives after the browser has already
+	decided to skip the transition.
+-->
+<style is:inline>
+	@media (prefers-reduced-motion: no-preference) {
+		@view-transition {
+			navigation: auto;
+		}
+	}
+</style>
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link

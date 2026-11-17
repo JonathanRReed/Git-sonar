@@ -2,6 +2,8 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
     testDir: './tests/e2e',
+    testMatch: '**/*.spec.mjs',
+    globalSetup: './tests/e2e/warm-up.mjs',
     timeout: 30_000,
     retries: process.env.CI ? 2 : 0,
     use: {
