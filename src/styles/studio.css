@@ -955,7 +955,6 @@ html[data-lights="off"] .ps-checks input:checked {
   .ps-rail {
     padding: 0.9rem 0.9rem 0.6rem;
     border-right: 0;
-    border-bottom: 1px solid var(--line);
     overflow: visible;
   }
 
@@ -1041,7 +1040,8 @@ html[data-lights="off"] .ps-checks input:checked {
   }
 
   .ps-reset {
-    align-self: flex-start;
+    align-self: stretch;
+    width: auto;
     margin-bottom: 1.5rem;
   }
 }

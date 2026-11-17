@@ -47,8 +47,8 @@
   --raised: #ffffff;
   --seg: #e6e8e3;
   --ink: #16181a;
-  --ink-2: #43494c;
-  --ink-3: #4f5558;
+  --ink-2: #353a3d;
+  --ink-3: #4a5053;
   --line: #d5d8d3;
   --line-2: #b9bdb8;
   --dot: #d92b25;
@@ -352,8 +352,8 @@ select {
 .g-label,
 .g-field {
   --ink: #16181a;
-  --ink-2: #43494c;
-  --ink-3: #596063;
+  --ink-2: #353a3d;
+  --ink-3: #4a5053;
   color: var(--ink);
 }
 
