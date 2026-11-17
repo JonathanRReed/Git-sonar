@@ -237,7 +237,7 @@ function text(
 
 export const festivalTemplate: PosterTemplate = {
     id: 'festival',
-    name: 'Festival Lineup',
+    name: 'Festival',
     group: 'cinematic',
     description: 'Contributors as a tiered festival bill — headliner top, supporting acts cascading down.',
     defaultAspect: 24 / 36,

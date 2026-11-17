@@ -189,7 +189,7 @@ const papers = [
 									<small>No. {String(i + 1).padStart(2, "0")}</small>
 									<b>{p.label}</b>
 									<i>{p.medium}</i>
-									<span class="salon__remix"><span class="g-dot" aria-hidden="true"></span>Remix this one</span>
+									<span class="salon__remix"><span class="g-dot" aria-hidden="true"></span><span class="salon__remix-text">Remix this one</span></span>
 								</a>
 							</figcaption>
 						</figure>
@@ -204,8 +204,10 @@ const papers = [
 				<ol class="steps">
 					{steps.map((step, i) => (
 						<li>
-							<small aria-hidden="true">No. {i + 1}</small>
-							<h3>{step.title}</h3>
+							<div class="steps__head">
+								<h3>{step.title}</h3>
+								<small aria-hidden="true">No. {i + 1}</small>
+							</div>
 							<p>{step.text}</p>
 						</li>
 					))}
@@ -347,7 +349,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.hero__text h1 {
-				font-size: clamp(3rem, 5.9vw, 5.4rem);
+				font-size: clamp(2.9rem, 5.4vw, 5rem);
 			}
 
 			.hero__lede {
@@ -455,7 +457,6 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.piece .g-label {
-				max-width: none;
 				margin-top: 1.4rem;
 			}
 
@@ -472,12 +473,15 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				padding: clamp(0.9rem, 9%, 1.6rem);
 			}
 
+			/* The same condensed display cut as every other heading on the wall. */
 			.yours__mat h2 {
-				font-size: clamp(1.4rem, 2vw, 1.8rem);
-				font-stretch: 100%;
-				font-weight: 700;
-				letter-spacing: -0.01em;
-				line-height: 1;
+				font-size: clamp(1.9rem, 2.9vw, 2.6rem);
+				line-height: 0.95;
+			}
+
+			/* An empty frame has no glass yet, so nothing reflects across the form. */
+			.yours::after {
+				content: none;
 			}
 
 			.yours__mat label {
@@ -494,6 +498,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			.yours__alt {
 				color: var(--ink);
+				text-decoration: underline;
 				text-underline-offset: 0.2em;
 			}
 
@@ -546,8 +551,17 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				padding-top: clamp(0rem, 3vw, 2.4rem);
 			}
 
-			.salon__label {
-				max-width: 13.5rem;
+			/* The words appear when a piece is pointed at; the dot alone marks it. */
+			.salon__remix-text {
+				opacity: 0;
+				transform: translateX(-0.25rem);
+				transition: opacity 0.2s ease, transform 0.25s var(--ease-out);
+			}
+
+			.salon__piece:hover .salon__remix-text,
+			.salon__label:focus-visible .salon__remix-text {
+				opacity: 1;
+				transform: none;
 			}
 
 			.salon__piece figcaption {
@@ -605,19 +619,23 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				box-shadow: var(--shadow-label);
 			}
 
+			.steps__head {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				gap: 1rem;
+			}
+
 			.steps small {
-				position: absolute;
-				top: clamp(1.2rem, 2.2vw, 1.9rem);
-				right: clamp(1.2rem, 2.2vw, 1.9rem);
-				font-size: 0.85rem;
-				font-weight: 700;
+				flex: none;
+				font-size: 0.8rem;
+				font-weight: 600;
 				font-variant-numeric: tabular-nums;
-				color: var(--ink);
+				color: var(--ink-2);
 			}
 
 			.steps h3 {
 				margin: 0;
-				padding-right: 3rem;
 				font-size: clamp(1.4rem, 2.1vw, 1.85rem);
 				font-weight: 700;
 				letter-spacing: -0.01em;
@@ -677,7 +695,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			/* A gallery elevation at one scale (--u is one inch): sheets on a shared
 			   centre line 57 in above the floor line, a 60 x 18 in bench beneath. */
 			.elevation {
-				--u: min(0.4rem, calc((100vw - 2.5rem) / 84));
+				--u: min(0.44rem, calc((100vw - 2.5rem) / 84));
 				position: relative;
 				width: min(80rem, calc(100% - 2.5rem));
 				margin: 0 auto;
@@ -740,9 +758,11 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				height: 100%;
 				overflow: hidden;
 				background: var(--card);
+				/* A thin black frame, then the shadow it throws. */
 				box-shadow:
-					calc(var(--lx, 0) * -0.5rem) 0.9rem 1.6rem rgba(20, 22, 24, 0.22),
-					0 0.1rem 0.3rem rgba(20, 22, 24, 0.28);
+					0 0 0 calc(var(--u) * 0.45) var(--frame-black),
+					calc(var(--lx, 0) * -0.5rem) 0.9rem 1.6rem calc(var(--u) * 0.45) rgba(20, 22, 24, 0.22),
+					0 0.1rem 0.3rem calc(var(--u) * 0.45) rgba(20, 22, 24, 0.28);
 			}
 
 			.sheet__paper img {

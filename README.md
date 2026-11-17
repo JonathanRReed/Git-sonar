@@ -67,10 +67,10 @@ The studio opens as soon as a repository loads. Pick a style from the rail (each
 | Punch Card | Commits by weekday and hour, with the busiest slot named |
 | Receipt | The history itemised by author, with a barcode from the head commit |
 | Year in Code | A radial year-ring spiral |
-| Album + Tracklist | Cover art and commits as tracks |
-| Movie One-Sheet | Commit graph and a generated billing block |
+| Album | Cover art and commits as tracks |
+| Movie Poster | Commit graph and a generated billing block |
 | Constellation | Each month as its own constellation |
-| Festival Lineup | Contributors arranged as a festival bill |
+| Festival | Contributors arranged as a festival bill |
 | Swiss Grid | A typographic data print |
 
 Colour themes are Night, Dawn, Gallery Paper, Riso, Blueprint, GitHub, Nord, and Dracula, each with full, two-tone, one-ink, and vivid palettes (OKLCH).

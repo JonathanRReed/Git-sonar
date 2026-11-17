@@ -194,7 +194,7 @@ function text(
 
 export const albumTracklistTemplate: PosterTemplate = {
     id: 'album-tracklist',
-    name: 'Album Tracklist',
+    name: 'Album',
     group: 'music',
     description: 'Square record sleeve: a radial commit-graph cover mark over a numbered, mono-set tracklist.',
     defaultAspect: 1,

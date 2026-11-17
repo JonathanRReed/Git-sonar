@@ -11,7 +11,7 @@
 
 body[data-view-mode="poster"] .poster-studio {
   display: grid;
-  grid-template-columns: 12.5rem minmax(0, 1fr) 21rem;
+  grid-template-columns: 13rem minmax(0, 1fr) 21rem;
 }
 
 .ps-h {
@@ -51,6 +51,13 @@ body[data-view-mode="poster"] .poster-studio {
   display: grid;
   place-items: center;
   aspect-ratio: 3 / 4;
+  padding: 0.45rem;
+  background: var(--seg);
+  transition: background-color 0.15s ease;
+}
+
+.ps-thumb:hover .ps-thumb__cell {
+  background: var(--line);
 }
 
 .ps-thumb__art {
@@ -59,8 +66,11 @@ body[data-view-mode="poster"] .poster-studio {
   max-height: 100%;
   overflow: hidden;
   background: #cfd2cd;
-  box-shadow: 0 0.15rem 0.45rem rgba(20, 22, 24, 0.28);
-  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  box-shadow: 0 0.1rem 0.3rem rgba(20, 22, 24, 0.3);
+}
+
+html[data-lights="off"] .ps-thumb__art {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 
 .ps-thumb__art img {
@@ -77,20 +87,16 @@ body[data-view-mode="poster"] .poster-studio {
   }
 }
 
-.ps-thumb:hover .ps-thumb__art {
-  transform: translateY(-2px);
-  box-shadow: 0 0.4rem 0.9rem rgba(20, 22, 24, 0.3);
-}
 
 .ps-thumb__name {
   display: block;
   margin-top: 0.4rem;
-  /* Always two lines tall, so every row of thumbnails sits on one baseline. */
-  min-height: 2.4em;
+  overflow: hidden;
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ps-thumb[aria-pressed="true"] {
@@ -101,9 +107,9 @@ body[data-view-mode="poster"] .poster-studio {
   font-weight: 700;
 }
 
-.ps-thumb[aria-pressed="true"] .ps-thumb__art {
+.ps-thumb[aria-pressed="true"] .ps-thumb__cell {
   outline: 1.5px solid var(--ink);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
 /* The red dot marks the piece you have picked. */
@@ -885,9 +891,19 @@ html[data-lights="off"] .ps-swatches button {
   background: #16181a;
 }
 
-/* After hours the checked box keeps a pale edge so it still reads as a box. */
+/* After hours: an empty box is an outline, a ticked one is white with a dark tick. */
+html[data-lights="off"] .ps-checks input {
+  border-color: #8b918d;
+  background: transparent;
+}
+
 html[data-lights="off"] .ps-checks input:checked {
   border-color: #fbfbf8;
+  background: #fbfbf8;
+}
+
+html[data-lights="off"] .ps-checks input:checked::after {
+  border-color: #16181a;
 }
 
 .ps-checks input:checked::after {
@@ -948,7 +964,7 @@ html[data-lights="off"] .ps-checks input:checked {
   /* Short enough that the style strip and the first controls show beneath it. */
   /* Sized so the first screen is whole: stage, style strip, then the bar. */
   .ps-stage {
-    height: calc(100dvh - 21.4rem);
+    height: calc(100dvh - 24.9rem);
     min-height: 20rem;
   }
 
@@ -965,11 +981,13 @@ html[data-lights="off"] .ps-checks input:checked {
     padding: 0.4rem 0.4rem 0.6rem;
     margin: 0 -0.4rem;
     align-items: flex-start;
+    /* The strip fades at its right edge: there is more to swipe to. */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 3rem), transparent);
   }
 
   .ps-thumb {
     flex: none;
-    width: 4.4rem;
+    width: 5.1rem;
   }
 
   .ps-thumb__name {
@@ -1000,9 +1018,6 @@ html[data-lights="off"] .ps-checks input:checked {
     mask-image: none;
   }
 
-  .ps-thumb__name {
-    min-height: 0;
-  }
 
   /* Download stays in reach: the panel dissolves into the page and its
      actions pin to the bottom of the screen. */

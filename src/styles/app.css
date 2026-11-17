@@ -532,8 +532,29 @@ body[data-view-mode="calendar"] .controls-bar {
 }
 
 .desk__label {
-  max-width: none;
   margin-top: 1.3rem;
+}
+
+/* The form sits in front of the picture light, not under it. */
+.desk__ask {
+  position: relative;
+  z-index: 1;
+}
+
+/* Before a repo is loaded the whole screen is the wall, header included. */
+.app:has(.app-views[hidden]) {
+  background:
+    radial-gradient(ellipse 34rem 36rem at 78% 40%, var(--spot), transparent 70%),
+    linear-gradient(180deg, var(--wall-lo), var(--wall-hi) 30%, var(--wall-end));
+}
+
+.app:has(.app-views[hidden]) .app-header {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+.app:has(.app-views[hidden]) .import-container {
+  background: none;
 }
 
 .desk__label span {
@@ -564,9 +585,35 @@ body[data-view-mode="calendar"] .controls-bar {
     font-size: 0.78rem;
   }
 
-  .app-stats,
-  #btn-help {
+  /* Two rows on a phone: what you are working on, then the view switch. */
+  .app-header {
+    flex-wrap: wrap;
+    padding-block: 0.5rem;
+  }
+
+  .app-stats .stat,
+  .app-moment {
     display: none;
+  }
+
+  .app-repo {
+    max-width: 9rem;
+    font-size: 0.95rem;
+  }
+
+  .app-views:not([hidden]) {
+    display: flex;
+    order: 9;
+    flex: 1 0 100%;
+    margin: 0.45rem 0 0;
+  }
+
+  .app-views button {
+    flex: 1;
+  }
+
+  .app-views:not([hidden]) + .app-actions {
+    margin-left: auto;
   }
 
   body[data-view-mode="inspect"] .mobile-menu-btn {
@@ -576,7 +623,7 @@ body[data-view-mode="calendar"] .controls-bar {
   .sidebar {
     position: fixed;
     left: -100%;
-    top: 3.5rem;
+    top: 6.4rem;
     bottom: 0;
     z-index: 200;
     width: min(20rem, 86vw);
@@ -617,7 +664,7 @@ body[data-view-mode="calendar"] .controls-bar {
     grid-template-columns: 1fr;
   }
 
-  /* The brand gives way to the view switch once a repo is loaded. */
+  /* Once a repo is loaded its name stands in for the brand. */
   .app-header:has(.app-views:not([hidden])) .app-brand {
     display: none;
   }
