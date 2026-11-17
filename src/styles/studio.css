@@ -117,10 +117,10 @@ html[data-lights="off"] .ps-thumb__art {
 .ps-vars button[aria-pressed="true"]::after {
   content: "";
   position: absolute;
-  top: -0.25rem;
-  right: -0.25rem;
-  width: 0.6rem;
-  height: 0.6rem;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   background: var(--dot);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -196,8 +196,13 @@ html[data-lights="off"] .is-wall .ps-stage {
   right: 0;
   bottom: 0;
   height: var(--floor, 34px);
-  background: linear-gradient(180deg, #58554f, #77746c);
-  box-shadow: 0 -5px 0 var(--skirting), 0 -6px 0 rgba(0, 0, 0, 0.12);
+  /* Polished concrete, darker toward the wall where the light falls off. */
+  background: linear-gradient(180deg, #4b4944 0, #6a6760 45%, #807d75);
+  /* The skirting board: a pale board with a shadow line above and below it. */
+  box-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 -9px 0 var(--skirting),
+    0 -10px 0 rgba(0, 0, 0, 0.14);
 }
 
 /* Museum bench: an oak slab on two steel legs, drawn in elevation. */
@@ -265,9 +270,9 @@ html[data-lights="off"] .is-wall .ps-stage {
 
 .ps-dim--w {
   height: 9px;
-  border-left: 1px solid currentColor;
-  border-right: 1px solid currentColor;
-  background: linear-gradient(currentColor, currentColor) 0 50% / 100% 1px no-repeat;
+  border-left: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  background: linear-gradient(currentColor, currentColor) 0 50% / 100% 1.5px no-repeat;
 }
 
 .ps-dim--w span {
@@ -279,9 +284,9 @@ html[data-lights="off"] .is-wall .ps-stage {
 
 .ps-dim--h {
   width: 9px;
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  background: linear-gradient(currentColor, currentColor) 50% 0 / 1px 100% no-repeat;
+  border-top: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  background: linear-gradient(currentColor, currentColor) 50% 0 / 1.5px 100% no-repeat;
 }
 
 .ps-dim--h span {
@@ -292,7 +297,6 @@ html[data-lights="off"] .is-wall .ps-stage {
 }
 
 .ps-dim--centre {
-  border-bottom: 0;
   color: var(--ink-2);
 }
 
@@ -564,6 +568,12 @@ html[data-lights="off"] .ps-floor {
   transition: width 0.15s linear;
 }
 
+.ps-vars__label {
+  color: var(--ink-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .ps-vars {
   display: flex;
   gap: 0.6rem;
@@ -662,9 +672,13 @@ html[data-lights="off"] .ps-floor {
   background: var(--rp-overlay);
 }
 
+/* Unavailable, but still plainly a button: only the arrow fades. */
 .ps-icon:disabled {
-  opacity: 0.35;
   cursor: default;
+}
+
+.ps-icon:disabled svg {
+  opacity: 0.35;
 }
 
 .ps-icon svg {
@@ -826,6 +840,7 @@ html[data-lights="off"] .ps-swatches button {
 /* The size picker, drawn like the other fields instead of a system menu. */
 .ps-select {
   appearance: none;
+  font-size: 0.875rem !important;
   padding-right: 2.2rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%2316181a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1.5 1.5 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -982,7 +997,11 @@ html[data-lights="off"] .ps-checks input:checked::after {
     margin: 0 -0.4rem;
     align-items: flex-start;
     /* The strip fades at its right edge: there is more to swipe to. */
-    mask-image: linear-gradient(90deg, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 1.4rem), transparent);
+  }
+
+  .ps-vars__label {
+    display: none;
   }
 
   .ps-thumb {

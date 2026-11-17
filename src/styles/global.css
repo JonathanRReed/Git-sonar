@@ -56,8 +56,8 @@
   --frame-black: #1a1b1c;
   --frame-oak: linear-gradient(135deg, #c79c69, #a97c4b 55%, #bd9160);
   --night-wall: #1b2422;
-  --booth-hi: #adafab;
-  --booth-lo: #8f918d;
+  --booth-hi: #c6c8c4;
+  --booth-lo: #adafab;
   --floor: linear-gradient(180deg, #4a4844, #6b6862 60%, #7a776f);
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -610,6 +610,15 @@ html[data-lights="off"] .g-wall::before {
 .g-switch[aria-pressed="false"]::before {
   background: linear-gradient(180deg, #c9ccc6 0 50%, #f4f5f1 50% 100%);
   box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.28), inset 0 -0.5rem 0.2rem -0.3rem rgba(255, 255, 255, 0.9);
+}
+
+/* After hours the plate itself goes dark, so the switch shows its state. */
+html[data-lights="off"] .g-switch {
+  background: linear-gradient(180deg, #555a57, #3a3f3c);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 0.15rem 0.35rem rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .g-switch:active::before {

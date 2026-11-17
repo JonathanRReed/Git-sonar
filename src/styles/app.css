@@ -122,10 +122,14 @@
   height: 1.05rem;
 }
 
+/* Header controls share one treatment: small radius, hairline border. */
 .app-header .g-btn {
   min-height: 2.25rem;
   padding: 0 0.85rem;
+  border-radius: 8px;
   font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--line-2);
 }
 
 .mobile-menu-btn {
@@ -312,10 +316,12 @@ body[data-view-mode="calendar"] .controls-bar {
   font-size: 1rem;
 }
 
+/* Reading text is set in the serif, as on every other paper object. */
 .desk__alts span {
   display: block;
   margin-top: 0.2rem;
-  font-size: 0.85rem;
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
   line-height: 1.35;
   color: var(--ink-2);
 }
@@ -454,7 +460,7 @@ body[data-view-mode="calendar"] .controls-bar {
 }
 
 .desk__meter b {
-  font-family: var(--font-sans);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -549,6 +555,8 @@ body[data-view-mode="calendar"] .controls-bar {
 }
 
 .app:has(.app-views[hidden]) .app-header {
+  /* The wordmark lines up with the column below it. */
+  padding-inline: max(1.25rem, calc((100% - 72rem) / 2));
   background: transparent;
   border-bottom-color: transparent;
 }
@@ -644,6 +652,10 @@ body[data-view-mode="calendar"] .controls-bar {
 @media (max-width: 560px) {
   .desk__form {
     flex-direction: column;
+  }
+
+  .desk__form .g-field {
+    font-size: 1rem;
   }
 
   .desk__moment-row {

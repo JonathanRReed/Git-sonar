@@ -32,7 +32,7 @@ const SPECS: Spec[] = [
     { id: 'receipt', template: 'receipt', themeId: 'blueprint', label: 'Receipt', medium: 'The whole history, itemised' },
     { id: 'core-sample', template: 'core-sample', themeId: 'paper', label: 'Core sample', medium: 'A layer for every month' },
     { id: 'punch-card', template: 'punch-card', themeId: 'night', label: 'Punch card', medium: 'When the work happens' },
-    { id: 'weave', template: 'weave', themeId: 'paper', label: 'Weave', medium: 'A row per week, dyed by its author' },
+    { id: 'weave', template: 'weave', themeId: 'paper', label: 'Weave', medium: 'A row per week, dyed by author' },
     { id: 'radial', template: 'radial-year', themeId: 'dawn', label: 'Year in code', medium: 'Twelve months in one orbit' },
     { id: 'album', template: 'album-tracklist', themeId: 'github', label: 'Album', medium: 'Top commits as a tracklist' },
     { id: 'movie', template: 'movie-one-sheet', themeId: 'night', label: 'Movie one-sheet', medium: 'The history, with full billing' },

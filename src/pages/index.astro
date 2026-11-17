@@ -404,7 +404,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			.piece::before {
 				content: "";
 				position: absolute;
-				inset: -18% -22% -6%;
+				inset: -30% -34% -12%;
 				z-index: 0;
 				background: radial-gradient(ellipse closest-side at 50% 45%, var(--spot), transparent);
 				pointer-events: none;
@@ -456,7 +456,9 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				box-shadow: 0 2rem 3rem rgba(20, 22, 24, 0.3), 0 0.3rem 0.6rem rgba(20, 22, 24, 0.3);
 			}
 
+			/* Hero frames are label-sized, so their labels run the frame's full width. */
 			.piece .g-label {
+				max-width: none;
 				margin-top: 1.4rem;
 			}
 
@@ -564,6 +566,14 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				transform: none;
 			}
 
+			/* Nothing to hover with on a touch screen, so the words stay. */
+			@media (hover: none) {
+				.salon__remix-text {
+					opacity: 1;
+					transform: none;
+				}
+			}
+
 			.salon__piece figcaption {
 				margin-top: 1.2rem;
 			}
@@ -652,9 +662,12 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			/* ---------- Privacy: the night room ---------- */
+			/* A second, darker room: a moulding line and a fall of shadow at the doorway. */
 			.private {
 				padding: clamp(4rem, 9vw, 8rem) 0;
+				border-top: 0.7rem solid var(--skirting);
 				background:
+					linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 5rem),
 					radial-gradient(ellipse 50% 70% at 78% 40%, rgba(255, 255, 255, 0.09), transparent 70%),
 					var(--night-wall);
 				color: #f1f0ec;
@@ -720,8 +733,9 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				width: 9px;
 				height: calc(var(--u) * 57);
 				margin: 0;
-				border-top: 1px solid var(--ink-2);
-				background: linear-gradient(var(--ink-2), var(--ink-2)) 50% 0 / 1px 100% no-repeat;
+				border-top: 1.5px solid var(--ink);
+				border-bottom: 1.5px solid var(--ink);
+				background: linear-gradient(var(--ink), var(--ink)) 50% 0 / 1.5px 100% no-repeat;
 			}
 
 			.elevation__height span {
@@ -916,8 +930,14 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 				.sheet p span,
 				.elevation__height,
-				.yours__label {
+				.yours__label b,
+				.yours__label i {
 					display: none;
+				}
+
+				/* On a phone the label keeps only its link, close under the frame. */
+				.piece .yours__label {
+					margin-top: 0.7rem;
 				}
 
 

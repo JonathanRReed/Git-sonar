@@ -251,6 +251,13 @@ export function PosterStudio() {
         fonts?.ready.then(() => setFontsReady((n) => n + 1));
     }, []);
 
+    // A new repo's poster starts titled with the repo's name, as a real value
+    // in the Title field rather than a suggestion.
+    useEffect(() => {
+        if (graph && !useGraphStore.getState().posterConfig.title) update({ title: repoName });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [graph]);
+
     // Hydrate from a #p=<config> permalink on first mount.
     useEffect(() => {
         if (typeof location === 'undefined') return;
@@ -794,6 +801,7 @@ export function PosterStudio() {
                         </svg>
                         <span>{playing >= 0 ? 'Stop' : 'Listen'}</span>
                     </button>
+                    {tray.length > 0 && <span className="ps-vars__label">Rolls</span>}
                     <div className="ps-vars" role="group" aria-label="Rolls so far">
                         {tray.map((v, i) => (
                             <button

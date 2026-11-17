@@ -152,7 +152,7 @@ function build(ctx: TemplateContext): Scene {
     const repoLabel = (options.repoName || 'repository').toString().toUpperCase();
     texts.push(text(`${repoLabel}  ·  ${spanLabel}`, width / 2, height - height * 0.07, {
         font: fontStack(MONO_FONT), size: scale(-3.4), weight: 500,
-        color: withAlpha(ink, 0.55), align: 'middle', spacing: width * 0.004,
+        color: withAlpha(ink, 0.72), align: 'middle', spacing: width * 0.004,
     }));
     // A tagline (for example the moment being captured) gets its own line
     // above the caption, shrunk if needed so it never runs off the sheet.
@@ -168,7 +168,7 @@ function build(ctx: TemplateContext): Scene {
     if (options.showWatermark) {
         texts.push(text('GITSONAR.COM', width / 2, height - height * 0.045, {
             font: fontStack(MONO_FONT), size: scale(-4), weight: 600,
-            color: withAlpha(ink, 0.32), align: 'middle', spacing: width * 0.006,
+            color: withAlpha(ink, 0.5), align: 'middle', spacing: width * 0.006,
         }));
     }
 
