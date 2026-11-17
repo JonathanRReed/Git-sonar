@@ -7,6 +7,8 @@
  * The key light: it follows the pointer, so frames throw their shadows away
  * from it and their glass catches a moving reflection (see --lx / --ly).
  */
+import { playSwitch } from '../lib/utils/sound';
+
 const root = document.documentElement;
 const switches = document.querySelectorAll<HTMLButtonElement>('[data-light-switch]');
 
@@ -20,6 +22,7 @@ sync();
 for (const button of switches) {
     button.addEventListener('click', () => {
         const off = root.dataset.lights !== 'off';
+        playSwitch(!off);
         if (off) root.dataset.lights = 'off';
         else delete root.dataset.lights;
         try {

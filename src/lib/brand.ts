@@ -10,7 +10,7 @@ export const BRAND = {
     name: 'Git Sonar',
     tagline: 'Every repo deserves a retrospective.',
     description:
-        'Git Sonar turns a commit history into a poster you can print and frame. It runs in your browser, so your code is never uploaded.',
+        'Git Sonar turns the history of a Git repo into a poster you can print and frame. It runs in your browser, so your code is never uploaded.',
     siteUrl: 'https://gitsonar.jonathanrreed.com',
     repoUrl: 'https://github.com/JonathanRReed/Git-sonar',
     author: 'Jonathan Reed',

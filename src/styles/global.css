@@ -300,6 +300,50 @@ select {
     calc(var(--lx, 0) * -0.15rem) 0.2rem 0.5rem rgba(20, 22, 24, 0.32);
 }
 
+/* Every frame hangs from a nail on a short wire, and swings when it is nudged. */
+.g-frame {
+  transform-origin: 50% -0.85rem;
+}
+
+.g-frame::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 0.5rem;
+  height: 0.9rem;
+  margin-left: -0.25rem;
+  background:
+    radial-gradient(circle at 50% 0.25rem, #f2f3f0 0 0.1rem, #8d918c 0.11rem 0.22rem, rgba(0, 0, 0, 0.35) 0.23rem 0.27rem, transparent 0.28rem),
+    linear-gradient(#5f6462, #5f6462) 50% 100% / 1px calc(100% - 0.3rem) no-repeat;
+  pointer-events: none;
+}
+
+.g-frame:hover {
+  animation: g-sway 1.5s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+@keyframes g-sway {
+  0% {
+    rotate: 0deg;
+  }
+  18% {
+    rotate: 1.5deg;
+  }
+  42% {
+    rotate: -1deg;
+  }
+  64% {
+    rotate: 0.55deg;
+  }
+  82% {
+    rotate: -0.22deg;
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+
 /* Glazing: a soft reflection that slides as the light moves. */
 .g-frame::after {
   content: "";
@@ -448,13 +492,23 @@ html[data-lights="off"] .g-frame:not(.g-frame--oak) {
   cursor: not-allowed;
 }
 
+/* The red button has depth: it sits proud of the page and goes down when pressed. */
 .g-btn--red {
   background: var(--dot);
   color: #fff;
+  box-shadow: 0 0.22rem 0 #8f1814;
+  translate: 0 -0.11rem;
+  transition: translate 0.07s ease-out, box-shadow 0.07s ease-out, background-color 0.15s ease;
 }
 
 .g-btn--red:hover:not(:disabled) {
-  background: var(--dot-deep);
+  background: #e23a34;
+}
+
+.g-btn--red:active:not(:disabled) {
+  box-shadow: 0 0 0 #8f1814;
+  translate: 0 0.11rem;
+  transform: none;
 }
 
 .g-btn--ink {

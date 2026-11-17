@@ -22,6 +22,7 @@ import type { EncodingConfig, HueSignal, SizeSignal } from '@lib/art/encoding';
 import { decodePosterConfig, makePosterConfig, type PosterConfig } from '@lib/art/poster-config';
 import { THEMES, type ThemeId } from '@lib/themes';
 import { repoDisplayName } from '@lib/utils/repo-name';
+import { playDice, playStamp, playTap } from '@lib/utils/sound';
 import type { RepoGraph } from '@lib/git/types';
 import {
     downloadPosterSVG,
@@ -180,6 +181,23 @@ function weeklyCounts(graph: RepoGraph, max = 64): number[] {
     return counts;
 }
 
+/** Where the pips sit on each face of a die, on a 24-unit square. */
+const PIPS: Record<number, [number, number][]> = {
+    1: [[12, 12]],
+    2: [[8, 8], [16, 16]],
+    3: [[8, 8], [12, 12], [16, 16]],
+    4: [[8, 8], [16, 8], [8, 16], [16, 16]],
+    5: [[8, 8], [16, 8], [12, 12], [8, 16], [16, 16]],
+    6: [[8, 7.5], [16, 7.5], [8, 12], [16, 12], [8, 16.5], [16, 16.5]],
+};
+
+/** The face a roll shows: 1 to 6, fixed for a given seed. */
+function dieFace(seed: string): number {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    return (h % 6) + 1;
+}
+
 /** A minor pentatonic ladder, in semitones above the root. */
 const SCALE = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24];
 const NOTE_MS = 150;
@@ -215,6 +233,8 @@ export function PosterStudio() {
     const [onWall, setOnWall] = useState(false);
     const [playing, setPlaying] = useState(-1);
     const [stamped, setStamped] = useState(0);
+    // Once a file has been saved, the wall label gets a red "sold" dot.
+    const [sold, setSold] = useState(false);
     const audioRef = useRef<{ ctx: AudioContext; timer: number } | null>(null);
     const [frame, setFrame] = useState<FrameStyle>('black');
     const [mat, setMat] = useState(true);
@@ -337,6 +357,7 @@ export function PosterStudio() {
 
     const shuffle = useCallback(() => {
         setRolling((n) => n + 1);
+        playDice();
         change({ seed: newSeed(cfg.seed) });
     }, [change, cfg.seed]);
 
@@ -491,6 +512,7 @@ export function PosterStudio() {
         setVariations({});
         setThumbs({});
         setHistory({ past: [], future: [] });
+        setSold(false);
     }
 
     // ---- style rail: every style, drawn from this repo ---------------------
@@ -518,6 +540,23 @@ export function PosterStudio() {
             window.clearTimeout(id);
         };
     }, [graph, thumbBase, repoName, viewMode, fontsReady]);
+
+    // ---- tilt: the sheet leans toward the pointer and its sheen slides -------
+    const onStageMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (onWall || reducedMotion || e.pointerType !== 'mouse') return;
+        const stage = e.currentTarget;
+        const box = stage.getBoundingClientRect();
+        const nx = ((e.clientX - box.left) / box.width) * 2 - 1;
+        const ny = ((e.clientY - box.top) / box.height) * 2 - 1;
+        stage.style.setProperty('--tilt-x', `${(-ny * 2.5).toFixed(2)}deg`);
+        stage.style.setProperty('--tilt-y', `${(nx * 3.5).toFixed(2)}deg`);
+        stage.style.setProperty('--sheen', `${(50 - nx * 45).toFixed(1)}%`);
+    }, [onWall, reducedMotion]);
+
+    const onStageLeave = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        e.currentTarget.style.setProperty('--tilt-x', '0deg');
+        e.currentTarget.style.setProperty('--tilt-y', '0deg');
+    }, []);
 
     // ---- keyboard ----------------------------------------------------------
     useEffect(() => {
@@ -594,7 +633,7 @@ export function PosterStudio() {
                     const md = `![${repoName}, drawn by Git Sonar](./${file})`;
                     try {
                         await navigator.clipboard?.writeText(md);
-                        flash('Animated SVG downloaded and the README line copied. Commit the SVG next to your README.');
+                        flash('Animated SVG downloaded & the README line copied. Commit the SVG next to your README.');
                     } catch {
                         flash(`Animated SVG downloaded. Add this to your README: ${md}`);
                     }
@@ -603,7 +642,7 @@ export function PosterStudio() {
                     flash(r === 'shared' ? 'Shared.' : 'Sharing unavailable, so the PNG was downloaded.');
                 } else if (kind === 'link') {
                     const { url, reproducible } = posterPermalink(poster, { provider: repoProvider, repoPath, demo: currentDemo, until: moment?.date, moment: moment?.label });
-                    replaceAddress(url);
+                    window.history.replaceState(null, '', url);
                     try {
                         await navigator.clipboard?.writeText(url);
                         flash(reproducible ? 'Link copied. It reopens this exact poster.' : 'Link copied. It restores these settings; open the same repo to see the same poster.');
@@ -611,9 +650,13 @@ export function PosterStudio() {
                         flash('The link is in the address bar. Copy it from there.');
                     }
                 }
-                if (kind === 'png' || kind === 'pdf' || kind === 'svg' || kind === 'embed') setStamped((n) => n + 1);
+                if (kind === 'png' || kind === 'pdf' || kind === 'svg' || kind === 'embed') {
+                    setStamped((n) => n + 1);
+                    setSold(true);
+                    playStamp();
+                }
             } catch (err) {
-                flash(err instanceof Error ? `That did not work: ${err.message}` : 'That did not work.');
+                flash(err instanceof Error ? `That didn't work: ${err.message}` : "That didn't work.");
             } finally {
                 setBusy(false);
             }
@@ -661,7 +704,7 @@ export function PosterStudio() {
     const { inches, ppi, centreY, framed } = wall;
     const wallShift = centreY - (STAGE_TOP + (fit.stageH - TRAY_H - STAGE_TOP) / 2);
     const sizeLabel = wall.spec.inches ? wall.spec.name.replace('×', ' × ') : `${Math.round(inches.w)} × ${Math.round(inches.h)} in`;
-    const fmtIn = (n: number) => `${Number.isInteger(n) ? n : n.toFixed(1)} in`;
+    const fmtIn = (n: number) => `${Number(n.toFixed(1))} in`;
     const frameColor = FRAMES.find((f) => f.id === frame)?.color ?? 'transparent';
     const half = { w: (wall.outer.w * ppi) / 2, h: (wall.outer.h * ppi) / 2 };
     const midX = fit.stageW / 2;
@@ -708,7 +751,7 @@ export function PosterStudio() {
                 </div>
             </nav>
 
-            <div className="ps-stage" ref={stageRef} style={stageVars}>
+            <div className="ps-stage" ref={stageRef} style={stageVars} onPointerMove={onStageMove} onPointerLeave={onStageLeave}>
                 <div className="ps-room" aria-hidden="true">
                     <div className="ps-floor" />
                     <div className="ps-bench"><i /><i /></div>
@@ -735,12 +778,14 @@ export function PosterStudio() {
 
                 <div className="ps-easel">
                     {graph ? (
-                        <canvas
-                            ref={canvasRef}
-                            className="ps-canvas"
-                            role="img"
-                            aria-label={`Live preview of the ${activeTemplate.name} poster for ${repoName}`}
-                        />
+                        <div className="ps-sheet">
+                            <canvas
+                                ref={canvasRef}
+                                className="ps-canvas"
+                                role="img"
+                                aria-label={`Live preview of the ${activeTemplate.name} poster for ${repoName}`}
+                            />
+                        </div>
                     ) : (
                         <p className="ps-empty">Load a repo to start a poster.</p>
                     )}
@@ -748,6 +793,7 @@ export function PosterStudio() {
 
                 {facts && plaqueFits && (
                     <div className="g-label ps-plaque">
+                        {sold && <span className="g-dot ps-plaque__sold" title="Downloaded" />}
                         <b>{repoName}</b>
                         <i>{activeTemplate.name}{facts.years ? `, ${facts.years}` : ''}</i>
                         {facts.line}
@@ -771,7 +817,9 @@ export function PosterStudio() {
                 <div className="ps-framing" aria-hidden={!onWall}>
                     <div className="g-seg" role="group" aria-label="Frame">
                         {FRAMES.map((f) => (
-                            <button key={f.id} type="button" tabIndex={onWall ? 0 : -1} aria-pressed={frame === f.id} onClick={() => setFrame(f.id)}>{f.label}</button>
+                            <button key={f.id} type="button" tabIndex={onWall ? 0 : -1} aria-pressed={frame === f.id} onClick={() => { playTap(); setFrame(f.id); }}>
+                                <i className={`ps-corner ps-corner--${f.id}`} aria-hidden="true" />{f.label}
+                            </button>
                         ))}
                     </div>
                     <label className={framed ? '' : 'is-off'}>
@@ -785,11 +833,9 @@ export function PosterStudio() {
                     <button type="button" className="ps-dice" onClick={shuffle} aria-label="Shuffle the composition" disabled={!graph}>
                         <svg key={rolling} className={rolling ? 'is-rolling' : undefined} viewBox="0 0 24 24" aria-hidden="true">
                             <rect x="3" y="3" width="18" height="18" rx="4" fill="#fff" />
-                            <circle cx="8" cy="8" r="1.6" fill="#16181a" />
-                            <circle cx="16" cy="8" r="1.6" fill="#16181a" />
-                            <circle cx="12" cy="12" r="1.6" fill="#d92b25" />
-                            <circle cx="8" cy="16" r="1.6" fill="#16181a" />
-                            <circle cx="16" cy="16" r="1.6" fill="#16181a" />
+                            {PIPS[dieFace(cfg.seed)].map(([x, y]) => (
+                                <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill={x === 12 && y === 12 ? '#d92b25' : '#16181a'} />
+                            ))}
                         </svg>
                     </button>
                     <p className="ps-tray__text">
@@ -839,7 +885,7 @@ export function PosterStudio() {
                         <h3>What is it for?</h3>
                         <button type="button" data-export="png" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('png')}>
                             <b>A screen</b><i>PNG</i>
-                            <span>For posts, wallpapers and slides.</span>
+                            <span>For posts, wallpapers & slides.</span>
                         </button>
                         <button type="button" data-export="pdf" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('pdf')}>
                             <b>A print shop</b><i>PDF</i>
@@ -847,7 +893,7 @@ export function PosterStudio() {
                         </button>
                         <button type="button" data-export="embed" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('embed')}>
                             <b>A README</b><i>Animated SVG</i>
-                            <span>Downloads the file and copies the Markdown line.</span>
+                            <span>Downloads the file & copies the Markdown line.</span>
                         </button>
                         <button type="button" data-export="svg" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('svg')}>
                             <b>A designer</b><i>SVG</i>
@@ -886,7 +932,7 @@ export function PosterStudio() {
                     </label>
                     <label className="ps-field">
                         <span>Tagline</span>
-                        <input className="g-field" value={cfg.subtitle} placeholder={momentTagline || 'Written for you if left empty'} onChange={(e) => change({ subtitle: e.target.value })} />
+                        <input className="g-field" value={cfg.subtitle} placeholder={momentTagline || 'Leave empty & one gets written'} onChange={(e) => change({ subtitle: e.target.value })} />
                     </label>
                 </section>
 
@@ -1012,13 +1058,4 @@ export function PosterStudio() {
             </aside>
         </div>
     );
-}
-
-/** Put the permalink in the address bar without adding a history entry. */
-function replaceAddress(url: string): void {
-    try {
-        window.history.replaceState(null, '', url);
-    } catch {
-        // Some embedded contexts forbid replaceState; the copied link still works.
-    }
 }

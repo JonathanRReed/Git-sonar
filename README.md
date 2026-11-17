@@ -2,9 +2,9 @@
 
 ![Git Sonar logo](public/favicon.svg)
 
-Every repo deserves a retrospective. Git Sonar turns a commit history into a poster you can print and frame, and still lets you explore the history as a graph. Processing and rendering run in the browser; imported repository data is not uploaded to an app server.
+Git Sonar turns the history of a Git repo into a poster you can print and frame. I made it as a love letter to code. If you built something you're proud of and it has a repo, this is a way to display it. It's free and it runs in the browser, so repository data is never uploaded to an app server.
 
-The site is built as a gallery: posters hang framed on a wall with museum labels, the call to action is an empty frame, and a light switch in the navigation dims the room to its picture lights.
+The site is built like a gallery. Posters hang in frames on a wall with labels, the call to action is an empty frame, and the light switch in the navigation turns the lights off.
 
 ## Run locally
 

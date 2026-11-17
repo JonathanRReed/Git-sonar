@@ -357,7 +357,7 @@ export function ImportPanel() {
           </button>
           <button type="button" onClick={loadSample} disabled={isLoading}>
             <b>Use the sample repo</b>
-            <span>Project Atlas: a year of work by eight people.</span>
+            <span>Project Atlas, 147 commits by 8 people.</span>
           </button>
         </div>
 
@@ -366,7 +366,7 @@ export function ImportPanel() {
           <summary>{moment ? `Capturing ${formatMomentDate(moment)}` : 'Capture an earlier moment'}</summary>
           <div className="desk__more-body">
             <p>
-              Make the poster of the repo as it stood on a day worth remembering: a launch, a release, a star count.
+              Get the repo as it stood on a day that mattered, like a launch, a release, or the day it hit 1,000 stars.
             </p>
             <div className="desk__moment-row">
               <label>
@@ -400,7 +400,7 @@ export function ImportPanel() {
                 />
               </label>
             </div>
-            <p>GitHub does not share the dates stars were given, so enter the day yourself. Leave the day empty for the repo as it is now.</p>
+            <p>This site can't look up the day a repo hit a star count, so you'll need to enter it. Leave the day empty to use the repo as it is now.</p>
           </div>
         </details>
 
@@ -426,7 +426,7 @@ export function ImportPanel() {
               </button>
             </div>
             <p id="token-hint">
-              A GitHub or GitLab token lifts rate limits and reaches private repos. For Bitbucket use username:appPassword. The token goes only to that provider.
+              A GitHub or GitLab token raises the rate limit &amp; lets you load private repos. For Bitbucket use username:appPassword. The token is only sent to that provider.
             </p>
             <label className="desk__remember">
               <input name="remember-repository-token" type="checkbox" checked={rememberToken} onChange={(e) => setRememberToken(e.target.checked)} />
@@ -471,7 +471,7 @@ export function ImportPanel() {
         )}
 
         <p className="desk__meter">
-          Code sent to our servers: <b>0 bytes</b>. We do not have any.
+          Code uploaded: <b>0 bytes</b>. There's no server to upload it to.
         </p>
       </div>
 

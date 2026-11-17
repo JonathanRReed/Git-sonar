@@ -32,21 +32,20 @@ const framing: Record<string, { oak?: boolean; mat?: boolean }> = {
 const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
 const styleCount = LANDING_POSTERS.length;
 const styleWord = NUMBER_WORDS[styleCount] ?? String(styleCount);
-const styleWordCap = styleWord.charAt(0).toUpperCase() + styleWord.slice(1);
 const posterById = (id: string) => LANDING_POSTERS.find((p) => p.id === id);
 
 const steps = [
 	{
 		title: "Bring a repo",
-		text: "Paste a link, open a folder or drop a .git zip. Take it as it is today, or as it stood on a day worth remembering.",
+		text: "Paste a link, open a folder, or drop a .git zip. You can also pick an earlier day & get the repo as it stood then.",
 	},
 	{
-		title: "Choose how it hangs",
-		text: "Pick a style, then set the colours, the words and what the marks mean. Roll the dice for a new composition of the same history.",
+		title: "Pick a style",
+		text: "Then change the colours, the words & what the marks stand for. The dice give you a new layout of the same history.",
 	},
 	{
-		title: "Take it home",
-		text: "Download a PNG for screens, an SVG for your README, or a PDF at true print size with the fonts built in.",
+		title: "Download it",
+		text: "PNG for screens, SVG for a README, or a PDF at real print size with the fonts built in.",
 	},
 ];
 
@@ -123,8 +122,14 @@ const papers = [
 				<div class="hero__grid">
 					<div class="hero__text">
 						<h1 id="hero-title">Every repo deserves a retrospective.</h1>
-						<p class="hero__lede">{BRAND.description}</p>
-						<p class="hero__visit">Admission free. Open source. {styleWordCap} styles on view.</p>
+						<p class="hero__lede">
+							If you built something you're proud of and it lives in a Git repo, this turns its history into a poster you can print &amp; frame.
+							It runs in your browser, so your code never gets uploaded.
+						</p>
+						<a class="ticket" href="/app">
+							<span class="ticket__main"><b>Admit one</b><i>and one repo</i></span>
+							<span class="ticket__stub" aria-label="Price: free">Free</span>
+						</a>
 					</div>
 
 					<div class="hero__pieces">
@@ -171,8 +176,8 @@ const papers = [
 				<div class="section-head">
 					<h2 id="collection-title">One repo, hung {styleWord} ways.</h2>
 					<p>
-						Every piece here was made from the same sample history, Project Atlas: {facts.commits} commits by {facts.authors} people.
-						Anything with a red dot can be remixed in the studio.
+						Every poster here came from the same sample history, Project Atlas: {facts.commits} commits by {facts.authors} people.
+						Click any of them to open it in the studio &amp; change it.
 					</p>
 				</div>
 
@@ -201,7 +206,7 @@ const papers = [
 
 			<section class="how g-wall" id="how" aria-labelledby="how-title">
 				<div class="section-head">
-					<h2 id="how-title">How a repo gets hung.</h2>
+					<h2 id="how-title">How it works.</h2>
 				</div>
 				<ol class="steps">
 					{steps.map((step, i) => (
@@ -219,25 +224,25 @@ const papers = [
 			<section class="private" aria-labelledby="private-title">
 				<div class="private__inner">
 					<div>
-						<h2 id="private-title">Your code never leaves the room.</h2>
+						<h2 id="private-title">Your code stays on your computer.</h2>
 						<p>
-							There is no {BRAND.name} server to send it to. A folder or a zip is read on your own computer and works offline.
+							There's no {BRAND.name} server to send it to. A folder or a zip is read on your own machine &amp; works offline.
 							A repo link is fetched by your browser, straight from GitHub, GitLab or Bitbucket.
 						</p>
 					</div>
 					<div class="g-label private__plaque">
-						<b>Conditions of entry</b>
-						<i>None.</i>
-						No account. No upload. No cost.
+						<b>Price</b>
+						<i>Free</i>
+						No account needed.
 					</div>
 				</div>
 			</section>
 
 			<section class="sizes g-wall" aria-labelledby="sizes-title">
 				<div class="section-head">
-					<h2 id="sizes-title">Take it home at any size.</h2>
+					<h2 id="sizes-title">It prints at any size.</h2>
 					<p>
-Everything below is drawn to one scale, bench included. Every export is vector-sharp, so the same poster holds up from a phone wallpaper to a one-sheet.
+Everything below is drawn to one scale, bench included. The exports are vector, so the same poster stays sharp as a phone wallpaper or a 24 × 36 print.
 					</p>
 				</div>
 				<div class="elevation">
@@ -256,11 +261,10 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					<div class="elevation__bench" aria-hidden="true"><i></i><i></i></div>
 				</div>
 				<p class="elevation__scale">A 5 ft gallery bench, drawn to the same scale</p>
-				<p class="sizes__formats">PNG for screens. SVG for the README. PDF for the print shop.</p>
 			</section>
 
 			<section class="closing g-wall" aria-labelledby="closing-title">
-				<h2 id="closing-title">There is a space on the wall.</h2>
+				<h2 id="closing-title">If you built something you're proud of, hang it up.</h2>
 				<div class="closing__actions">
 					<a class="g-btn g-btn--red" href="/app">Open the studio</a>
 					<a class="g-btn g-btn--line" href={BRAND.repoUrl} target="_blank" rel="noopener noreferrer">View the source</a>
@@ -362,12 +366,63 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				line-height: 1.45;
 			}
 
-			.hero__visit {
-				margin: clamp(1.1rem, 2vw, 1.6rem) 0 0;
+			/* An admission ticket: a paper stub with a perforation, torn a little on hover. */
+			.ticket {
+				--ink: #16181a;
+				display: inline-flex;
+				margin-top: clamp(1.3rem, 2.4vw, 2rem);
+				color: var(--ink);
+				text-decoration: none;
+				filter: drop-shadow(0 0.15rem 0.3rem rgba(20, 22, 24, 0.22));
+			}
+
+			.ticket__main,
+			.ticket__stub {
+				display: grid;
+				align-content: center;
+				padding: 0.55rem 1rem 0.6rem;
+				background: var(--card);
+			}
+
+			/* Half-round notches at both ends of the perforation. */
+			.ticket__main {
+				-webkit-mask: radial-gradient(circle 0.4rem at 100% 0, transparent 98%, #000) top / 100% 51% no-repeat,
+					radial-gradient(circle 0.4rem at 100% 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+				mask: radial-gradient(circle 0.4rem at 100% 0, transparent 98%, #000) top / 100% 51% no-repeat,
+					radial-gradient(circle 0.4rem at 100% 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+			}
+
+			.ticket__main b {
+				font-size: 1.15rem;
+				font-weight: 800;
+				font-stretch: 75%;
+				letter-spacing: 0.01em;
+				line-height: 1;
+			}
+
+			.ticket__main i {
+				margin-top: 0.15rem;
 				font-family: var(--font-serif);
-				font-size: 1.05rem;
-				font-style: italic;
-				color: var(--ink-2);
+				font-size: 0.92rem;
+			}
+
+			.ticket__stub {
+				border-left: 2px dashed rgba(22, 24, 26, 0.45);
+				color: var(--dot);
+				font-size: 1.15rem;
+				font-weight: 800;
+				font-stretch: 75%;
+				transform-origin: 0 100%;
+				transition: transform 0.3s var(--ease-out);
+				-webkit-mask: radial-gradient(circle 0.4rem at 0 0, transparent 98%, #000) top / 100% 51% no-repeat,
+					radial-gradient(circle 0.4rem at 0 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+				mask: radial-gradient(circle 0.4rem at 0 0, transparent 98%, #000) top / 100% 51% no-repeat,
+					radial-gradient(circle 0.4rem at 0 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+			}
+
+			.ticket:hover .ticket__stub,
+			.ticket:focus-visible .ticket__stub {
+				transform: rotate(7deg) translateX(0.15rem);
 			}
 
 			/* One hang line: three frames of the same size, level top and bottom,
@@ -488,6 +543,10 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				display: none;
 				font-family: var(--font-serif);
 				font-size: 1rem;
+			}
+
+			.yours:hover {
+				animation: none;
 			}
 
 			/* An empty frame has no glass yet, so nothing reflects across the form. */
@@ -842,14 +901,6 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				font-style: italic;
 				color: var(--ink-2);
 				text-align: center;
-			}
-
-			.sizes__formats {
-				width: min(80rem, calc(100% - 2.5rem));
-				margin: clamp(2.2rem, 5vw, 3.5rem) auto 0;
-				font-family: var(--font-serif);
-				font-size: clamp(1.15rem, 1.6vw, 1.45rem);
-				font-style: italic;
 			}
 
 			/* ---------- Closing ---------- */

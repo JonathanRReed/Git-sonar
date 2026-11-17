@@ -70,7 +70,6 @@ function build(ctx: TemplateContext): Scene {
     rows.push({ kind: 'pair', left: 'TOTAL COMMITS', right: signals.commitCount.toLocaleString('en-US'), bold: true });
     rows.push({ kind: 'rule', char: '=' });
     rows.push({ kind: 'gap' });
-    rows.push({ kind: 'center', text: 'THANK YOU FOR SHIPPING' });
     rows.push({ kind: 'center', text: 'NO REFUNDS ON FORCE PUSHES' });
     rows.push({ kind: 'gap' });
     rows.push({ kind: 'barcode' });

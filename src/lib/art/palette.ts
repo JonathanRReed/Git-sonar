@@ -90,7 +90,9 @@ export function buildPalette(theme: Theme, mood: PaletteMood = 'theme'): Palette
 
     let accent = c.foam;
     let accent2 = c.gold;
-    let categorical = roleHexes.slice();
+    // A theme may bring its own inks; otherwise the six role colours lead.
+    const inks = theme.inks;
+    let categorical = (inks ?? roleHexes).slice();
 
     if (mood === 'duotone') {
         accent = fmt(accentBase);
@@ -103,7 +105,7 @@ export function buildPalette(theme: Theme, mood: PaletteMood = 'theme'): Palette
     } else if (mood === 'vivid') {
         accent = fmt(shift(accentBase, 0, 0, 0.06));
         accent2 = fmt(shift(accent2Base, 0, 0, 0.06));
-        categorical = roleHexes.map((h) => fmt(shift(safeOklch(h), 0, 0, 0.05)));
+        categorical = (inks ?? roleHexes).map((h) => fmt(shift(safeOklch(h), 0, 0, 0.05)));
     }
 
     const rampInterp = interpolate([accent, accent2], 'oklch');
@@ -136,6 +138,10 @@ export function buildPalette(theme: Theme, mood: PaletteMood = 'theme'): Palette
     const categoryColor = (index: number, total: number): string => {
         if (total <= categorical.length && index < categorical.length) {
             return categorical[index];
+        }
+        // Hand-picked inks repeat rather than hand over to generated hues.
+        if (inks && (mood === 'theme' || mood === 'vivid')) {
+            return categorical[index % categorical.length];
         }
         const baseL = accentBase.l;
         const baseC = Math.max(0.09, accentBase.c);

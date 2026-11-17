@@ -96,6 +96,13 @@ export function renderPoster(graph: RepoGraph, cfg: PosterConfig, repoName?: str
     };
 
     let scene = template.build(ctx);
+    // Themes with a wash fade the sheet from its paper colour into a second one.
+    if (theme.wash && scene.background.kind === 'solid' && scene.background.color === palette.bg) {
+        scene = {
+            ...scene,
+            background: { ...scene.background, kind: 'gradient', color2: theme.wash.color, angle: theme.wash.angle },
+        };
+    }
     // Film grain and a heavy vignette read as atmosphere on a dark sheet but
     // as dirt on light paper, so light sheets keep only a whisper of vignette.
     const sheet = scene.background.color;

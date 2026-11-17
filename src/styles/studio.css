@@ -149,6 +149,7 @@ html[data-lights="off"] .ps-thumb__art {
 }
 
 .ps-easel {
+  perspective: 90rem;
   position: absolute;
   inset: 3.5rem 0 5.5rem 0;
   display: grid;
@@ -172,6 +173,42 @@ html[data-lights="off"] .ps-thumb__art {
 
 .is-wall .ps-stage::before {
   opacity: 0;
+}
+
+/* The sheet leans a few degrees toward the pointer, and light slides across it. */
+.ps-sheet {
+  position: relative;
+  line-height: 0;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.25s var(--ease-out);
+}
+
+.ps-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 36%, rgba(255, 255, 255, 0.13) 48%, rgba(255, 255, 255, 0.03) 55%, transparent 66%);
+  background-size: 260% 100%;
+  background-position: var(--sheen, 50%) 0;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.ps-stage:hover .ps-sheet::after {
+  opacity: 1;
+}
+
+/* Hung on the wall, the frame swings once on its nail and comes to rest. */
+.is-wall .ps-sheet {
+  transform: none;
+  transform-origin: 50% 0;
+  animation: g-sway 1.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+.is-wall .ps-sheet::after {
+  display: none;
 }
 
 /* A soft shadow on the wall behind the sheet and a tight one where it stands. */
@@ -383,6 +420,32 @@ html[data-lights="off"] .is-wall .ps-stage {
   background: rgba(var(--paper-rgb), 0.9);
 }
 
+/* Frame choices are corner samples, as on a framer's counter. */
+.ps-corner {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.4rem;
+  border-top: 0.22rem solid #1a1b1c;
+  border-left: 0.22rem solid #1a1b1c;
+  vertical-align: -0.05rem;
+}
+
+.ps-corner--oak {
+  border-color: #b58a5a;
+}
+
+.ps-corner--white {
+  border-color: #fff;
+  filter: drop-shadow(0 0 0.5px rgba(20, 22, 24, 0.9));
+}
+
+.ps-corner--none {
+  border-width: 1px;
+  border-style: dashed;
+  border-color: #8a8f8b;
+}
+
 /* Frame and mat share one paper tab, so the checkbox reads as part of it. */
 .ps-framing {
   padding: 0 0.7rem 0 0;
@@ -456,6 +519,21 @@ html[data-lights="off"] .is-wall .ps-stage {
   font-size: 0.9rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* The "sold" dot, pressed onto the label once a file has been saved. */
+.ps-plaque__sold {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  animation: ps-stick 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes ps-stick {
+  from {
+    opacity: 0;
+    transform: scale(2.2);
+  }
 }
 
 .ps-plaque__moment {
@@ -843,6 +921,7 @@ html[data-lights="off"] .ps-floor {
 
 .ps-swatches {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.65rem;
   margin: 0.15rem 0 0.8rem;
 }
@@ -910,10 +989,38 @@ html[data-lights="off"] .ps-swatches button {
   margin: 0;
 }
 
+/* Sliders are desk faders: a slot with tick marks and a cap you can grab. */
 .ps-slider input {
+  appearance: none;
   width: 100%;
+  height: 1.5rem;
   margin: 0;
-  accent-color: var(--ink);
+  background:
+    linear-gradient(var(--ink), var(--ink)) 0 50% / 100% 2px no-repeat,
+    repeating-linear-gradient(90deg, var(--line-2) 0 1px, transparent 1px 10%) 0 50% / 100% 0.6rem no-repeat;
+  cursor: grab;
+}
+
+.ps-slider input:active {
+  cursor: grabbing;
+}
+
+.ps-slider input::-webkit-slider-thumb {
+  appearance: none;
+  width: 0.8rem;
+  height: 1.4rem;
+  border-radius: 0.15rem;
+  background: linear-gradient(90deg, #2b2e30 0 44%, #f4f5f1 44% 56%, #2b2e30 56%);
+  box-shadow: 0 0.12rem 0.25rem rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.ps-slider input::-moz-range-thumb {
+  width: 0.8rem;
+  height: 1.4rem;
+  border: 0;
+  border-radius: 0.15rem;
+  background: linear-gradient(90deg, #2b2e30 0 44%, #f4f5f1 44% 56%, #2b2e30 56%);
+  box-shadow: 0 0.12rem 0.25rem rgba(0, 0, 0, 0.4);
 }
 
 .ps-slider output {

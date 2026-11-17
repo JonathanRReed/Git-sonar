@@ -20,16 +20,16 @@ const structuredData = JSON.stringify({
 
 const notes = [
 	{
-		title: "The work",
-		text: "I build software for reading project data, commit history and the decisions behind them.",
+		title: "Why I made it",
+		text: `I think of ${BRAND.name} as a love letter to code. If you wrote something you're proud of & it has a Git repo, this is a way to actually display it. It's free & I'm not trying to make money from it.`,
 	},
 	{
-		title: "The tool",
-		text: `${BRAND.name} reads commits, branches, authors and cadence from a folder, a zip or a repo link, then draws them as a poster.`,
+		title: "How it works",
+		text: "It reads the commits, branches & authors from a folder, a zip or a repo link, then draws them as a poster. All of that happens in your browser.",
 	},
 	{
-		title: "The output",
-		text: "A PNG for screens, an SVG for the README, a PDF at true print size, or a link that reopens the same poster.",
+		title: "What you get",
+		text: "A PNG for screens, an SVG for a README, a PDF at real print size, or a link that reopens the same poster.",
 	},
 ];
 ---
@@ -78,7 +78,7 @@ const notes = [
 			</section>
 
 			<section class="about-cta g-wall" aria-labelledby="about-cta-title">
-				<h2 id="about-cta-title">See your own repo on the wall.</h2>
+				<h2 id="about-cta-title">Try it on something you built.</h2>
 				<div class="about-cta__actions">
 					<a class="g-btn g-btn--red" href="/app">Make a poster</a>
 					<a class="g-btn g-btn--line" href={BRAND.repoUrl} target="_blank" rel="noopener noreferrer">View the source</a>

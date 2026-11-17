@@ -42,6 +42,24 @@ describe('data-drawn styles', () => {
         }
     });
 
+    it('fades the sheet into a second colour on themes that have a wash', () => {
+        const washed = scene('transit-map', { themeId: 'acid' });
+        expect(washed.background.kind).toBe('gradient');
+        expect(washed.background.color2).toBe('#ff8ad8');
+        // Pulsar prints on its own black, so a wash leaves it alone.
+        expect(scene('pulsar', { themeId: 'acid' }).background.kind).toBe('solid');
+        // Themes without a wash are unchanged.
+        expect(scene('transit-map', { themeId: 'paper' }).background.kind).toBe('solid');
+    });
+
+    it('uses a theme\'s hand-picked inks in order', () => {
+        const s = scene('transit-map', { themeId: 'blacklight', paletteMood: 'theme' });
+        const side = s.strokes.filter((st) => st.id.startsWith('line-') && st.id !== 'line-0').map((st) => st.color.toLowerCase());
+        expect(side).toContain('#39ff14');
+        expect(side).toContain('#ff2bd6');
+        expect(THEME_IDS.length).toBe(14);
+    });
+
     it('is deterministic, and a new roll changes the generative ones', () => {
         for (const template of ['growth-rings', 'transit-map', 'core-sample']) {
             const a = sceneToSVG(scene(template, { seed: 'one' }));
