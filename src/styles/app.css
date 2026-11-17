@@ -221,7 +221,7 @@ body[data-view-mode="calendar"] .controls-bar {
   gap: clamp(2rem, 6vw, 6rem);
   align-items: start;
   /* Auto margins centre it when there is room and never clip it when there is not. */
-  width: min(72rem, calc(100% - 2.5rem));
+  width: min(80rem, calc(100% - 2.5rem));
   min-width: 0;
   margin: auto;
   padding: 2.5rem 0 3rem;
@@ -545,6 +545,7 @@ body[data-view-mode="calendar"] .controls-bar {
 .desk__ask {
   position: relative;
   z-index: 1;
+  max-width: 46rem;
 }
 
 /* Before a repo is loaded the whole screen is the wall, header included. */
@@ -556,7 +557,7 @@ body[data-view-mode="calendar"] .controls-bar {
 
 .app:has(.app-views[hidden]) .app-header {
   /* The wordmark lines up with the column below it. */
-  padding-inline: max(1.25rem, calc((100% - 72rem) / 2));
+  padding-inline: max(1.25rem, calc((100% - 80rem) / 2));
   background: transparent;
   border-bottom-color: transparent;
 }
@@ -579,6 +580,11 @@ body[data-view-mode="calendar"] .controls-bar {
 
   .desk__wall {
     max-width: 14rem;
+  }
+
+  /* On a narrow screen the frame appears only while a repo is being read. */
+  .desk__wall:not(:has(.desk__mat.is-busy)) {
+    display: none;
   }
 }
 

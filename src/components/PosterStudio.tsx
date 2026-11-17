@@ -79,7 +79,7 @@ const WALL = {
     centre: 57,
     bench: { w: 60, h: 18 },
     /** Visible strip of floor under the bench, in px. */
-    floorPx: 34,
+    floorPx: 60,
 };
 type FrameStyle = 'none' | 'black' | 'oak' | 'white';
 const FRAMES: { id: FrameStyle; label: string; color: string }[] = [
@@ -412,7 +412,7 @@ export function PosterStudio() {
         const { scene } = result;
         // The easel is the stage minus the tray; leave air around the sheet.
         const stageW = stage.clientWidth - 56;
-        const stageH = stage.clientHeight - TRAY_H - STAGE_TOP - 28;
+        const stageH = stage.clientHeight - TRAY_H - STAGE_TOP - 52;
         if (stageW <= 0 || stageH <= 0) return;
         const aspect = scene.width / scene.height;
         let scale = Math.min(stageW / scene.width, stageH / scene.height);
@@ -650,7 +650,7 @@ export function PosterStudio() {
     }, [graph]);
 
     // Only show the label when there is bare stage beside the sheet for it.
-    const benchW = Math.min(fit.stageW - 56, (fit.stageH - TRAY_H - STAGE_TOP - 28) * fit.aspect);
+    const benchW = Math.min(fit.stageW - 56, (fit.stageH - TRAY_H - STAGE_TOP - 52) * fit.aspect);
     const plaqueFits = (fit.stageW - benchW) / 2 >= 250;
 
     // "On a wall": a gallery elevation at true scale. The sheet hangs with its
@@ -770,10 +770,9 @@ export function PosterStudio() {
                         {FRAMES.map((f) => (
                             <button key={f.id} type="button" tabIndex={onWall ? 0 : -1} aria-pressed={frame === f.id} onClick={() => setFrame(f.id)}>{f.label}</button>
                         ))}
+                        <span className="ps-framing__sep" aria-hidden="true" />
+                        <button type="button" tabIndex={onWall ? 0 : -1} aria-pressed={framed && mat} disabled={!framed} onClick={() => setMat((v) => !v)}>Mat</button>
                     </div>
-                    <label className={framed ? '' : 'is-off'}>
-                        <input type="checkbox" tabIndex={onWall ? 0 : -1} checked={mat} disabled={!framed} onChange={(e) => setMat(e.target.checked)} /> Mat
-                    </label>
                 </div>
                 <p className="ps-wallnote" aria-hidden={!onWall}>{sizeLabel}, hung at gallery height</p>
 

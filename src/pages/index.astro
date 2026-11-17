@@ -138,8 +138,9 @@ const papers = [
 									)}
 								</a>
 								<figcaption class="g-label">
-									<b>Project Atlas</b>
-									<i>{p.label}</i>
+									<small>No. {String(LANDING_POSTERS.indexOf(p) + 1).padStart(2, "0")}</small>
+									<b>{p.label}</b>
+									<i>Project Atlas</i>
 									{i === 0 ? `${facts.commits} commits on paper` : `${facts.authors} authors, ${facts.merges} merges`}
 								</figcaption>
 							</figure>
@@ -152,6 +153,7 @@ const papers = [
 									<label for="yours-repo">Paste a repo link to see it hung.</label>
 									<input class="g-field" id="yours-repo" name="github" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="you/your-repo" />
 									<button class="g-btn g-btn--red" type="submit">Make my poster</button>
+									<a class="yours__alt yours__alt--inside" href="/app?demo=showcase">or start with the sample repo</a>
 								</form>
 							</div>
 							<div class="g-label yours__label">
@@ -189,7 +191,7 @@ const papers = [
 									<small>No. {String(i + 1).padStart(2, "0")}</small>
 									<b>{p.label}</b>
 									<i>{p.medium}</i>
-									<span class="salon__remix"><span class="g-dot" aria-hidden="true"></span><span class="salon__remix-text">Remix this one</span></span>
+									<span class="salon__remix"><span class="g-dot" aria-hidden="true"></span><span class="salon__remix-text">Remix</span></span>
 								</a>
 							</figcaption>
 						</figure>
@@ -240,7 +242,6 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				</div>
 				<div class="elevation">
 					<p class="elevation__centre" aria-hidden="true"></p>
-					<p class="elevation__height" aria-hidden="true"><span>57 in to centre</span></p>
 					<ul class="elevation__row">
 						{papers.map((paper) => (
 							<li class="sheet" style={`--w:${paper.w};--h:${paper.h}`}>
@@ -349,7 +350,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.hero__text h1 {
-				font-size: clamp(2.9rem, 5.4vw, 5rem);
+				font-size: clamp(2.8rem, 5vw, 4.6rem);
 			}
 
 			.hero__lede {
@@ -481,6 +482,13 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				line-height: 0.95;
 			}
 
+			/* On a phone the sample link moves inside the frame, under the button. */
+			.yours__alt--inside {
+				display: none;
+				font-family: var(--font-serif);
+				font-size: 1rem;
+			}
+
 			/* An empty frame has no glass yet, so nothing reflects across the form. */
 			.yours::after {
 				content: none;
@@ -553,25 +561,9 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				padding-top: clamp(0rem, 3vw, 2.4rem);
 			}
 
-			/* The words appear when a piece is pointed at; the dot alone marks it. */
+			/* The red dot marks a piece you can remix; one quiet word says so. */
 			.salon__remix-text {
-				opacity: 0;
-				transform: translateX(-0.25rem);
-				transition: opacity 0.2s ease, transform 0.25s var(--ease-out);
-			}
-
-			.salon__piece:hover .salon__remix-text,
-			.salon__label:focus-visible .salon__remix-text {
-				opacity: 1;
-				transform: none;
-			}
-
-			/* Nothing to hover with on a touch screen, so the words stay. */
-			@media (hover: none) {
-				.salon__remix-text {
-					opacity: 1;
-					transform: none;
-				}
+				color: var(--ink-2);
 			}
 
 			.salon__piece figcaption {
@@ -586,10 +578,10 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			.salon__remix {
 				display: flex;
 				align-items: center;
-				gap: 0.45rem;
+				gap: 0.4rem;
 				margin-top: 0.45rem;
 				font-family: var(--font-sans);
-				font-size: 0.82rem;
+				font-size: 0.78rem;
 				font-weight: 600;
 			}
 
@@ -662,10 +654,9 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			/* ---------- Privacy: the night room ---------- */
-			/* A second, darker room: a moulding line and a fall of shadow at the doorway. */
+			/* A second, darker room: the wall simply turns, with a fall of shadow at the corner. */
 			.private {
 				padding: clamp(4rem, 9vw, 8rem) 0;
-				border-top: 0.7rem solid var(--skirting);
 				background:
 					linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 5rem),
 					radial-gradient(ellipse 50% 70% at 78% 40%, rgba(255, 255, 255, 0.09), transparent 70%),
@@ -725,24 +716,25 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				border-top: 1px dashed var(--ink-3);
 			}
 
-			/* How high that line is, as a dimension in a gutter of its own. */
-			.elevation__height {
+			/* How high that line is: a dimension drawn right beside the first sheet,
+			   from the centre line down to the floor. */
+			.sheet:first-child::before {
+				content: "";
 				position: absolute;
-				top: calc(var(--u) * 18);
-				left: 0.5rem;
+				top: 50%;
+				left: -2.4rem;
 				width: 9px;
 				height: calc(var(--u) * 57);
-				margin: 0;
 				border-top: 1.5px solid var(--ink);
 				border-bottom: 1.5px solid var(--ink);
 				background: linear-gradient(var(--ink), var(--ink)) 50% 0 / 1.5px 100% no-repeat;
 			}
 
-			.elevation__height span {
+			.sheet:first-child::after {
+				content: "57 in to centre";
 				position: absolute;
-				left: 15px;
-				top: 50%;
-				transform: translateY(-50%);
+				top: calc(50% + 0.5rem);
+				right: calc(100% + 2.9rem);
 				font-family: var(--font-serif);
 				font-size: 0.9rem;
 				font-style: italic;
@@ -929,15 +921,14 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				}
 
 				.sheet p span,
-				.elevation__height,
-				.yours__label b,
-				.yours__label i {
+				.sheet:first-child::before,
+				.sheet:first-child::after,
+				.yours__label {
 					display: none;
 				}
 
-				/* On a phone the label keeps only its link, close under the frame. */
-				.piece .yours__label {
-					margin-top: 0.7rem;
+				.yours__alt--inside {
+					display: block;
 				}
 
 

@@ -352,7 +352,7 @@ export function ImportPanel() {
         <div className="desk__alts">
           <button type="button" onClick={openFolder} disabled={isLoading}>
             <b>Open a folder on this computer</b>
-            <span>Pick the project folder. No zipping, and it works offline.</span>
+            <span>No zipping, and it works offline.</span>
           </button>
           <button type="button" onClick={loadSample} disabled={isLoading}>
             <b>Use the sample repo</b>

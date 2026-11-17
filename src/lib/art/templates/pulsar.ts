@@ -112,7 +112,7 @@ function build(ctx: TemplateContext): Scene {
         ];
 
         // Fade the farthest rows slightly so the stack recedes into the dark.
-        const lineAlpha = 0.45 + 0.55 * rowFrac;
+        const lineAlpha = 0.62 + 0.38 * rowFrac;
         const lineW = (0.9 + 1.1 * rowFrac) * encoding.weightScale;
 
         // Push far-to-near: top rows (r small) first, so each later (lower)

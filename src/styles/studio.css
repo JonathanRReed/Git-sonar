@@ -151,8 +151,26 @@ html[data-lights="off"] .ps-thumb__art {
   transition: transform 0.65s var(--ease-out);
 }
 
+/* "On the bench": a pale work surface runs along the bottom of the booth, with
+   the shadow line where it meets the back wall. */
+.ps-stage::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 5.5rem 0;
+  height: 17%;
+  background:
+    linear-gradient(180deg, rgba(20, 22, 24, 0.22), rgba(20, 22, 24, 0) 0.7rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12));
+  transition: opacity 0.4s ease;
+}
+
+.is-wall .ps-stage::before {
+  opacity: 0;
+}
+
 .ps-canvas {
   display: block;
+  position: relative;
   box-shadow: 0 1.8rem 3.2rem rgba(20, 22, 24, 0.38), 0 0.25rem 0.6rem rgba(20, 22, 24, 0.35);
 }
 
@@ -358,20 +376,27 @@ html[data-lights="off"] .is-wall .ps-stage {
   background: rgba(var(--paper-rgb), 0.9);
 }
 
-.ps-framing label {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.82rem;
-  font-weight: 600;
+.ps-framing__sep {
+  width: 1px;
+  margin: 0.3rem 0.2rem;
+  background: var(--line-2);
 }
 
-.ps-framing label.is-off {
-  opacity: 0.45;
+.ps-framing .g-seg button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.ps-framing input {
-  accent-color: var(--ink);
+/* Controls mounted on the stage keep their daylight look after hours,
+   because the viewing booth they sit on does not change. */
+.ps-where,
+.ps-framing {
+  --seg: #e6e8e3;
+  --raised: #fff;
+  --ink: #16181a;
+  --ink-2: #353a3d;
+  --line-2: #b9bdb8;
+  --paper-rgb: 247, 247, 244;
 }
 
 .ps-wallnote {
@@ -979,8 +1004,8 @@ html[data-lights="off"] .ps-checks input:checked::after {
   /* Short enough that the style strip and the first controls show beneath it. */
   /* Sized so the first screen is whole: stage, style strip, then the bar. */
   .ps-stage {
-    height: calc(100dvh - 24.9rem);
-    min-height: 20rem;
+    height: calc(100dvh - 27.6rem);
+    min-height: 19rem;
   }
 
   .ps-rail {
@@ -996,17 +1021,16 @@ html[data-lights="off"] .ps-checks input:checked::after {
     padding: 0.4rem 0.4rem 0.6rem;
     margin: 0 -0.4rem;
     align-items: flex-start;
-    /* The strip fades at its right edge: there is more to swipe to. */
-    mask-image: linear-gradient(90deg, #000 calc(100% - 1.4rem), transparent);
   }
 
   .ps-vars__label {
     display: none;
   }
 
+  /* Sized so a fifth style always peeks in from the right. */
   .ps-thumb {
     flex: none;
-    width: 5.1rem;
+    width: 4.7rem;
   }
 
   .ps-thumb__name {
