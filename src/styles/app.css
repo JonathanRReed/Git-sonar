@@ -122,6 +122,11 @@
   height: 1.05rem;
 }
 
+.app-sound[aria-pressed="true"] .app-sound__off,
+.app-sound[aria-pressed="false"] .app-sound__on {
+  display: none;
+}
+
 /* Header controls share one treatment: small radius, hairline border. */
 .app-header .g-btn {
   min-height: 2.25rem;

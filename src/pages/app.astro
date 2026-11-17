@@ -64,6 +64,13 @@ import { AppShellController } from "@components/AppShellController";
 
 					<div class="app-actions">
 						<button class="g-switch app-switch" type="button" data-light-switch aria-pressed="true" aria-label="Gallery lights" title="Gallery lights"></button>
+						<button type="button" class="app-icon-btn app-sound" data-sound-toggle aria-pressed="true" aria-label="Sounds" title="Sounds">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4z"></path>
+								<path class="app-sound__on" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"></path>
+								<path class="app-sound__off" d="M16 9.5l5 5M21 9.5l-5 5"></path>
+							</svg>
+						</button>
 						<button type="button" class="app-icon-btn" id="btn-help" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
 								<circle cx="12" cy="12" r="9"></circle>

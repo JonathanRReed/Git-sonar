@@ -2,18 +2,37 @@
  * Small synthesized sounds for the physical controls: the light switch, the
  * dice, the edition stamp. Nothing is downloaded; each sound is a few
  * milliseconds of filtered noise or a falling sine. They only ever play in
- * response to a click, and `localStorage["gallery-sound"] = "off"` silences them.
+ * response to a click, and the sound button (stored as `gallery-sound`) mutes them.
  */
 
+const STORAGE_KEY = 'gallery-sound';
+
 let context: AudioContext | null = null;
+let muted: boolean | null = null;
+
+export function soundEnabled(): boolean {
+    if (muted === null) {
+        try {
+            muted = localStorage.getItem(STORAGE_KEY) === 'off';
+        } catch {
+            // Storage is unavailable in some private modes; the sounds still work.
+            muted = false;
+        }
+    }
+    return !muted;
+}
+
+export function setSoundEnabled(on: boolean): void {
+    muted = !on;
+    try {
+        localStorage.setItem(STORAGE_KEY, on ? 'on' : 'off');
+    } catch {
+        // Private mode: the choice still holds for this visit.
+    }
+}
 
 function audio(): AudioContext | null {
-    if (typeof window === 'undefined') return null;
-    try {
-        if (localStorage.getItem('gallery-sound') === 'off') return null;
-    } catch {
-        // Storage is unavailable in some private modes; the sounds still work.
-    }
+    if (typeof window === 'undefined' || !soundEnabled()) return null;
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return null;
     context ??= new Ctor();

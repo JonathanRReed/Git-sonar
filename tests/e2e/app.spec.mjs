@@ -196,6 +196,16 @@ test.describe('Git Sonar app', () => {
         await expect(page.locator('html')).not.toHaveAttribute('data-lights', 'off');
     });
 
+    test('the sound button mutes the controls and is remembered', async ({ page }) => {
+        await page.goto('/');
+        const sounds = page.getByRole('button', { name: 'Sounds' });
+        await expect(sounds).toHaveAttribute('aria-pressed', 'true');
+        await sounds.click();
+        await expect(sounds).toHaveAttribute('aria-pressed', 'false');
+        await page.goto('/app');
+        await expect(page.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'false');
+    });
+
     test('the collection hangs all fourteen styles', async ({ page }) => {
         await page.goto('/');
         await expect(page.getByRole('heading', { name: 'One repo, hung fourteen ways.' })).toBeVisible();

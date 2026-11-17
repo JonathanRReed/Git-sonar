@@ -6,8 +6,10 @@
  *
  * The key light: it follows the pointer, so frames throw their shadows away
  * from it and their glass catches a moving reflection (see --lx / --ly).
+ *
+ * The sound button mutes the clicks, knocks and thuds the controls make.
  */
-import { playSwitch } from '../lib/utils/sound';
+import { playSwitch, playTap, setSoundEnabled, soundEnabled } from '../lib/utils/sound';
 
 const root = document.documentElement;
 const switches = document.querySelectorAll<HTMLButtonElement>('[data-light-switch]');
@@ -31,6 +33,22 @@ for (const button of switches) {
             // Private mode: the switch still works for this visit.
         }
         sync();
+    });
+}
+
+const soundButtons = document.querySelectorAll<HTMLButtonElement>('[data-sound-toggle]');
+
+function syncSound(): void {
+    for (const button of soundButtons) button.setAttribute('aria-pressed', String(soundEnabled()));
+}
+
+syncSound();
+
+for (const button of soundButtons) {
+    button.addEventListener('click', () => {
+        setSoundEnabled(!soundEnabled());
+        playTap();
+        syncSound();
     });
 }
 
