@@ -179,11 +179,7 @@ async function handleQueryImport() {
         const graph = provider === 'gitlab'
             ? await imports.parseGitLabRepo(repoPath, options)
             : provider === 'bitbucket'
-                ? await imports.parseBitbucketRepo(repoPath, options).then(async (full) => {
-                    if (!moment) return full;
-                    const { snapshotGraphAt } = await import('@lib/git/graph');
-                    return snapshotGraphAt(full, moment.untilMs);
-                })
+                ? await imports.parseBitbucketRepo(repoPath, options)
                 : await imports.parseGitHubRepo(repoPath, options);
 
         state.setGraph(graph);

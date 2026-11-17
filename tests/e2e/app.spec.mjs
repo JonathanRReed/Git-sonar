@@ -75,7 +75,15 @@ test.describe('Git Sonar app', () => {
         await page.goto('/');
         await page.getByLabel('Paste a repo link to see it hung.').fill('https://github.com/sveltejs/svelte');
         await page.getByRole('button', { name: 'Make my poster' }).click();
-        await expect(page).toHaveURL(/\/app\?github=sveltejs%2Fsvelte/);
+        await expect(page).toHaveURL(/\/app\?github=sveltejs%2Fsvelte$/);
+    });
+
+    test('a pasted branch page is reduced to its repo', async ({ page }) => {
+        await page.route('https://api.github.com/**', (route) => route.abort());
+        await page.goto('/');
+        await page.getByLabel('Paste a repo link to see it hung.').fill('https://github.com/sveltejs/svelte/tree/main');
+        await page.getByRole('button', { name: 'Make my poster' }).click();
+        await expect(page).toHaveURL(/\/app\?github=sveltejs%2Fsvelte$/);
     });
 
     test('landing collection remixes a poster into the studio', async ({ page }) => {

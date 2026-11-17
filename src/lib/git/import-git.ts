@@ -346,7 +346,7 @@ export async function parseBitbucketRepo(
     urlOrPath: string,
     options: GitRepoImportOptions = {}
 ): Promise<RepoGraph> {
-    const { maxCommits = 1000, onProgress, authToken } = options;
+    const { maxCommits = 1000, onProgress, authToken, until } = options;
     const parsed = parseBitbucketUrl(urlOrPath);
     if (!parsed) {
         throw new Error('Invalid Bitbucket URL. Use format: https://bitbucket.org/owner/repo or owner/repo');
@@ -376,7 +376,10 @@ export async function parseBitbucketRepo(
         const repoInfo = await repoInfoRes.json() as { mainbranch?: { name?: string } };
         const defaultBranch = repoInfo.mainbranch?.name ?? 'main';
 
-        // Fetch commits with pagination
+        // Fetch commits with pagination. Bitbucket can't be asked for history
+        // as of a date, so newer commits are skipped here and paging carries
+        // on until enough older ones turn up.
+        let newestHash: string | null = null;
         let nextUrl: string | null = `https://api.bitbucket.org/2.0/repositories/${owner}/${repo}/commits?pagelen=100`;
 
         while (nextUrl && commits.size < maxCommits) {
@@ -399,13 +402,16 @@ export async function parseBitbucketRepo(
             for (const commit of data.values) {
                 if (commits.has(commit.hash)) continue;
                 if (commits.size >= maxCommits) break;
+                const authoredAt = new Date(commit.date).getTime();
+                if (until && authoredAt > until) continue;
+                newestHash ??= commit.hash;
 
                 const authorName = commit.author.raw.split('<')[0].trim();
                 commits.set(commit.hash, {
                     id: commit.hash,
                     parents: commit.parents.map(p => p.hash),
                     authorName,
-                    authoredAt: new Date(commit.date).getTime(),
+                    authoredAt,
                     messageSubject: commit.message.split('\n')[0],
                 });
             }
@@ -431,7 +437,18 @@ export async function parseBitbucketRepo(
         }
 
         if (commits.size === 0) {
-            throw new Error('No commits found in repository');
+            throw new Error(until ? 'No commits on or before that date. Pick a later day.' : 'No commits found in repository');
+        }
+
+        if (until) {
+            // A parent can carry a later date than its child (rebases, clock
+            // skew); cut those links so nothing points outside the snapshot.
+            for (const [id, commit] of commits) {
+                if (commit.parents.some((p) => !commits.has(p))) {
+                    commits.set(id, { ...commit, parents: commit.parents.filter((p) => commits.has(p)) });
+                }
+            }
+            refsAsOf(refs, commits, defaultBranch, newestHash);
         }
 
         return buildRepoGraph(commits, refs, defaultBranch);

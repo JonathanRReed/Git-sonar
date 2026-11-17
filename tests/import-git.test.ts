@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { parseGitHubRepo, parseGitLabProjectPath, parseGitLabRepo } from '@lib/git/import-git';
+import { parseBitbucketRepo, parseGitHubRepo, parseGitLabProjectPath, parseGitLabRepo } from '@lib/git/import-git';
+import { parseRepoInput } from '@lib/utils/repo-name';
 
 describe('parseGitLabProjectPath', () => {
     it('parses a two-segment GitLab URL', () => {
@@ -113,5 +114,78 @@ describe('line counts for hosted repos', () => {
 
         expect(calls.some((u) => u.includes('with_stats=true'))).toBe(true);
         expect(graph.commits.get(sha(1))?.stats).toEqual({ additions: 12, deletions: 3 });
+    });
+});
+
+describe('Bitbucket history as of a day', () => {
+    const jsonResponse = (body: unknown) => new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    const sha = (n: number) => n.toString(16).padStart(40, '0');
+    const day = (n: number) => `2024-01-${String(n).padStart(2, '0')}T12:00:00Z`;
+    const commit = (n: number) => ({ hash: sha(n), date: day(n), message: `Commit ${n}`, parents: n > 1 ? [{ hash: sha(n - 1) }] : [], author: { raw: 'Ada <a@x.io>' } });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    /** Six commits, newest first, three to a page. */
+    function stubBitbucket() {
+        const calls: string[] = [];
+        vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+            const url = String(input);
+            calls.push(url);
+            if (url.includes('/commits?')) {
+                return url.includes('page=2')
+                    ? jsonResponse({ values: [commit(3), commit(2), commit(1)] })
+                    : jsonResponse({ values: [commit(6), commit(5), commit(4)], next: 'https://api.bitbucket.org/2.0/repositories/ada/engine/commits?pagelen=100&page=2' });
+            }
+            if (url.includes('/refs/branches')) return jsonResponse({ values: [{ name: 'main', target: { hash: sha(6) } }] });
+            return jsonResponse({ mainbranch: { name: 'main' } });
+        }));
+        return calls;
+    }
+
+    it('pages past newer commits to reach the cutoff, even at the commit limit', async () => {
+        const calls = stubBitbucket();
+        // The newest three commits fill the limit on their own; all are after the cutoff.
+        const graph = await parseBitbucketRepo('ada/engine', { maxCommits: 3, until: Date.UTC(2024, 0, 3, 23, 59, 59) });
+
+        expect(calls.some((u) => u.includes('page=2'))).toBe(true);
+        expect([...graph.commits.keys()].sort()).toEqual([sha(1), sha(2), sha(3)]);
+        expect(graph.defaultHead).toBe(sha(3));
+    });
+
+    it('says so when nothing is that old', async () => {
+        stubBitbucket();
+        await expect(parseBitbucketRepo('ada/engine', { until: Date.UTC(2023, 0, 1) }))
+            .rejects.toThrow('No commits on or before that date');
+    });
+
+    it('takes the newest commits when there is no cutoff', async () => {
+        const calls = stubBitbucket();
+        const graph = await parseBitbucketRepo('ada/engine', { maxCommits: 3 });
+
+        expect(calls.some((u) => u.includes('page=2'))).toBe(false);
+        expect(graph.defaultHead).toBe(sha(6));
+    });
+});
+
+describe('parseRepoInput', () => {
+    it('keeps plain owner/repo as GitHub', () => {
+        expect(parseRepoInput(' sveltejs/svelte ')).toEqual({ provider: 'github', path: 'sveltejs/svelte' });
+    });
+
+    it('reduces a branch or file page to its repo', () => {
+        expect(parseRepoInput('https://github.com/sveltejs/svelte/tree/main')).toEqual({ provider: 'github', path: 'sveltejs/svelte' });
+        expect(parseRepoInput('https://github.com/sveltejs/svelte/blob/main/README.md?plain=1#L3')).toEqual({ provider: 'github', path: 'sveltejs/svelte' });
+        expect(parseRepoInput('https://bitbucket.org/atlassian/aui/src/master/')).toEqual({ provider: 'bitbucket', path: 'atlassian/aui' });
+    });
+
+    it('handles clone addresses', () => {
+        expect(parseRepoInput('git@github.com:facebook/react.git')).toEqual({ provider: 'github', path: 'facebook/react' });
+        expect(parseRepoInput('https://www.github.com/facebook/react.git/')).toEqual({ provider: 'github', path: 'facebook/react' });
+    });
+
+    it('keeps nested GitLab groups and drops the page after /-/', () => {
+        expect(parseRepoInput('https://gitlab.com/gitlab-org/quality/triage-ops/-/tree/master')).toEqual({ provider: 'gitlab', path: 'gitlab-org/quality/triage-ops' });
     });
 });

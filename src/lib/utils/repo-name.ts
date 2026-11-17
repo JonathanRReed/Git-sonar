@@ -26,3 +26,21 @@ export function cleanSourceName(name: string): string {
         .trim();
     return cleaned || 'Local repo';
 }
+
+export type RepoProvider = 'github' | 'gitlab' | 'bitbucket';
+
+/**
+ * Reduce whatever was pasted (a repo page, a branch or file page, a clone
+ * address, or plain owner/repo) to the provider and the repo's own path.
+ */
+export function parseRepoInput(raw: string): { provider: RepoProvider; path: string } {
+    const input = raw.trim();
+    const provider: RepoProvider = /gitlab\.com/i.test(input) ? 'gitlab' : /bitbucket\.org/i.test(input) ? 'bitbucket' : 'github';
+    const path = input
+        .replace(/^(?:https?:\/\/|git@)?(?:www\.)?(?:github\.com|gitlab\.com|bitbucket\.org)[/:]/i, '')
+        .replace(/[?#].*$/, '')
+        .replace(/\/+$/, '');
+    // GitLab projects can sit in nested groups, and its pages hang off "/-/".
+    const repo = provider === 'gitlab' ? path.replace(/\/-\/.*$/, '') : path.split('/').slice(0, 2).join('/');
+    return { provider, path: repo.replace(/\.git$/i, '') };
+}

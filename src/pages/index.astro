@@ -274,6 +274,8 @@ Everything below is drawn to one scale, bench included. The exports are vector, 
 		<SiteFooter />
 
 		<script>
+			import { parseRepoInput } from "@lib/utils/repo-name";
+
 			// The empty frame: send a pasted repo to the studio, on the right provider.
 			const form = document.querySelector<HTMLFormElement>("#yours-form");
 			const input = document.querySelector<HTMLInputElement>("#yours-repo");
@@ -285,12 +287,7 @@ Everything below is drawn to one scale, bench included. The exports are vector, 
 					window.location.assign("/app");
 					return;
 				}
-				const provider = /gitlab\.com/i.test(raw) ? "gitlab" : /bitbucket\.org/i.test(raw) ? "bitbucket" : "github";
-				const path = raw
-					.replace(/^https?:\/\//i, "")
-					.replace(/^(www\.)?(github\.com|gitlab\.com|bitbucket\.org)\//i, "")
-					.replace(/\.git$/i, "")
-					.replace(/\/+$/, "");
+				const { provider, path } = parseRepoInput(raw);
 				const params = new URLSearchParams({ [provider]: path });
 				window.location.assign(`/app?${params.toString()}`);
 			});

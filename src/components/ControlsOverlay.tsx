@@ -348,13 +348,18 @@ export function ControlsOverlay() {
         try {
             const imports = await import('@lib/git/import-git');
             let graph;
-            const authTokenValue = authToken ?? undefined;
+            // Keep the earlier moment, if one is being captured.
+            const options = {
+                maxCommits: MAX_POSTER_COMMITS,
+                authToken: authToken ?? undefined,
+                until: useGraphStore.getState().moment?.untilMs,
+            };
             if (currentRepoProvider === 'gitlab') {
-                graph = await imports.parseGitLabRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseGitLabRepo(currentRepoPath, options);
             } else if (currentRepoProvider === 'bitbucket') {
-                graph = await imports.parseBitbucketRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseBitbucketRepo(currentRepoPath, options);
             } else {
-                graph = await imports.parseGitHubRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseGitHubRepo(currentRepoPath, options);
             }
             setGraph(graph);
         } catch (err) {

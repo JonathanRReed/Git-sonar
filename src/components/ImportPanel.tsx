@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, ty
 import { formatMomentDate, makeMoment, useGraphStore } from '@lib/store/graph-store';
 import { snapshotGraphAt } from '@lib/git/graph';
 import type { RepoGraph } from '@lib/git/types';
-import { cleanSourceName, repoDisplayName } from '@lib/utils/repo-name';
+import { cleanSourceName, parseRepoInput, repoDisplayName } from '@lib/utils/repo-name';
 import { debugError } from '@lib/utils/debug';
 
 const DEFAULT_MAX_COMMITS = 1000;
@@ -16,18 +16,10 @@ const SUGGESTED_REPOS = ['sveltejs/svelte', 'facebook/react', 'rust-lang/rust', 
 /** Most dots the frame will draw, however large the history. */
 const MAX_DOTS = 84;
 
-type Provider = 'github' | 'gitlab' | 'bitbucket';
-
 /** One file from an opened folder (structurally matches import-git's GitFolderEntry). */
 interface GitFolderEntry {
   path: string;
   read: () => Promise<ArrayBuffer>;
-}
-
-function providerOf(url: string): Provider {
-  if (url.includes('gitlab.com')) return 'gitlab';
-  if (url.includes('bitbucket.org')) return 'bitbucket';
-  return 'github';
 }
 
 /** Cut a freshly read history back to the chosen moment, if there is one. */
@@ -140,10 +132,9 @@ export function ImportPanel() {
 
   const importFromUrl = useCallback(
     async (rawUrl: string) => {
-      const url = rawUrl.trim();
-      if (!url) return;
+      if (!rawUrl.trim()) return;
 
-      const provider = providerOf(url);
+      const { provider, path: url } = parseRepoInput(rawUrl);
       const name = repoDisplayName(url, null);
       setLoading(true);
       setError(null);
@@ -155,14 +146,13 @@ export function ImportPanel() {
         const options = {
           maxCommits: DEFAULT_MAX_COMMITS,
           authToken: token,
-          // GitHub and GitLab can be asked for the history as of a day.
           until: useGraphStore.getState().moment?.untilMs,
           onProgress: (found: number) => setImportStatus({ name, found }),
         };
         const graph = provider === 'gitlab'
           ? await imports.parseGitLabRepo(url, options)
           : provider === 'bitbucket'
-            ? asOfMoment(await imports.parseBitbucketRepo(url, options))
+            ? await imports.parseBitbucketRepo(url, options)
             : await imports.parseGitHubRepo(url, options);
 
         setAuthToken(token ?? null, rememberToken);
