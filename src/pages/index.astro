@@ -38,7 +38,7 @@ const posterById = (id: string) => LANDING_POSTERS.find((p) => p.id === id);
 const steps = [
 	{
 		title: "Bring a repo",
-		text: "Paste a link, open a folder from your computer, or drop a .git zip. Capture it as it is today, or as it stood on a day worth remembering.",
+		text: "Paste a link, open a folder or drop a .git zip. Take it as it is today, or as it stood on a day worth remembering.",
 	},
 	{
 		title: "Choose how it hangs",
@@ -52,10 +52,10 @@ const steps = [
 
 // Paper sizes drawn to scale against each other and a 5 ft bench (1 in = 0.4rem).
 const papers = [
-	{ name: "A4", w: 8.27, h: 11.69, note: "8.3 × 11.7 in", poster: posterById("swiss") },
-	{ name: "A3", w: 11.69, h: 16.54, note: "11.7 × 16.5 in", poster: posterById("growth-rings") },
-	{ name: "18 × 24", w: 18, h: 24, note: "The classic poster", poster: posterById("transit-map") },
-	{ name: "24 × 36", w: 24, h: 36, note: "One-sheet size", poster: posterById("core-sample") },
+	{ name: "A4", w: 8.27, h: 11.69, note: "Desk size", poster: posterById("swiss") },
+	{ name: "A3", w: 11.69, h: 16.54, note: "Hallway size", poster: posterById("growth-rings") },
+	{ name: "18 × 24 in", w: 18, h: 24, note: "The classic poster", poster: posterById("transit-map") },
+	{ name: "24 × 36 in", w: 24, h: 36, note: "One-sheet size", poster: posterById("core-sample") },
 ];
 ---
 
@@ -242,6 +242,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				</div>
 				<div class="elevation">
 					<p class="elevation__centre" aria-hidden="true"></p>
+					<p class="elevation__height" aria-hidden="true"><span>57 in to centre</span></p>
 					<ul class="elevation__row">
 						{papers.map((paper) => (
 							<li class="sheet" style={`--w:${paper.w};--h:${paper.h}`}>
@@ -561,9 +562,26 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				padding-top: clamp(0rem, 3vw, 2.4rem);
 			}
 
-			/* The red dot marks a piece you can remix; one quiet word says so. */
+			/* The red dot marks a piece you can remix. The word shows when the piece is
+			   pointed at, and always on a touch screen, where nothing can hover. */
 			.salon__remix-text {
 				color: var(--ink-2);
+				opacity: 0;
+				transform: translateX(-0.25rem);
+				transition: opacity 0.2s ease, transform 0.25s var(--ease-out);
+			}
+
+			.salon__piece:hover .salon__remix-text,
+			.salon__label:focus-visible .salon__remix-text {
+				opacity: 1;
+				transform: none;
+			}
+
+			@media (hover: none) {
+				.salon__remix-text {
+					opacity: 1;
+					transform: none;
+				}
 			}
 
 			.salon__piece figcaption {
@@ -716,25 +734,24 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				border-top: 1px dashed var(--ink-3);
 			}
 
-			/* How high that line is: a dimension drawn right beside the first sheet,
-			   from the centre line down to the floor. */
-			.sheet:first-child::before {
-				content: "";
+			/* How high that line is, as a dimension in a gutter of its own. */
+			.elevation__height {
 				position: absolute;
-				top: 50%;
-				left: -2.4rem;
+				top: calc(var(--u) * 18);
+				left: 0.5rem;
 				width: 9px;
 				height: calc(var(--u) * 57);
+				margin: 0;
 				border-top: 1.5px solid var(--ink);
 				border-bottom: 1.5px solid var(--ink);
 				background: linear-gradient(var(--ink), var(--ink)) 50% 0 / 1.5px 100% no-repeat;
 			}
 
-			.sheet:first-child::after {
-				content: "57 in to centre";
+			.elevation__height span {
 				position: absolute;
-				top: calc(50% + 0.5rem);
-				right: calc(100% + 2.9rem);
+				left: 15px;
+				top: 50%;
+				transform: translateY(-50%);
 				font-family: var(--font-serif);
 				font-size: 0.9rem;
 				font-style: italic;
@@ -921,8 +938,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				}
 
 				.sheet p span,
-				.sheet:first-child::before,
-				.sheet:first-child::after,
+				.elevation__height,
 				.yours__label {
 					display: none;
 				}

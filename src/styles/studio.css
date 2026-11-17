@@ -151,16 +151,17 @@ html[data-lights="off"] .ps-thumb__art {
   transition: transform 0.65s var(--ease-out);
 }
 
-/* "On the bench": a pale work surface runs along the bottom of the booth, with
-   the shadow line where it meets the back wall. */
+/* "On the bench": the sheet stands on a pale ledge, leaning on the back wall.
+   The ledge's edge sits just above the sheet's foot, so the two meet. */
 .ps-stage::before {
   content: "";
   position: absolute;
   inset: auto 0 5.5rem 0;
-  height: 17%;
+  height: var(--ledge, 2.5rem);
   background:
-    linear-gradient(180deg, rgba(20, 22, 24, 0.22), rgba(20, 22, 24, 0) 0.7rem),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 2px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.16));
+  box-shadow: 0 -1px 0 rgba(20, 22, 24, 0.2);
   transition: opacity 0.4s ease;
 }
 
@@ -168,10 +169,11 @@ html[data-lights="off"] .ps-thumb__art {
   opacity: 0;
 }
 
+/* A soft shadow on the wall behind the sheet and a tight one where it stands. */
 .ps-canvas {
   display: block;
   position: relative;
-  box-shadow: 0 1.8rem 3.2rem rgba(20, 22, 24, 0.38), 0 0.25rem 0.6rem rgba(20, 22, 24, 0.35);
+  box-shadow: 0 0.5rem 2.6rem rgba(20, 22, 24, 0.3), 0 0.5rem 0.5rem -0.2rem rgba(20, 22, 24, 0.5);
 }
 
 .ps-empty {
@@ -376,15 +378,28 @@ html[data-lights="off"] .is-wall .ps-stage {
   background: rgba(var(--paper-rgb), 0.9);
 }
 
-.ps-framing__sep {
-  width: 1px;
-  margin: 0.3rem 0.2rem;
-  background: var(--line-2);
+/* Frame and mat share one paper tab, so the checkbox reads as part of it. */
+.ps-framing {
+  padding: 0 0.7rem 0 0;
+  border-radius: 9px;
+  background: rgba(var(--paper-rgb), 0.9);
 }
 
-.ps-framing .g-seg button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.ps-framing label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ps-framing label.is-off {
+  opacity: 0.45;
+}
+
+.ps-framing input {
+  accent-color: #16181a;
 }
 
 /* Controls mounted on the stage keep their daylight look after hours,
@@ -1004,8 +1019,8 @@ html[data-lights="off"] .ps-checks input:checked::after {
   /* Short enough that the style strip and the first controls show beneath it. */
   /* Sized so the first screen is whole: stage, style strip, then the bar. */
   .ps-stage {
-    height: calc(100dvh - 27.6rem);
-    min-height: 19rem;
+    height: calc(100dvh - 24.9rem);
+    min-height: 20rem;
   }
 
   .ps-rail {

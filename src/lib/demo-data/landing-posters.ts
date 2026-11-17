@@ -80,7 +80,8 @@ export const LANDING_POSTERS: LandingPoster[] = SPECS.map((s) => ({
 }));
 
 /** The framed posters hung beside the empty frame in the hero (by id). */
-export const HERO_POSTER_IDS = ['growth-rings', 'pulsar'];
+// In catalogue order, so the hero labels read No. 01, No. 02.
+export const HERO_POSTER_IDS = ['pulsar', 'growth-rings'];
 
 /** Facts about the sample repo, for wall labels. Build-time only. */
 export function showcaseFacts(): { commits: number; authors: number; merges: number } {

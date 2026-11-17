@@ -373,10 +373,10 @@ select {
   text-wrap: pretty;
 }
 
-/* After hours a black frame would vanish into the wall; lift it to graphite
-   and give it a rim of light. */
+/* After hours a black frame would vanish into the wall; it stays black but
+   takes a rim of light from the picture lamp. */
 html[data-lights="off"] .g-frame:not(.g-frame--oak) {
-  background: #34383a;
+  background: #202324;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),

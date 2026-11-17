@@ -319,6 +319,7 @@ export function ImportPanel() {
       <div className="desk__ask">
         <h1>Which repo are we hanging?</h1>
 
+        <label className="desk__field-label" htmlFor="repository-url">Repo link</label>
         <form className="desk__form" onSubmit={handleSubmit}>
           <input
             id="repository-url"

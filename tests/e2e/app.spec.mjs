@@ -62,7 +62,7 @@ test.describe('Git Sonar app', () => {
     test('the empty frame sends a pasted repo to the studio', async ({ page }) => {
         await page.route('https://api.github.com/**', (route) => route.abort());
         await page.goto('/');
-        await page.getByLabel('Paste a repo link and see it hung.').fill('https://github.com/sveltejs/svelte');
+        await page.getByLabel('Paste a repo link to see it hung.').fill('https://github.com/sveltejs/svelte');
         await page.getByRole('button', { name: 'Make my poster' }).click();
         await expect(page).toHaveURL(/\/app\?github=sveltejs%2Fsvelte/);
     });

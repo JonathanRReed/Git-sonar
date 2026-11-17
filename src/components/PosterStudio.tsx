@@ -79,7 +79,7 @@ const WALL = {
     centre: 57,
     bench: { w: 60, h: 18 },
     /** Visible strip of floor under the bench, in px. */
-    floorPx: 60,
+    floorPx: 46,
 };
 type FrameStyle = 'none' | 'black' | 'oak' | 'white';
 const FRAMES: { id: FrameStyle; label: string; color: string }[] = [
@@ -652,6 +652,8 @@ export function PosterStudio() {
     // Only show the label when there is bare stage beside the sheet for it.
     const benchW = Math.min(fit.stageW - 56, (fit.stageH - TRAY_H - STAGE_TOP - 52) * fit.aspect);
     const plaqueFits = (fit.stageW - benchW) / 2 >= 250;
+    const benchH = benchW / fit.aspect;
+    const ledge = Math.max(18, (fit.stageH - TRAY_H - STAGE_TOP - benchH) / 2 + Math.min(22, benchH * 0.03));
 
     // "On a wall": a gallery elevation at true scale. The sheet hangs with its
     // centre 57 in above the floor, over a museum bench for a sense of size.
@@ -671,6 +673,7 @@ export function PosterStudio() {
         '--frame': `${wall.frameIn * ppi}px`,
         '--frame-color': frameColor,
         '--floor': `${WALL.floorPx}px`,
+        '--ledge': `${ledge}px`,
     } as React.CSSProperties;
 
     return (
@@ -770,9 +773,10 @@ export function PosterStudio() {
                         {FRAMES.map((f) => (
                             <button key={f.id} type="button" tabIndex={onWall ? 0 : -1} aria-pressed={frame === f.id} onClick={() => setFrame(f.id)}>{f.label}</button>
                         ))}
-                        <span className="ps-framing__sep" aria-hidden="true" />
-                        <button type="button" tabIndex={onWall ? 0 : -1} aria-pressed={framed && mat} disabled={!framed} onClick={() => setMat((v) => !v)}>Mat</button>
                     </div>
+                    <label className={framed ? '' : 'is-off'}>
+                        <input type="checkbox" tabIndex={onWall ? 0 : -1} checked={mat} disabled={!framed} onChange={(e) => setMat(e.target.checked)} /> Mat
+                    </label>
                 </div>
                 <p className="ps-wallnote" aria-hidden={!onWall}>{sizeLabel}, hung at gallery height</p>
 
