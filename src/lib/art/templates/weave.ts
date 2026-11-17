@@ -10,6 +10,7 @@ import type { Scene, SceneStroke, SceneText } from '../scene';
 import { fontStack } from '../fonts';
 import { adjustLightness, withAlpha } from '../palette';
 import { authorColorer, plural, rect, text, timeBuckets, titleOf } from './kit';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'Syne';
 const MONO_FONT = 'JetBrainsMono';
@@ -83,7 +84,8 @@ function build(ctx: TemplateContext): Scene {
         font: fontStack(MONO_FONT), size: width * 0.0152, weight: 500, color: palette.fgMuted, spacing: width * 0.0022,
     }));
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width - margin, baseY + width * 0.036, {
+        // In the top margin, clear of the fringe; the caption owns the bottom line.
+        texts.push(text(CREDIT, width - margin, Math.min(margin * 0.62, top - fringe - width * 0.012), {
             font: fontStack(MONO_FONT), size: width * 0.013, weight: 600, color: withAlpha(palette.fg, 0.5), align: 'end', spacing: width * 0.004,
         }));
     }

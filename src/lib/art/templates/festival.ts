@@ -14,6 +14,7 @@ import type { Scene, SceneText, SceneNode, SceneStroke } from '../scene';
 import { buildGraphScene, typeScale, formatDate, type Box } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha } from '../palette';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'Unbounded';   // expressive festival name
 const NAME_FONT = 'BarlowCondensed'; // all-caps lineup names
@@ -189,7 +190,7 @@ function build(ctx: TemplateContext): Scene {
     }));
 
     if (options.showWatermark) {
-        texts.push(text('PRESENTED BY GITSONAR.COM', width / 2, footerY, {
+        texts.push(text(`PRESENTED BY ${CREDIT}`, width / 2, footerY, {
             font: fontStack(META_FONT), size: scale(-3.2), weight: 500,
             color: withAlpha(palette.fgMuted, 0.7), align: 'middle', spacing: width * 0.008,
         }));

@@ -10,6 +10,7 @@ import type { Scene, SceneStroke, SceneText, Vec2 } from '../scene';
 import { fontStack } from '../fonts';
 import { adjustLightness, withAlpha } from '../palette';
 import { authorColorer, line, monthYear, plural, poly, rect, text, timeBuckets, titleOf } from './kit';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'Oswald';
 const MONO_FONT = 'JetBrainsMono';
@@ -113,7 +114,8 @@ function build(ctx: TemplateContext): Scene {
         lx += chip * 1.45 + label.length * width * 0.0083 + width * 0.028;
     });
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width - margin, margin + width * 0.012, {
+        // Above the title, so a long repo name cannot run into it.
+        texts.push(text(CREDIT, width - margin, margin * 0.62, {
             font: fontStack(MONO_FONT), size: width * 0.013, weight: 600, color: withAlpha(palette.fg, 0.5), align: 'end', spacing: width * 0.004,
         }));
     }

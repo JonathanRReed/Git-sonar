@@ -16,6 +16,7 @@ import { fontStack } from '../fonts';
 import { withAlpha, adjustLightness } from '../palette';
 import { gaussian, rangeOf } from '../rng';
 import { monthYear } from './kit';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'Cormorant';
 const SUB_FONT = 'PlayfairDisplay';
@@ -190,7 +191,7 @@ function build(ctx: TemplateContext): Scene {
     }));
 
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width / 2, margin * 0.85, {
+        texts.push(text(CREDIT, width / 2, margin * 0.85, {
             font: fontStack(MONO_FONT), size: scale(-3.4), weight: 600, color: withAlpha(palette.fgMuted, 0.55), align: 'middle', spacing: width * 0.006,
         }));
     }

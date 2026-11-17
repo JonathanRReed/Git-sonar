@@ -14,6 +14,7 @@ import type { Scene, SceneText, SceneStroke, Vec2 } from '../scene';
 import { buildGraphScene, trackList, truncate, type Box } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha } from '../palette';
+import { CREDIT } from '../../brand';
 
 const ARTIST_FONT = 'Unbounded'; // album "artist" / title display face
 const ALBUM_FONT = 'Syne'; // secondary display
@@ -147,7 +148,7 @@ function build(ctx: TemplateContext): Scene {
 
     // Watermark — bottom-right, restrained.
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM · RECORDS', width - margin, footerY, {
+        texts.push(text(`${CREDIT} · RECORDS`, width - margin, footerY, {
             font: fontStack(MONO_FONT), size: width * 0.013, weight: 600,
             color: withAlpha(palette.fg, 0.5), align: 'end', spacing: width * 0.003,
         }));

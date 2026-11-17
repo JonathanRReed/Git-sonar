@@ -18,6 +18,7 @@ import type { Scene, SceneStroke, SceneText, Vec2 } from '../scene';
 import { typeScale, formatDate } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha, readableInk } from '../palette';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'SpaceGrotesk';
 const MONO_FONT = 'JetBrainsMono';
@@ -166,7 +167,7 @@ function build(ctx: TemplateContext): Scene {
     }
 
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width / 2, height - height * 0.045, {
+        texts.push(text(CREDIT, width / 2, height - height * 0.045, {
             font: fontStack(MONO_FONT), size: scale(-4), weight: 600,
             color: withAlpha(ink, 0.5), align: 'middle', spacing: width * 0.006,
         }));

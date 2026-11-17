@@ -10,6 +10,7 @@ import type { Scene, SceneStroke, SceneText } from '../scene';
 import { fontStack } from '../fonts';
 import { withAlpha } from '../palette';
 import { plural, poly, rect, text, titleOf } from './kit';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'Oswald';
 const MONO_FONT = 'JetBrainsMono';
@@ -111,7 +112,7 @@ function build(ctx: TemplateContext): Scene {
         }));
     }
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width - margin, height - margin, {
+        texts.push(text(CREDIT, width - margin, height - margin, {
             font: fontStack(MONO_FONT), size: width * 0.013, weight: 600, color: withAlpha(palette.fg, 0.5), align: 'end', spacing: width * 0.004,
         }));
     }

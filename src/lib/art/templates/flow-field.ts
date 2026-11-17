@@ -15,6 +15,7 @@ import type { Scene, SceneStroke, SceneText, Vec2 } from '../scene';
 import { typeScale, formatDate, sampleNodes } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha, adjustLightness } from '../palette';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'Syne';
 const CREDIT_FONT = 'JetBrainsMono';
@@ -141,8 +142,10 @@ function build(ctx: TemplateContext): Scene {
 
     // Title — bottom-left, sitting in the reserved margin band.
     const title = (options.title || options.repoName || 'flow field').toString();
+    // Syne is wide: about 0.78 em a capital, so long names step down to fit.
+    const titleSize = Math.min(scale(0.2), (right - left) / (title.length * 0.78 + 1));
     texts.push(text(title.toUpperCase(), left, bottom + scale(-1.2), {
-        font: fontStack(TITLE_FONT), size: scale(0.2), weight: 700,
+        font: fontStack(TITLE_FONT), size: titleSize, weight: 700,
         color: palette.fg, align: 'start', spacing: width * 0.004,
     }));
 
@@ -154,17 +157,17 @@ function build(ctx: TemplateContext): Scene {
         color: palette.fgMuted, align: 'start', spacing: width * 0.002,
     }));
 
-    // Thin credit line — bottom-right, mirrors the title baseline.
+    // Dates, bottom-right on the tagline's baseline so the title has its own line.
     const credit = signals.timeSpanMs > 0
         ? `${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase()
         : 'GENERATIVE FLOW FIELD';
-    texts.push(text(credit, right, bottom + scale(-1.2), {
+    texts.push(text(credit, right, bottom + scale(-1.2) + scale(-1.6), {
         font: fontStack(CREDIT_FONT), size: scale(-2.8), weight: 400,
         color: palette.fgMuted, align: 'end', spacing: width * 0.003,
     }));
 
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', right, top, {
+        texts.push(text(CREDIT, right, top, {
             font: fontStack(CREDIT_FONT), size: scale(-3.2), weight: 500,
             color: withAlpha(palette.fg, 0.45), align: 'end', spacing: width * 0.005,
         }));

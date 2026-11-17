@@ -9,6 +9,7 @@ import type { GlyphShape, SceneEdge, SceneNode, Vec2 } from './scene';
 import type { TemplateContext } from './template';
 import { createPositioner, type LayoutMode } from './layout';
 import { withAlpha } from './palette';
+import { CREDIT } from '../brand';
 
 export interface Box {
     x: number;
@@ -321,7 +322,7 @@ export function billingLines(ctx: TemplateContext): string[] {
         lines.push(formatDateRange(signals.firstCommitMs, signals.lastCommitMs).toUpperCase());
     }
     if (options.showSignature) {
-        lines.push('GITSONAR.COM');
+        lines.push(CREDIT);
     }
     return lines;
 }

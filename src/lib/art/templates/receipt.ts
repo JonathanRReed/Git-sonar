@@ -10,6 +10,7 @@ import { fontStack } from '../fonts';
 import { adjustLightness, withAlpha } from '../palette';
 import { formatCompact } from '../compose';
 import { poly, rect, shortDate, text, titleOf } from './kit';
+import { CREDIT } from '../../brand';
 
 const MONO_FONT = 'JetBrainsMono';
 /** Characters across the receipt. */
@@ -74,7 +75,7 @@ function build(ctx: TemplateContext): Scene {
     rows.push({ kind: 'gap' });
     rows.push({ kind: 'barcode' });
     rows.push({ kind: 'center', text: head.slice(0, 7) });
-    if (options.showWatermark) rows.push({ kind: 'center', text: 'GITSONAR.COM' });
+    if (options.showWatermark) rows.push({ kind: 'center', text: CREDIT });
 
     // ---- the paper, sized to its contents -----------------------------------
     const units = rows.reduce((n, r) => n + (r.kind === 'barcode' ? 3 : r.kind === 'center' && r.big ? 1.9 : r.kind === 'gap' ? 0.6 : 1), 0);
