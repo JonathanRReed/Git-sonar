@@ -92,26 +92,50 @@ describe('ImportPanel', () => {
         expect(screen.getByLabelText('Repository archive').getAttribute('name')).toBe('repository-archive');
     });
 
-    it('loads the selected demo when Load Demo is pressed', async () => {
+    it('asks one question and offers the ways in', () => {
         render(<ImportPanel />);
 
-        fireEvent.click(screen.getByRole('button', { name: 'Load Demo' }));
+        expect(screen.getByRole('heading', { name: 'Which repo are we hanging?' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Make poster' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Open a folder on this computer/ })).toBeTruthy();
+    });
+
+    it('loads the sample repo and remembers which demo it is', async () => {
+        render(<ImportPanel />);
+
+        fireEvent.click(screen.getByRole('button', { name: /Use the sample repo/ }));
 
         await waitFor(() => {
-            expect(loadDemoDataset).toHaveBeenCalledWith('branching');
-            expect(useGraphStore.getState().graph?.defaultHead).toBe('branching-000002');
+            expect(loadDemoDataset).toHaveBeenCalledWith('showcase');
+            expect(useGraphStore.getState().graph?.defaultHead).toBe('showcase-000002');
+            expect(useGraphStore.getState().currentDemo).toBe('showcase');
         });
     });
 
-    it('changes the selected demo with the size controls', async () => {
+    it('keeps the call to action enabled and focuses the box on an empty submit', () => {
         render(<ImportPanel />);
 
-        fireEvent.click(screen.getByRole('button', { name: 'Large' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Load Demo' }));
+        const button = screen.getByRole('button', { name: 'Make poster' }) as HTMLButtonElement;
+        expect(button.disabled).toBe(false);
+        fireEvent.click(button);
 
-        await waitFor(() => {
-            expect(loadDemoDataset).toHaveBeenCalledWith('complex');
-            expect(useGraphStore.getState().graph?.defaultHead).toBe('complex-000002');
-        });
+        expect(document.activeElement).toBe(screen.getByLabelText('Repository URL'));
+        expect(useGraphStore.getState().isLoading).toBe(false);
+    });
+});
+
+describe('import state', () => {
+    it('keeps the loading state when the previous error is cleared', () => {
+        const store = useGraphStore.getState();
+        store.setLoading(true);
+        store.setError(null);
+        store.setImportStatus({ name: 'svelte', found: 200 });
+
+        expect(useGraphStore.getState().isLoading).toBe(true);
+        expect(useGraphStore.getState().importStatus?.found).toBe(200);
+
+        useGraphStore.getState().setError('Rate limited');
+        expect(useGraphStore.getState().isLoading).toBe(false);
+        expect(useGraphStore.getState().importStatus).toBeNull();
     });
 });

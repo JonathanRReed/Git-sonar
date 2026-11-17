@@ -1,0 +1,134 @@
+---
+import { BRAND } from "@lib/brand";
+
+interface Props {
+	/** Which page is current, for aria-current. */
+	current?: "home" | "about";
+}
+
+const { current } = Astro.props;
+---
+
+<nav class="site-nav" aria-label="Primary">
+	<a class="site-nav__brand" href="/" aria-current={current === "home" ? "page" : undefined}>{BRAND.name}</a>
+	<div class="site-nav__links">
+		<a href="/#collection">The collection</a>
+		<a href="/#how">How it works</a>
+		<a href="/about" aria-current={current === "about" ? "page" : undefined}>About</a>
+		<a href={BRAND.repoUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
+		<a class="site-nav__cta" href="/app">Open the studio</a>
+		<span class="site-nav__lights">Lights</span>
+		<button class="g-switch" type="button" data-light-switch aria-pressed="true" aria-label="Gallery lights" title="Gallery lights"></button>
+	</div>
+</nav>
+
+<script>
+	import "../../scripts/lights";
+</script>
+
+<style>
+	.site-nav {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		width: min(80rem, calc(100% - 2.5rem));
+		margin: 0 auto;
+		padding: 1.4rem 0 0;
+		font-family: var(--font-sans);
+	}
+
+	.site-nav__brand {
+		color: var(--ink);
+		font-size: 1.3rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		text-decoration: none;
+	}
+
+	.site-nav__links {
+		display: flex;
+		align-items: center;
+		gap: clamp(0.9rem, 2.2vw, 1.9rem);
+	}
+
+	.site-nav__links a {
+		padding: 0.35rem 0;
+		color: var(--ink);
+		font-size: 0.95rem;
+		font-weight: 500;
+		text-decoration: none;
+		background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat;
+		transition: background-size 0.25s var(--ease-out);
+	}
+
+	.site-nav__links a:hover,
+	.site-nav__links a[aria-current="page"] {
+		background-size: 100% 1.5px;
+	}
+
+	/* The one action in the nav, as a small outlined button. */
+	.site-nav__links .site-nav__cta {
+		padding: 0.5rem 0.9rem;
+		font-weight: 700;
+		background: none;
+		box-shadow: inset 0 0 0 1.5px var(--ink);
+		transition: background-color 0.15s ease, color 0.15s ease;
+	}
+
+	.site-nav__links .site-nav__cta:hover {
+		background: var(--ink);
+		color: var(--paper);
+	}
+
+	.site-nav {
+		align-items: center;
+	}
+
+	.site-nav__lights {
+		margin-right: -0.9rem;
+		font-family: var(--font-serif);
+		font-size: 0.95rem;
+		font-style: italic;
+		font-weight: 500;
+		color: var(--ink);
+	}
+
+	/* On a phone the page links drop to a quiet second row under the wordmark. */
+	@media (max-width: 720px) {
+		.site-nav {
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			gap: 0.4rem 1.3rem;
+		}
+
+		/* Forces the page links onto their own row. */
+		.site-nav::after {
+			content: "";
+			order: 2;
+			flex-basis: 100%;
+		}
+
+		.site-nav__links {
+			display: contents;
+		}
+
+		.site-nav__brand {
+			margin-right: auto;
+		}
+
+		.site-nav__links a:not(.site-nav__cta) {
+			order: 3;
+			font-size: 0.9rem;
+		}
+
+		.site-nav__links a[target="_blank"],
+		.site-nav__lights {
+			display: none;
+		}
+
+		.site-nav__cta + .site-nav__lights + .g-switch {
+			margin-left: 0.6rem;
+		}
+	}
+</style>

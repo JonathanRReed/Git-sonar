@@ -2,7 +2,9 @@
 
 ![Git Sonar logo](public/favicon.svg)
 
-Explore Git history as a graph, then turn it into a poster, album cover, or generative print. Processing and rendering run in the browser; imported repository data is not uploaded to an app server.
+Git Sonar turns the history of a Git repo into a poster you can print and frame. I made it as a love letter to code. If you built something you're proud of and it has a repo, this is a way to display it. It's free and it runs in the browser, so repository data is never uploaded to an app server.
+
+The site is built like a gallery. Posters hang in frames on a wall with labels, the call to action is an empty frame, and the light switch in the navigation turns the lights off.
 
 ## Run locally
 
@@ -23,17 +25,18 @@ Open `http://localhost:4321`.
 
 ## Import history
 
-Load a bundled Small, Medium, or Large demo. Alternatively, paste a GitHub, GitLab, or Bitbucket repository URL. An optional token supports private repositories and higher rate limits.
+The app opens on one question, "Which repo are we hanging?", with four ways in:
 
-To import a local repository, zip its `.git` directory and drop the archive into the app:
+- **Paste a link** to a GitHub, GitLab, or Bitbucket repository, or click one of the suggested public repos. An optional token supports private repositories and higher rate limits, and lets GitHub imports include lines added and removed (GitLab imports always include them).
+- **Open a folder on this computer.** Pick the project folder; only `.git` is read, nothing is zipped, and it works offline.
+- **Drop a `.git` zip** anywhere on the page: `cd your-repo && zip -r repo-git.zip .git`
+- **Use the sample repo**, Project Atlas.
 
-```bash
-cd your-repo && zip -r git-export.zip .git
-```
+While a repository loads, its commits land in the empty frame and the wall label counts them.
 
 ## Explore the graph
 
-Drag to pan, scroll or pinch to zoom, and click a commit to select it. Double-click or press Enter for details. Search by message, author, or SHA. The timeline scrubber and calendar navigate by date; the camera and document controls export PNG and SVG.
+Switch from Poster to History in the header. Drag to pan, scroll or pinch to zoom, and click a commit to select it. Double-click or press Enter for details. Search by message, author, or SHA. The timeline scrubber and calendar navigate by date; the camera and document controls export PNG and SVG.
 
 Branches occupy separate lanes. Spatial indexing, viewport culling, level-of-detail rendering, batched edges, debounced search, and incremental loading reduce work for large histories. Live announcements and focus management support screen readers.
 
@@ -51,22 +54,30 @@ Branches occupy separate lanes. Spatial indexing, viewport culling, level-of-det
 
 ## Make a poster
 
-Import history, click Poster, then choose a template, title, theme, palette, and data mappings. Shuffle changes the seed; the same seed and settings reproduce the same design.
+The studio opens as soon as a repository loads. Pick a style from the rail (each thumbnail is drawn from your own history), then set the words, colours, and what the marks mean. The dice shuffle the composition and keep earlier rolls in a tray; the same roll and settings always reproduce the same design. Undo and redo work, as do `S` (shuffle), `W` (wall), and the arrow keys (styles).
 
-| Template | Uses |
+| Style | Draws |
 | --- | --- |
-| Movie One-Sheet | Commit graph and a generated billing block |
-| Festival Lineup | Contributors arranged as a festival bill |
-| Album + Tracklist | Cover art and commits as tracks |
-| Flow Field | Seeded ribbons |
-| Pulsar | Commit cadence as stacked curves |
-| Year in Code | A radial year-ring spiral |
-| Constellation | A star map |
-| Swiss Grid | A typographic data print |
+| Pulsar | Commit cadence as stacked ridgelines |
+| Flow field | Authors as seeded currents |
+| Growth rings | One ring per week, thick where the work was heavy |
+| Transit map | Branches as lines, commits as stations, merges as interchanges |
+| Core sample | One layer per month, coloured by who led it |
+| Weave | A row per week, dyed by its lead author |
+| Punch card | Commits by weekday and hour, with the busiest slot named |
+| Receipt | The history itemised by author, with a barcode from the head commit |
+| Year in code | A radial year-ring spiral |
+| Album | Cover art and commits as tracks |
+| Movie poster | Commit graph and a generated billing block |
+| Constellation | Each month as its own constellation |
+| Festival | Contributors arranged as a festival bill |
+| Swiss grid | A typographic data print |
 
-Map authors, lanes, time, or churn to color. Map churn, recency, or merges to size. Other controls adjust turbulence, density, and glow. OKLCH palettes use Night, Dawn, GitHub, Nord, or Dracula themes with duotone, mono, or vivid variants.
+Colour themes are Night, Dawn, Gallery Paper, Riso, Blueprint, GitHub, Nord, and Dracula, each with full, two-tone, one-ink, and vivid palettes (OKLCH).
 
-Export high-resolution PNG, vector SVG, or vector PDF. PDF supports A4 through A1, 18×24, and 24×36 print dimensions in sRGB, with an optional print-safe palette. Outputs embed fonts; SVG uses base64 `@font-face`, while PDF registers font faces. The build fetches TTF files into `public/fonts/`.
+**On a wall** hangs the poster in a gallery elevation drawn to scale: centred 57 inches above the floor, over a five-foot bench, with dimension lines and a choice of frame and mat. **Listen** plays the history as sound, one note per week.
+
+Download asks what the poster is for: a screen (PNG), a print shop (PDF), a README (animated SVG plus the Markdown line), a designer (SVG), the clipboard, or a link. PDF supports A4 through A1, 18×24, and 24×36 print dimensions in sRGB, with an optional print-safe palette. Outputs embed fonts; SVG uses base64 `@font-face`, while PDF registers font faces. The build fetches TTF files into `public/fonts/`.
 
 Copy link encodes settings in `#p=…`. Public-repository and demo links can reproduce the poster for another visitor. Private or local-import links restore settings only; the recipient still needs the repository data.
 

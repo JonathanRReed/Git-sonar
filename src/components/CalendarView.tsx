@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useGraphStore } from '@lib/store/graph-store';
-import { hexToRgba } from '@lib/utils/color';
+
 
 function startOfDay(date: Date) {
   const d = new Date(date);
@@ -23,7 +23,7 @@ function formatRange(start: Date, end: Date) {
 }
 
 export function CalendarView() {
-  const { nodes, theme, viewMode } = useGraphStore();
+  const { nodes, viewMode } = useGraphStore();
 
   const calendar = useMemo(() => {
     if (nodes.length === 0) {
@@ -80,7 +80,7 @@ export function CalendarView() {
     <div className="calendar-view">
       <div className="calendar-header">
         <div>
-          <h2>Calendar View</h2>
+          <h2>Commit calendar</h2>
           <p>{calendar.rangeLabel}</p>
         </div>
         <div className="calendar-stats">
@@ -109,7 +109,7 @@ export function CalendarView() {
                     role="gridcell"
                     className="calendar-cell"
                     title={`${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}: ${day.count} commits`}
-                    style={{ backgroundColor: hexToRgba(theme.colors.foam, alpha) }}
+                    style={{ backgroundColor: `rgba(var(--rp-text-rgb), ${alpha})` }}
                   />
                 );
               })}
@@ -122,7 +122,7 @@ export function CalendarView() {
         <span>Less</span>
         <div className="legend-scale">
           {[0.08, 0.2, 0.4, 0.6, 0.8].map((alpha) => (
-            <span key={alpha} style={{ backgroundColor: hexToRgba(theme.colors.foam, alpha) }} />
+            <span key={alpha} style={{ backgroundColor: `rgba(var(--rp-text-rgb), ${alpha})` }} />
           ))}
         </div>
         <span>More</span>
@@ -141,9 +141,9 @@ export function CalendarView() {
           flex-direction: column;
           gap: 1.5rem;
           background:
-            radial-gradient(circle at 18% 14%, rgba(143, 211, 199, 0.14), transparent 30rem),
-            radial-gradient(circle at 86% 10%, rgba(242, 179, 109, 0.12), transparent 28rem),
-            rgba(8, 9, 8, 0.96);
+            radial-gradient(circle at 18% 14%, rgba(var(--rp-text-rgb), 0.14), transparent 30rem),
+            radial-gradient(circle at 86% 10%, rgba(217, 43, 37, 0.12), transparent 28rem),
+            rgba(var(--rp-surface-rgb), 0.96);
           z-index: 6;
           overflow: auto;
         }
@@ -180,8 +180,8 @@ export function CalendarView() {
           flex-direction: column;
           gap: 0.75rem;
           padding: 1.5rem;
-          background: rgba(16, 18, 15, 0.78);
-          border: 1px solid rgba(244, 240, 232, 0.12);
+          background: rgba(var(--rp-surface-rgb), 0.78);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.12);
           border-radius: 1rem;
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.2);
           backdrop-filter: blur(18px);
@@ -214,7 +214,7 @@ export function CalendarView() {
           width: 14px;
           height: 14px;
           border-radius: 4px;
-          background: rgba(156, 207, 216, 0.08);
+          background: rgba(var(--rp-text-rgb), 0.08);
           border: 1px solid rgba(255, 255, 255, 0.04);
         }
 

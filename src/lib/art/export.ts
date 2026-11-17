@@ -239,6 +239,9 @@ export interface PermalinkSource {
     provider?: 'github' | 'gitlab' | 'bitbucket' | null;
     repoPath?: string | null;
     demo?: string | null;
+    /** An earlier moment being captured: its day (YYYY-MM-DD) and label. */
+    until?: string | null;
+    moment?: string | null;
 }
 
 /**
@@ -259,6 +262,10 @@ export function posterPermalink(cfg: PosterConfig, source?: PermalinkSource, bas
     } else if (source?.provider && source?.repoPath) {
         params.set(source.provider, source.repoPath);
         reproducible = true;
+    }
+    if (reproducible && source?.until) {
+        params.set('until', source.until);
+        if (source.moment) params.set('moment', source.moment);
     }
     params.set('view', 'poster');
     return { url: `${origin}?${params.toString()}#p=${encoded}`, reproducible };

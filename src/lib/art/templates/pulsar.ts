@@ -18,6 +18,7 @@ import type { Scene, SceneStroke, SceneText, Vec2 } from '../scene';
 import { typeScale, formatDate } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha, readableInk } from '../palette';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'SpaceGrotesk';
 const MONO_FONT = 'JetBrainsMono';
@@ -112,8 +113,8 @@ function build(ctx: TemplateContext): Scene {
         ];
 
         // Fade the farthest rows slightly so the stack recedes into the dark.
-        const lineAlpha = 0.45 + 0.55 * rowFrac;
-        const lineW = (0.9 + 1.1 * rowFrac) * encoding.weightScale;
+        const lineAlpha = 0.72 + 0.28 * rowFrac;
+        const lineW = (1.15 + 1.0 * rowFrac) * encoding.weightScale;
 
         // Push far-to-near: top rows (r small) first, so each later (lower)
         // ridge's opaque fill hides the lines of the ridges behind it.
@@ -152,13 +153,23 @@ function build(ctx: TemplateContext): Scene {
     const repoLabel = (options.repoName || 'repository').toString().toUpperCase();
     texts.push(text(`${repoLabel}  ·  ${spanLabel}`, width / 2, height - height * 0.07, {
         font: fontStack(MONO_FONT), size: scale(-3.4), weight: 500,
-        color: withAlpha(ink, 0.55), align: 'middle', spacing: width * 0.004,
+        color: withAlpha(ink, 0.72), align: 'middle', spacing: width * 0.004,
     }));
+    // A tagline (for example the moment being captured) gets its own line
+    // above the caption, shrunk if needed so it never runs off the sheet.
+    if (options.subtitle) {
+        const tagline = options.subtitle.toUpperCase();
+        const tagSize = Math.min(scale(-2.6), (width * 0.84) / (tagline.length * 0.78));
+        texts.push(text(tagline, width / 2, height - height * 0.1, {
+            font: fontStack(MONO_FONT), size: tagSize, weight: 500,
+            color: withAlpha(ink, 0.82), align: 'middle', spacing: tagSize * 0.16,
+        }));
+    }
 
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width / 2, height - height * 0.045, {
+        texts.push(text(CREDIT, width / 2, height - height * 0.045, {
             font: fontStack(MONO_FONT), size: scale(-4), weight: 600,
-            color: withAlpha(ink, 0.32), align: 'middle', spacing: width * 0.006,
+            color: withAlpha(ink, 0.5), align: 'middle', spacing: width * 0.006,
         }));
     }
 

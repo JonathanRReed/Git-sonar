@@ -253,7 +253,7 @@ export function CommitDetailsDialog() {
           -webkit-backdrop-filter: blur(24px);
           color: var(--rp-text);
           box-shadow:
-            0 0 60px rgba(156, 207, 216, 0.15),
+            0 0 60px rgba(var(--rp-text-rgb), 0.15),
             0 30px 60px rgba(196, 167, 231, 0.1),
             0 0 0 1px rgba(0, 0, 0, 0.3);
           z-index: 1000;
@@ -378,8 +378,8 @@ export function CommitDetailsDialog() {
         .commit-sha code {
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.8rem;
-          background: rgba(156, 207, 216, 0.1);
-          border: 1px solid rgba(156, 207, 216, 0.2);
+          background: rgba(var(--rp-text-rgb), 0.1);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.2);
           border-radius: 6px;
           padding: 0.3em 0.6em;
           color: var(--rp-foam);
@@ -479,9 +479,9 @@ export function CommitDetailsDialog() {
         }
 
         .commit-tag--branch {
-          background: rgba(156, 207, 216, 0.1);
+          background: rgba(var(--rp-text-rgb), 0.1);
           color: var(--rp-foam);
-          border: 1px solid rgba(156, 207, 216, 0.2);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.2);
         }
 
         .commit-stats-row {
@@ -525,7 +525,7 @@ export function CommitDetailsDialog() {
 
         .commit-stat--add {
           color: var(--rp-foam);
-          border-color: rgba(156, 207, 216, 0.2);
+          border-color: rgba(var(--rp-text-rgb), 0.2);
         }
 
         .commit-stat--del {
@@ -597,8 +597,8 @@ export function CommitDetailsDialog() {
         }
 
         .commit-dialog__action-btn.primary:hover {
-          background: linear-gradient(135deg, rgba(156, 207, 216, 0.9), rgba(196, 167, 231, 0.9));
-          box-shadow: 0 8px 25px rgba(156, 207, 216, 0.3);
+          background: linear-gradient(135deg, rgba(var(--rp-text-rgb), 0.9), rgba(196, 167, 231, 0.9));
+          box-shadow: 0 8px 25px rgba(var(--rp-text-rgb), 0.3);
         }
 
         @media (max-width: 600px) {

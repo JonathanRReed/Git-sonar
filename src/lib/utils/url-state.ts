@@ -6,7 +6,7 @@
  */
 
 import type { ViewMode, LayoutMode } from '@lib/store/graph-store';
-import type { ThemeId } from '@lib/themes';
+import { THEME_IDS, type ThemeId } from '@lib/themes';
 
 export interface ShareableState {
     /** Repository provider and path */
@@ -23,7 +23,7 @@ export interface ShareableState {
     commit?: string;
 }
 
-const VALID_THEMES: ThemeId[] = ['night', 'dawn', 'github', 'nord', 'dracula'];
+const VALID_THEMES: ThemeId[] = THEME_IDS;
 const VALID_LAYOUTS: LayoutMode[] = ['vertical', 'horizontal', 'radial'];
 const VALID_VIEWS: ViewMode[] = ['inspect', 'poster', 'calendar'];
 
@@ -95,7 +95,8 @@ export function generateShareableUrl(state: ShareableState): string {
         params.set('layout', state.layout);
     }
 
-    if (state.view && state.view !== 'inspect') {
+    // The studio is the default view, so only other views need saying.
+    if (state.view && state.view !== 'poster') {
         params.set('view', state.view);
     }
 

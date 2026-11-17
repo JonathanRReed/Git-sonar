@@ -5,6 +5,13 @@ interface DemoDatasetLoader {
 }
 
 const DEMO_DATASET_LOADERS: Record<string, DemoDatasetLoader> = {
+    // The sample repo behind the landing-page collection: built in memory, no fetch.
+    showcase: {
+        async load() {
+            const { buildShowcaseGraph } = await import('./showcase');
+            return buildShowcaseGraph();
+        },
+    },
     simple: {
         async load() {
             const response = await fetch('/data/simple.json');

@@ -197,6 +197,10 @@ export interface Theme {
     name: string;
     variant: ThemeVariant;
     colors: ThemeColors;
+    /** A second paper colour the sheet fades into, with the fade's angle in degrees. */
+    wash?: { color: string; angle: number };
+    /** Hand-picked colours for authors and branches, used in order instead of generated hues. */
+    inks?: string[];
 }
 
 // =============================================================================

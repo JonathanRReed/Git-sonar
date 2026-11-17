@@ -11,7 +11,7 @@ import type { RepoGraph } from '@lib/git/types';
 import { generatePositionedNodes, generateEdges } from '@lib/git/graph';
 import { getTheme } from '@lib/themes';
 import { deriveArtSignals } from './signals';
-import { buildPalette, printSafe as printSafeColor } from './palette';
+import { buildPalette, printSafe as printSafeColor, readableInk } from './palette';
 import { makeRng, makeNoise2D } from './rng';
 import { resolvePosterSize, sizeAspect, type ResolvedSize } from './sizes';
 import { getTemplateOrDefault } from './templates';
@@ -96,6 +96,26 @@ export function renderPoster(graph: RepoGraph, cfg: PosterConfig, repoName?: str
     };
 
     let scene = template.build(ctx);
+    // Themes with a wash fade the sheet from its paper colour into a second one.
+    if (theme.wash && scene.background.kind === 'solid' && scene.background.color === palette.bg) {
+        scene = {
+            ...scene,
+            background: { ...scene.background, kind: 'gradient', color2: theme.wash.color, angle: theme.wash.angle },
+        };
+    }
+    // Film grain and a heavy vignette read as atmosphere on a dark sheet but
+    // as dirt on light paper, so light sheets keep only a whisper of vignette.
+    const sheet = scene.background.color;
+    if (sheet && readableInk(sheet) === '#000000' && (scene.background.vignette || scene.background.grain)) {
+        scene = {
+            ...scene,
+            background: {
+                ...scene.background,
+                vignette: scene.background.vignette ? scene.background.vignette * 0.12 : undefined,
+                grain: undefined,
+            },
+        };
+    }
     if (cfg.printSafe) scene = applyPrintSafe(scene);
 
     return { scene, target, template, seedSource };

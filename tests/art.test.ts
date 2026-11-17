@@ -13,7 +13,7 @@ import { renderPoster } from '@lib/art/poster-renderer';
 import { posterPermalink } from '@lib/art/export';
 import { sceneToSVG } from '@lib/art/render-svg';
 import { TEMPLATE_LIST } from '@lib/art/templates';
-import { getTheme } from '@lib/themes';
+import { getTheme, THEME_IDS } from '@lib/themes';
 import { getPrintSpec, validatePrintSpec } from '@lib/art/print';
 import { FONT_FILES, fontFilesForKeys } from '@lib/art/font-files';
 import { FONTS, embeddedFontFaceCss } from '@lib/art/fonts';
@@ -104,7 +104,7 @@ describe('art signals', () => {
 
 describe('palette engine', () => {
     it('derives a coherent palette from each theme and spaces author hues', () => {
-        for (const id of ['night', 'dawn', 'github', 'nord', 'dracula'] as const) {
+        for (const id of THEME_IDS) {
             const pal = buildPalette(getTheme(id));
             expect(pal.ramp(5)).toHaveLength(5);
             expect(pal.sequential(0)).toMatch(/^#/);
@@ -195,7 +195,7 @@ describe('poster config permalink', () => {
             encoding: { hue: 'nonsense' } as never,
         }));
         const decoded = decodePosterConfig(hostile)!;
-        expect(['night', 'dawn', 'github', 'nord', 'dracula']).toContain(decoded.themeId);
+        expect(THEME_IDS).toContain(decoded.themeId);
         expect(decoded.size).toBe('native');
         expect(decoded.layout).toBe('vertical');
         // And it must render without throwing.

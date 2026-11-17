@@ -272,7 +272,7 @@ export function CommitFilters({ filters, onFiltersChange }: CommitFiltersProps) 
                 }
 
                 .filter-dropdown__item--active {
-                    background: rgba(156, 207, 216, 0.15);
+                    background: rgba(var(--rp-text-rgb), 0.15);
                     color: var(--rp-foam);
                 }
 

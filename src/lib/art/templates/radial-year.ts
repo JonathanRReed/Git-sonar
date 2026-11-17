@@ -18,6 +18,7 @@ import type { Scene, SceneNode, SceneStroke, SceneText, Vec2 } from '../scene';
 import { typeScale, formatDate, sampleNodes } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha } from '../palette';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'SpaceGrotesk';
 const LABEL_FONT = 'JetBrainsMono';
@@ -46,13 +47,13 @@ function build(ctx: TemplateContext): Scene {
     const strokes: SceneStroke[] = [];
     const sceneNodes: SceneNode[] = [];
 
-    // Ring geometry. Reserve the inner ~16% radius for the record-label title and
+    // Ring geometry. Reserve the inner ~28% radius for the record-label title and
     // keep an outer margin. With multiple years we space rings evenly across that
     // band; with a single year the gap is tiny so everything sits on one ring.
     // Clamp ring count so a forged far-future commit can't draw thousands of rings.
     const years = Math.min(80, Math.max(1, (signals.lastYear || 0) - (signals.firstYear || 0) + 1));
     const maxR = Math.max(10, Math.min(width, height) / 2 - margin);
-    const innerR = maxR * 0.16;
+    const innerR = maxR * 0.28;
     const usable = maxR - innerR;
     const ringGap = years > 1 ? usable / years : usable * 0.0;
     const baseR = years > 1 ? innerR + ringGap * 0.5 : innerR + usable * 0.62;
@@ -145,12 +146,14 @@ function build(ctx: TemplateContext): Scene {
 
     // ---- Record-label title in the eye of the spiral -------------------------
     const labelTitle = (options.title || options.repoName || 'repository').toString().toUpperCase();
-    const labelSize = Math.min(scale(-0.4), innerR * 0.9);
-    texts.push(text(truncateMiddle(labelTitle, 18), cx, cy + labelSize * 0.34, {
+    // Sized to fit inside the eye, so the name never runs into the first ring.
+    const shown = truncateMiddle(labelTitle, 18);
+    const labelSize = Math.min(scale(-0.4), (innerR * 1.8) / (shown.length * 0.62));
+    texts.push(text(shown, cx, cy + labelSize * 0.34, {
         font: fontStack(TITLE_FONT), size: labelSize, weight: 700,
         color: palette.fg, align: 'middle', spacing: width * 0.001,
     }));
-    texts.push(text('A YEAR IN CODE', cx, cy - labelSize * 0.7, {
+    texts.push(text('A YEAR IN CODE', cx, cy - labelSize * 0.95, {
         font: fontStack(LABEL_FONT), size: scale(-4), weight: 500,
         color: palette.accent, align: 'middle', spacing: width * 0.006,
     }));
@@ -173,7 +176,7 @@ function build(ctx: TemplateContext): Scene {
         }));
 
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', cx, margin, {
+        texts.push(text(CREDIT, cx, margin, {
             font: fontStack(LABEL_FONT), size: scale(-3.6), weight: 600,
             color: withAlpha(palette.fg, 0.5), align: 'middle', spacing: width * 0.006,
         }));
@@ -229,7 +232,7 @@ function text(
 
 export const radialYearTemplate: PosterTemplate = {
     id: 'radial-year',
-    name: 'Year in Code',
+    name: 'Year in code',
     group: 'generative',
     description: 'A radial spiral of commits — one concentric ring per year, dotted around a record-label title.',
     defaultAspect: 1,

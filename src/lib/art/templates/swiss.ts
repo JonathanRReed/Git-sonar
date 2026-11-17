@@ -11,6 +11,7 @@ import type { Scene, SceneText } from '../scene';
 import { buildGraphScene, typeScale, formatDate, formatCompact, wrapText, type Box } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha } from '../palette';
+import { CREDIT } from '../../brand';
 
 const TITLE_FONT = 'SpaceGrotesk';
 const BODY_FONT = 'Inter';
@@ -85,7 +86,7 @@ function build(ctx: TemplateContext): Scene {
     }
 
     if (options.showWatermark) {
-        texts.push(text('GITSONAR.COM', width - margin, margin, { font: fontStack(MONO_FONT), size: scale(-3.2), weight: 600, color: withAlpha(palette.fg, 0.5), align: 'end', spacing: width * 0.005 }));
+        texts.push(text(CREDIT, width - margin, margin, { font: fontStack(MONO_FONT), size: scale(-3.2), weight: 600, color: withAlpha(palette.fg, 0.5), align: 'end', spacing: width * 0.005 }));
     }
 
     return {
@@ -116,7 +117,7 @@ function text(
 
 export const swissTemplate: PosterTemplate = {
     id: 'swiss',
-    name: 'Swiss Grid',
+    name: 'Swiss grid',
     group: 'data',
     description: 'Strict-grid minimalist typographic print foregrounding the repo stats.',
     defaultAspect: 18 / 24,

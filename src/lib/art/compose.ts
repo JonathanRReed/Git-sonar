@@ -9,6 +9,7 @@ import type { GlyphShape, SceneEdge, SceneNode, Vec2 } from './scene';
 import type { TemplateContext } from './template';
 import { createPositioner, type LayoutMode } from './layout';
 import { withAlpha } from './palette';
+import { CREDIT } from '../brand';
 
 export interface Box {
     x: number;
@@ -138,8 +139,13 @@ export function buildGraphScene(
     // serpentine ribbon (seeded, deterministic) that fills the box.
     const lowLane = positioner.maxLane <= 1 && (layout === 'vertical' || layout === 'horizontal');
     if (lowLane && srcNodes.length > 2) {
-        const amp = laneWidth * 3.4;
-        const turns = Math.max(1.5, Math.min(4.5, srcNodes.length / 14));
+        // Swing wide enough that the ribbon's proportions match the box it has
+        // to fill, instead of fitting down to a thin column; the roll picks how
+        // many times it doubles back.
+        const run = srcNodes.length * (layout === 'vertical' ? rowHeight : laneWidth);
+        const boxRatio = layout === 'vertical' ? box.w / Math.max(1, box.h) : box.h / Math.max(1, box.w);
+        const amp = Math.max(laneWidth * 3.4, run * boxRatio * 0.42);
+        const turns = Math.max(1.5, Math.min(5.5, srcNodes.length / 14)) * (0.75 + ctx.rng() * 0.6);
         srcNodes.forEach((n, i) => {
             const w = world.get(n.id)!;
             const tt = i / (srcNodes.length - 1);
@@ -316,7 +322,7 @@ export function billingLines(ctx: TemplateContext): string[] {
         lines.push(formatDateRange(signals.firstCommitMs, signals.lastCommitMs).toUpperCase());
     }
     if (options.showSignature) {
-        lines.push('GITSONAR.COM');
+        lines.push(CREDIT);
     }
     return lines;
 }

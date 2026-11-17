@@ -16,6 +16,12 @@ import { radialYearTemplate } from './radial-year';
 import { flowFieldTemplate } from './flow-field';
 import { festivalTemplate } from './festival';
 import { constellationTemplate } from './constellation';
+import { growthRingsTemplate } from './growth-rings';
+import { transitMapTemplate } from './transit-map';
+import { coreSampleTemplate } from './core-sample';
+import { weaveTemplate } from './weave';
+import { punchCardTemplate } from './punch-card';
+import { receiptTemplate } from './receipt';
 
 type Preset = Pick<PosterTemplate, 'defaultEncoding' | 'defaultMood' | 'heroSeed' | 'relevantControls'>;
 
@@ -47,6 +53,13 @@ const PRESETS: Record<string, Preset> = {
         defaultMood: 'theme', heroSeed: 'orion',
         relevantControls: ['size', 'densityAmount', 'glow'],
     },
+    // The data-drawn styles compose themselves; only the roll and palette apply.
+    'growth-rings': { defaultMood: 'duotone', heroSeed: 'oak', relevantControls: [] },
+    'transit-map': { defaultMood: 'vivid', heroSeed: 'central', relevantControls: [] },
+    'core-sample': { defaultMood: 'theme', heroSeed: 'bedrock', relevantControls: [] },
+    weave: { defaultMood: 'vivid', heroSeed: 'loom', relevantControls: [] },
+    'punch-card': { defaultMood: 'duotone', heroSeed: 'hollerith', relevantControls: [] },
+    receipt: { defaultMood: 'mono', heroSeed: 'till', relevantControls: [] },
     swiss: {
         defaultEncoding: { size: 'uniform', hue: 'time' },
         defaultMood: 'mono', heroSeed: 'grid',
@@ -62,9 +75,15 @@ function withPreset(t: PosterTemplate): PosterTemplate {
 const ALL: PosterTemplate[] = [
     pulsarTemplate,
     flowFieldTemplate,
-    movieOneSheetTemplate,
+    growthRingsTemplate,
+    transitMapTemplate,
+    coreSampleTemplate,
+    weaveTemplate,
+    punchCardTemplate,
+    receiptTemplate,
     radialYearTemplate,
     albumTracklistTemplate,
+    movieOneSheetTemplate,
     constellationTemplate,
     festivalTemplate,
     swissTemplate,

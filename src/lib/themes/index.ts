@@ -143,48 +143,266 @@ const DRACULA: Theme = {
     },
 };
 
+/**
+ * Gallery Paper
+ * Off-white stock with ink and primaries: the house look, made for framing.
+ */
+const GALLERY_PAPER: Theme = {
+    id: 'paper',
+    name: 'Gallery Paper',
+    variant: 'light',
+    colors: {
+        base: '#fbfaf5',
+        surface: '#f1efe8',
+        overlay: '#e4e1d8',
+        muted: '#6f6d67',
+        subtle: '#4a4844',
+        text: '#16181a',
+        love: '#b3261e',
+        gold: '#e2a019',
+        rose: '#7a4fb5',
+        pine: '#2f7d5b',
+        foam: '#d92b25',
+        iris: '#1f4b8f',
+        highlightLow: '#f1efe8',
+        highlightMed: '#dcd9cf',
+        highlightHigh: '#b9b6ac',
+    },
+};
+
+/**
+ * Blueprint
+ * White line on cyanotype blue, like an architect's print.
+ */
+const BLUEPRINT: Theme = {
+    id: 'blueprint',
+    name: 'Blueprint',
+    variant: 'dark',
+    colors: {
+        base: '#123a6b',
+        surface: '#17457d',
+        overlay: '#1d5192',
+        muted: '#9dbde4',
+        subtle: '#c9dcf3',
+        text: '#f2f7ff',
+        love: '#ff9d8a',
+        gold: '#ffe08a',
+        rose: '#ffc2e0',
+        pine: '#a8f0c6',
+        foam: '#eaf3ff',
+        iris: '#8ec1ff',
+        highlightLow: '#17457d',
+        highlightMed: '#2a62a8',
+        highlightHigh: '#8ec1ff',
+    },
+};
+
+/**
+ * Riso
+ * Two-drum risograph inks on newsprint: federal blue and fluorescent pink.
+ */
+const RISO: Theme = {
+    id: 'riso',
+    name: 'Riso',
+    variant: 'light',
+    colors: {
+        base: '#f2efe6',
+        surface: '#e9e5da',
+        overlay: '#dcd7ca',
+        muted: '#62616b',
+        subtle: '#3d3c44',
+        text: '#1d2a6d',
+        love: '#ff4c3b',
+        gold: '#ffb511',
+        rose: '#ff6f4c',
+        pine: '#00a95c',
+        foam: '#ff48b0',
+        iris: '#3255a4',
+        highlightLow: '#e9e5da',
+        highlightMed: '#d3cec0',
+        highlightHigh: '#a9a495',
+    },
+};
+
+/** Acid Test: electric yellow fading to hot pink, inked in violet. */
+const ACID: Theme = {
+    id: 'acid',
+    name: 'Acid Test',
+    variant: 'light',
+    wash: { color: '#ff8ad8', angle: 160 },
+    inks: ['#6a00f4', '#ff2e63', '#0066ff', '#ff5a00', '#d400c8', '#008f66', '#2a0a4a', '#00a2ff'],
+    colors: {
+        base: '#f4ff3d',
+        surface: '#e9f52e',
+        overlay: '#d9e61f',
+        muted: '#5b3a86',
+        subtle: '#3d1f66',
+        text: '#2a0a4a',
+        love: '#ff2e63',
+        gold: '#ff5a00',
+        rose: '#d400c8',
+        pine: '#008f66',
+        foam: '#6a00f4',
+        iris: '#0066ff',
+        highlightLow: '#e9f52e',
+        highlightMed: '#cfdc1a',
+        highlightHigh: '#a8b400',
+    },
+};
+
+/** Blacklight: a velvet poster under UV, neon on violet-black. */
+const BLACKLIGHT: Theme = {
+    id: 'blacklight',
+    name: 'Blacklight',
+    variant: 'dark',
+    wash: { color: '#3a0a5c', angle: 200 },
+    inks: ['#39ff14', '#ff2bd6', '#00e5ff', '#fff000', '#b967ff', '#ff6b00', '#ff3b3b', '#3d5afe'],
+    colors: {
+        base: '#0b0221',
+        surface: '#150637',
+        overlay: '#22104f',
+        muted: '#9a86c8',
+        subtle: '#cbbcf0',
+        text: '#f4eeff',
+        love: '#ff3b3b',
+        gold: '#ff2bd6',
+        rose: '#b967ff',
+        pine: '#fff000',
+        foam: '#39ff14',
+        iris: '#00e5ff',
+        highlightLow: '#1b0a42',
+        highlightMed: '#35187a',
+        highlightHigh: '#6a3fd0',
+    },
+};
+
+/** Thermal: the repo through a heat camera, indigo cold to white-yellow hot. */
+const THERMAL: Theme = {
+    id: 'thermal',
+    name: 'Thermal',
+    variant: 'dark',
+    wash: { color: '#4a0050', angle: 180 },
+    inks: ['#fff200', '#ffb000', '#ff6a00', '#ff1e56', '#d100d1', '#7a00ff', '#00c2ff', '#ffffff'],
+    colors: {
+        base: '#0a0033',
+        surface: '#16004d',
+        overlay: '#2a0a66',
+        muted: '#b39ad6',
+        subtle: '#e6d5ff',
+        text: '#fff6d6',
+        love: '#ff1e56',
+        gold: '#fff200',
+        rose: '#ff5ea8',
+        pine: '#00c2ff',
+        foam: '#ff9d00',
+        iris: '#b100e8',
+        highlightLow: '#16004d',
+        highlightMed: '#3d1480',
+        highlightHigh: '#7a3fd0',
+    },
+};
+
+/** Phosphor: a green CRT left on overnight. */
+const PHOSPHOR: Theme = {
+    id: 'phosphor',
+    name: 'Phosphor',
+    variant: 'dark',
+    wash: { color: '#06240f', angle: 180 },
+    inks: ['#39ff6a', '#c6ff4d', '#00c98b', '#9dffcf', '#1f8f4a', '#eaff00', '#00ffb3', '#6dff3a'],
+    colors: {
+        base: '#020b05',
+        surface: '#06170c',
+        overlay: '#0b2414',
+        muted: '#4f9d63',
+        subtle: '#8fe39b',
+        text: '#c8ffc4',
+        love: '#ff6b6b',
+        gold: '#c6ff4d',
+        rose: '#9dffcf',
+        pine: '#1f8f4a',
+        foam: '#39ff6a',
+        iris: '#00c98b',
+        highlightLow: '#06170c',
+        highlightMed: '#124023',
+        highlightHigh: '#2a7a44',
+    },
+};
+
+/** Sherbet: pink paper melting into peach, with candy inks. */
+const SHERBET: Theme = {
+    id: 'sherbet',
+    name: 'Sherbet',
+    variant: 'light',
+    wash: { color: '#ffe9c2', angle: 150 },
+    inks: ['#ff3d7f', '#ff8c00', '#6f4dff', '#0fa697', '#e63946', '#ff5fa2', '#3b1b4a', '#00a6e0'],
+    colors: {
+        base: '#ffe0ec',
+        surface: '#ffd3e3',
+        overlay: '#ffc2d8',
+        muted: '#85557f',
+        subtle: '#5c3566',
+        text: '#3b1b4a',
+        love: '#e63946',
+        gold: '#ff8c00',
+        rose: '#ff5fa2',
+        pine: '#0fa697',
+        foam: '#ff3d7f',
+        iris: '#6f4dff',
+        highlightLow: '#ffd3e3',
+        highlightMed: '#ffb3cf',
+        highlightHigh: '#e889b0',
+    },
+};
+
+/** Gold Leaf: gilt on lacquer black. */
+const GOLD_LEAF: Theme = {
+    id: 'goldleaf',
+    name: 'Gold Leaf',
+    variant: 'dark',
+    wash: { color: '#221a08', angle: 135 },
+    inks: ['#f9e08a', '#d4af37', '#b8860b', '#e9c46a', '#fff3c4', '#a67c00', '#c8553d', '#8d7a3a'],
+    colors: {
+        base: '#0d0b07',
+        surface: '#161208',
+        overlay: '#231c0d',
+        muted: '#9c8a5a',
+        subtle: '#d8c58c',
+        text: '#f6e7b8',
+        love: '#c8553d',
+        gold: '#f9e08a',
+        rose: '#e9c46a',
+        pine: '#7d6b2a',
+        foam: '#d4af37',
+        iris: '#b8860b',
+        highlightLow: '#161208',
+        highlightMed: '#3a2f14',
+        highlightHigh: '#7d6b2a',
+    },
+};
+
 export const THEMES = {
     night: ROSE_PINE_NIGHT,
     dawn: ROSE_PINE_DAWN,
+    paper: GALLERY_PAPER,
+    riso: RISO,
+    blueprint: BLUEPRINT,
+    acid: ACID,
+    blacklight: BLACKLIGHT,
+    thermal: THERMAL,
+    phosphor: PHOSPHOR,
+    sherbet: SHERBET,
+    goldleaf: GOLD_LEAF,
     github: GITHUB_DARK,
     nord: NORD,
     dracula: DRACULA,
 } as const;
 
+/** Every theme id, for validating links and saved settings. */
+export const THEME_IDS = Object.keys(THEMES) as (keyof typeof THEMES)[];
+
 export type ThemeId = keyof typeof THEMES;
 
 const THEME_STORAGE_KEY = 'git-sonar-theme';
-
-/**
- * RGB color maps for new themes
- */
-const THEME_RGB: Record<ThemeId, { base: string; surface: string; text: string }> = {
-    night: {
-        base: '8, 9, 8',
-        surface: '16, 18, 15',
-        text: '244, 240, 232',
-    },
-    dawn: {
-        base: '250, 244, 237',
-        surface: '255, 250, 243',
-        text: '87, 82, 121',
-    },
-    github: {
-        base: '13, 17, 23',
-        surface: '22, 27, 34',
-        text: '201, 209, 217',
-    },
-    nord: {
-        base: '46, 52, 64',
-        surface: '59, 66, 82',
-        text: '236, 239, 244',
-    },
-    dracula: {
-        base: '40, 42, 54',
-        surface: '52, 55, 70',
-        text: '248, 248, 242',
-    },
-};
 
 export const DEFAULT_THEME: ThemeId = 'night';
 
@@ -229,42 +447,23 @@ export function getTheme(id: ThemeId): Theme {
 }
 
 /**
- * Apply theme colors to CSS variables.
+ * Publish the art theme as CSS variables. The page chrome is a fixed gallery
+ * palette (see global.css), so these are namespaced --art-* and only style
+ * things that sit on the artwork itself.
  */
 export function applyThemeToCSS(theme: Theme): void {
     if (typeof document === 'undefined') return;
 
     const root = document.documentElement;
     const c = theme.colors;
-    const rgb = THEME_RGB[theme.id as ThemeId];
-    
-    const toRgb = (hex: string) => {
-        const num = parseInt(hex.slice(1), 16);
-        const r = (num >> 16) & 255;
-        const g = (num >> 8) & 255;
-        const b = num & 255;
-        return `${r}, ${g}, ${b}`;
-    };
 
-    root.style.setProperty('--rp-base', c.base);
-    root.style.setProperty('--rp-surface', c.surface);
-    root.style.setProperty('--rp-overlay', c.overlay);
-    root.style.setProperty('--rp-muted', c.muted);
-    root.style.setProperty('--rp-subtle', c.subtle);
-    root.style.setProperty('--rp-text', c.text);
-    root.style.setProperty('--rp-love', c.love);
-    root.style.setProperty('--rp-gold', c.gold);
-    root.style.setProperty('--rp-rose', c.rose);
-    root.style.setProperty('--rp-pine', c.pine);
-    root.style.setProperty('--rp-foam', c.foam);
-    root.style.setProperty('--rp-iris', c.iris);
-    root.style.setProperty('--rp-highlight-low', c.highlightLow);
-    root.style.setProperty('--rp-highlight-med', c.highlightMed);
-    root.style.setProperty('--rp-highlight-high', c.highlightHigh);
-    
-    // Use pre-computed RGB values or fallback to computed values
-    root.style.setProperty('--rp-base-rgb', rgb?.base ?? toRgb(c.base));
-    root.style.setProperty('--rp-surface-rgb', rgb?.surface ?? toRgb(c.surface));
-    root.style.setProperty('--rp-overlay-rgb', toRgb(c.overlay));
-    root.style.setProperty('--rp-text-rgb', rgb?.text ?? toRgb(c.text));
+    root.style.setProperty('--art-base', c.base);
+    root.style.setProperty('--art-surface', c.surface);
+    root.style.setProperty('--art-overlay', c.overlay);
+    root.style.setProperty('--art-muted', c.muted);
+    root.style.setProperty('--art-subtle', c.subtle);
+    root.style.setProperty('--art-text', c.text);
+    root.style.setProperty('--art-accent', c.foam);
+    root.style.setProperty('--art-accent-2', c.gold);
+    root.dataset.artVariant = theme.variant;
 }

@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # local Claude Code session state
 .claude/
+
+# visual review screenshots (ui-visual-hill-climb)
+.ui-reviews/

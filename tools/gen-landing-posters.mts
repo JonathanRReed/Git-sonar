@@ -52,6 +52,39 @@ async function ensureFonts(): Promise<void> {
     }
 }
 
+// Site typefaces, used only to draw the social card (kept out of the served
+// /fonts/ dir, which is reserved for the fonts posters embed).
+const OG_FONT_DIR = 'node_modules/.cache/og-fonts';
+const OG_FONTS = [
+    { spec: 'Bricolage+Grotesque:opsz,wdth,wght@96,75,800', file: 'BricolageGrotesque-Condensed-800' },
+    { spec: 'Newsreader:opsz,wght@16,400', file: 'Newsreader-400' },
+];
+
+/** Family name inside the static instance Google serves for the spec above. */
+const OG_DISPLAY = 'Bricolage Grotesque 96pt Condensed ExtraBold, Bricolage Grotesque 96pt Condensed, Bricolage Grotesque';
+
+async function ensureOgFonts(): Promise<string[]> {
+    mkdirSync(OG_FONT_DIR, { recursive: true });
+    const files: string[] = [];
+    for (const { spec, file } of OG_FONTS) {
+        const out = `${OG_FONT_DIR}/${file}.ttf`;
+        if (!existsSync(out)) {
+            try {
+                const css = await (await fetch(`https://fonts.googleapis.com/css2?family=${spec}&display=swap`, { headers: { 'User-Agent': TTF_UA } })).text();
+                const m = css.match(/url\((https:\/\/[^)]+\.ttf)\)/);
+                if (!m) { console.warn(`  ! no TTF url for ${spec}`); continue; }
+                writeFileSync(out, Buffer.from(await (await fetch(m[1])).arrayBuffer()));
+            } catch (err) {
+                // The card still renders with a fallback face; it is not worth failing the build.
+                console.warn(`  ! could not fetch ${spec}:`, (err as Error).message);
+                continue;
+            }
+        }
+        files.push(out);
+    }
+    return files;
+}
+
 async function main() {
     await ensureFonts();
     const fontFiles = existsSync(FONT_DIR)
@@ -77,28 +110,57 @@ async function main() {
     console.log(`landing posters rasterized — ${(total / 1024).toFixed(0)} KB total`);
 
     // Social OG card (1200x630 PNG) — real platforms reject SVG OG images.
-    const hero = pngById.get('pulsar') ?? pngById.get('flow-field');
-    const heroDataUri = hero ? `data:image/png;base64,${hero.toString('base64')}` : '';
+    // It is the landing hero in miniature: the gallery wall, the headline as
+    // wall text, and two framed pieces.
+    const ogFonts = await ensureOgFonts();
+    const dataUri = (id: string) => {
+        const png = pngById.get(id);
+        return png ? `data:image/png;base64,${png.toString('base64')}` : '';
+    };
+    const flow = dataUri('growth-rings');
+    const pulsar = dataUri('pulsar');
     const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0c100e"/><stop offset="55%" stop-color="#10120f"/><stop offset="100%" stop-color="#0a0b0a"/>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d0d4cf"/><stop offset="30%" stop-color="#dfe2de"/><stop offset="100%" stop-color="#d6d9d5"/>
     </linearGradient>
-    <radialGradient id="glow" cx="14%" cy="20%" r="60%"><stop offset="0%" stop-color="#2f6f63" stop-opacity="0.5"/><stop offset="100%" stop-color="#2f6f63" stop-opacity="0"/></radialGradient>
+    <radialGradient id="spot" cx="50%" cy="42%" r="50%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="oak" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c79c69"/><stop offset="55%" stop-color="#a97c4b"/><stop offset="100%" stop-color="#bd9160"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a4844"/><stop offset="100%" stop-color="#7a776f"/></linearGradient>
+    <filter id="drop" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#141618" flood-opacity="0.3"/></filter>
   </defs>
-  <rect width="1200" height="630" fill="url(#g)"/>
-  <rect width="1200" height="630" fill="url(#glow)"/>
-  <clipPath id="pc"><rect x="760" y="40" width="360" height="550" rx="14"/></clipPath>
-  ${heroDataUri ? `<image href="${heroDataUri}" x="700" y="-40" width="540" height="720" preserveAspectRatio="xMidYMid slice" clip-path="url(#pc)"/>` : ''}
-  <rect x="760" y="40" width="360" height="550" rx="14" fill="none" stroke="#f4f0e8" stroke-opacity="0.16"/>
-  <text x="80" y="250" font-family="Unbounded" font-weight="700" font-size="78" fill="#f4f0e8">Your Git history,</text>
-  <text x="80" y="338" font-family="Unbounded" font-weight="700" font-size="78" fill="#f4f0e8">as art.</text>
-  <text x="84" y="180" font-family="JetBrains Mono" font-weight="500" font-size="24" letter-spacing="3" fill="#8fd3c7">TURN ANY REPO INTO ART</text>
-  <text x="84" y="430" font-family="JetBrains Mono" font-weight="500" font-size="25" fill="#b9b6ac">Movie posters, album covers &amp; generative prints</text>
-  <text x="84" y="468" font-family="JetBrains Mono" font-weight="500" font-size="25" fill="#b9b6ac">from any commit history — in your browser.</text>
-  <text x="84" y="560" font-family="Unbounded" font-weight="700" font-size="30" fill="#f2b36d">gitsonar.jonathanrreed.com</text>
+  <rect width="1200" height="630" fill="url(#wall)"/>
+  <ellipse cx="770" cy="270" rx="230" ry="300" fill="url(#spot)"/>
+  <ellipse cx="1040" cy="290" rx="220" ry="290" fill="url(#spot)"/>
+  <rect y="572" width="1200" height="10" fill="#eceeeb"/>
+  <rect y="582" width="1200" height="48" fill="url(#floor)"/>
+
+  <text font-family="${OG_DISPLAY}" font-weight="800" font-size="104" letter-spacing="-2" fill="#16181a">
+    <tspan x="64" y="190">Every repo</tspan><tspan x="64" y="286">deserves a</tspan><tspan x="64" y="382">retrospective.</tspan>
+  </text>
+  <text x="66" y="452" font-family="Newsreader" font-size="31" fill="#16181a">Turn a commit history into a poster</text>
+  <text x="66" y="492" font-family="Newsreader" font-size="31" fill="#16181a">you can print and frame.</text>
+  <text x="66" y="545" font-family="${OG_DISPLAY}" font-weight="800" font-size="24" fill="#16181a">gitsonar.jonathanrreed.com</text>
+
+  <g filter="url(#drop)">
+    <rect x="648" y="96" width="246" height="317" fill="#1a1b1c"/>
+    <rect x="655" y="103" width="232" height="303" fill="#fbfbf8"/>
+    ${flow ? `<image href="${flow}" x="673" y="121" width="196" height="261" preserveAspectRatio="xMidYMid slice"/>` : ''}
+  </g>
+  <g filter="url(#drop)">
+    <rect x="930" y="138" width="216" height="266" fill="url(#oak)"/>
+    ${pulsar ? `<image href="${pulsar}" x="938" y="146" width="200" height="250" preserveAspectRatio="xMidYMid slice"/>` : ''}
+  </g>
+  <g>
+    <rect x="648" y="440" width="170" height="64" fill="#fbfbf8"/>
+    <text x="660" y="465" font-family="${OG_DISPLAY}" font-weight="800" font-size="17" fill="#16181a">Project Atlas</text>
+    <text x="660" y="488" font-family="Newsreader" font-size="16" fill="#16181a">147 commits on paper</text>
+    <circle cx="818" cy="440" r="8" fill="#d92b25"/>
+  </g>
 </svg>`;
-    const ogPng = new Resvg(og, { font: { fontFiles, loadSystemFonts: true, defaultFontFamily: 'Inter' } }).render().asPng();
+    const ogPng = new Resvg(og, { font: { fontFiles: [...fontFiles, ...ogFonts], loadSystemFonts: true, defaultFontFamily: 'Inter' } }).render().asPng();
     const ogOpt = await sharp(Buffer.from(ogPng)).png({ compressionLevel: 9, palette: true }).toBuffer();
     writeFileSync('public/og-image.png', ogOpt);
     console.log(`og-image.png written (${(ogOpt.length / 1024).toFixed(0)} KB)`);

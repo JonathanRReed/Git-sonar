@@ -116,7 +116,6 @@ export function ControlsOverlay() {
         navigatePrev,
         navigateLane,
         viewMode,
-        setViewMode,
         layoutMode,
         setLayoutMode,
         showDatelines,
@@ -140,15 +139,7 @@ export function ControlsOverlay() {
         setError,
         setGraph,
         posterTitle,
-        setPosterTitle,
-        posterSubtitle,
-        setPosterSubtitle,
-        showWatermark,
-        toggleWatermark,
-        showSignature,
-        toggleSignature,
         showTimeline,
-        toggleTimeline,
         showHeatmap,
         toggleHeatmap,
         showTeaching,
@@ -177,6 +168,12 @@ export function ControlsOverlay() {
                 if (e.key === 'Escape') {
                     (e.target as HTMLElement).blur();
                 }
+                return;
+            }
+
+            // Outside the History view only Help and Escape apply; the studio
+            // has its own keys.
+            if (useGraphStore.getState().viewMode !== 'inspect' && e.key !== '?' && e.key !== 'Escape') {
                 return;
             }
 
@@ -351,13 +348,18 @@ export function ControlsOverlay() {
         try {
             const imports = await import('@lib/git/import-git');
             let graph;
-            const authTokenValue = authToken ?? undefined;
+            // Keep the earlier moment, if one is being captured.
+            const options = {
+                maxCommits: MAX_POSTER_COMMITS,
+                authToken: authToken ?? undefined,
+                until: useGraphStore.getState().moment?.untilMs,
+            };
             if (currentRepoProvider === 'gitlab') {
-                graph = await imports.parseGitLabRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseGitLabRepo(currentRepoPath, options);
             } else if (currentRepoProvider === 'bitbucket') {
-                graph = await imports.parseBitbucketRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseBitbucketRepo(currentRepoPath, options);
             } else {
-                graph = await imports.parseGitHubRepo(currentRepoPath, { maxCommits: MAX_POSTER_COMMITS, authToken: authTokenValue });
+                graph = await imports.parseGitHubRepo(currentRepoPath, options);
             }
             setGraph(graph);
         } catch (err) {
@@ -395,117 +397,6 @@ export function ControlsOverlay() {
             <>
                 {/* Bottom controls bar */}
                 <div className="controls-bar">
-                    <div className="mode-toggle" role="group" aria-label="Graph mode">
-                        <button
-                            type="button"
-                            className={`mode-btn ${viewMode === 'inspect' ? 'mode-btn--active' : ''}`}
-                            onClick={() => setViewMode('inspect')}
-                            aria-pressed={viewMode === 'inspect'}
-                        >
-                            Inspect
-                        </button>
-                        <button
-                            type="button"
-                            className={`mode-btn ${viewMode === 'poster' ? 'mode-btn--active' : ''}`}
-                            onClick={() => setViewMode('poster')}
-                            aria-pressed={viewMode === 'poster'}
-                        >
-                            Poster
-                        </button>
-                        <button
-                            type="button"
-                            className={`mode-btn ${viewMode === 'calendar' ? 'mode-btn--active' : ''}`}
-                            onClick={() => setViewMode('calendar')}
-                            aria-pressed={viewMode === 'calendar'}
-                        >
-                            Calendar
-                        </button>
-                    </div>
-
-                    {/* Load All Commits button for poster mode */}
-                    {viewMode === 'poster' && hasMoreCommits && currentRepoPath && (
-                        <button
-                            type="button"
-                            className="control-btn control-btn--load-all"
-                            onClick={handleLoadAllCommits}
-                            aria-label={`Load up to ${MAX_POSTER_COMMITS.toLocaleString()} commits for poster`}
-                            title={`Load up to ${MAX_POSTER_COMMITS.toLocaleString()} commits (for complete poster)`}
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                            </svg>
-                            <span className="control-btn__text">Load {MAX_POSTER_COMMITS / 1000}k</span>
-                        </button>
-                    )}
-
-                    {/* Poster mode controls */}
-                    {viewMode === 'poster' && (
-                        <>
-                            <div className="poster-inputs">
-                                <input
-                                    type="text"
-                                    className="poster-title-input"
-                                    placeholder="Poster title..."
-                                    value={posterTitle}
-                                    onChange={(e) => setPosterTitle(e.target.value)}
-                                    aria-label="Poster title"
-                                />
-                                <input
-                                    type="text"
-                                    className="poster-subtitle-input"
-                                    placeholder="Subtitle (optional)..."
-                                    value={posterSubtitle}
-                                    onChange={(e) => setPosterSubtitle(e.target.value)}
-                                    aria-label="Poster subtitle"
-                                />
-                            </div>
-                            
-                            <div className="poster-options">
-                                <button
-                                    type="button"
-                                    className={`control-btn control-btn--labeled ${showTimeline ? 'control-btn--active' : ''}`}
-                                    onClick={toggleTimeline}
-                                    aria-pressed={showTimeline}
-                                    aria-label="Toggle timeline ruler"
-                                    title="Show timeline ruler"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 2v20" />
-                                        <path d="M8 6h8M6 12h12M8 18h8" />
-                                    </svg>
-                                    <span>Timeline</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`control-btn control-btn--labeled ${showWatermark ? 'control-btn--active' : ''}`}
-                                    onClick={toggleWatermark}
-                                    aria-pressed={showWatermark}
-                                    aria-label="Toggle Git Sonar watermark"
-                                    title="Show Git Sonar watermark"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <text x="12" y="16" textAnchor="middle" fontSize="8" fill="currentColor" stroke="none">GS</text>
-                                    </svg>
-                                    <span>Watermark</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`control-btn control-btn--labeled ${showSignature ? 'control-btn--active' : ''}`}
-                                    onClick={toggleSignature}
-                                    aria-pressed={showSignature}
-                                    aria-label="Toggle date signature"
-                                    title="Show date signature"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                    </svg>
-                                    <span>Date</span>
-                                </button>
-                            </div>
-                        </>
-                    )}
-
                     <div className="layout-selector">
                         <label htmlFor="layout-select">Layout</label>
                         <select
@@ -546,63 +437,6 @@ export function ControlsOverlay() {
                         </svg>
                         <span>Heatmap</span>
                     </button>
-
-                    <div className="dpi-selector">
-                        <label htmlFor="dpi-select">DPI</label>
-                        <select
-                            id="dpi-select"
-                            value={exportDPI}
-                            onChange={(e) => setExportDPI(Number(e.target.value) as 1 | 2 | 4)}
-                            aria-label="Export DPI"
-                        >
-                            <option value={1}>1x</option>
-                            <option value={2}>2x</option>
-                            <option value={4}>4x</option>
-                        </select>
-                    </div>
-
-                    <div className="size-selector">
-                        <label htmlFor="size-select">Size</label>
-                        <select
-                            id="size-select"
-                            value={exportSize}
-                            onChange={(e) => setExportSize(e.target.value as ExportSize)}
-                            aria-label="Export size"
-                        >
-                            <option value="native">Native</option>
-                            <option value="A4">A4</option>
-                            <option value="A3">A3</option>
-                            <option value="A2">A2</option>
-                            <option value="A1">A1</option>
-                            <option value="Square">Square</option>
-                            <option value="Poster18x24">Poster 18x24</option>
-                            <option value="Poster24x36">Poster 24x36</option>
-                        </select>
-                        <label className="bleed-toggle">
-                            <input
-                                type="checkbox"
-                                checked={bleedEnabled}
-                                onChange={(e) => setBleedEnabled(e.target.checked)}
-                            />
-                            Add 0.125 in bleed
-                        </label>
-                        <label className="bleed-toggle">
-                            <input
-                                type="checkbox"
-                                checked={cropMarksEnabled}
-                                onChange={(e) => setCropMarksEnabled(e.target.checked)}
-                            />
-                            Show crop marks
-                        </label>
-                        <label className="bleed-toggle">
-                            <input
-                                type="checkbox"
-                                checked={safeAreaEnabled}
-                                onChange={(e) => setSafeAreaEnabled(e.target.checked)}
-                            />
-                            Show safe area
-                        </label>
-                    </div>
 
                     <div className="background-selector">
                         <label htmlFor="bg-select">Background</label>
@@ -696,6 +530,86 @@ export function ControlsOverlay() {
                         <span>Guide</span>
                     </button>
 
+                    {hasMoreCommits && currentRepoPath && (
+                        <button
+                            type="button"
+                            className="control-btn control-btn--labeled"
+                            onClick={handleLoadAllCommits}
+                            title={`Load up to ${MAX_POSTER_COMMITS.toLocaleString()} commits`}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <span>Load more history</span>
+                        </button>
+                    )}
+
+                    <details className="export-drawer">
+                        <summary className="control-btn control-btn--labeled">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                <path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" />
+                            </svg>
+                            <span>Export this view</span>
+                        </summary>
+                        <div className="export-drawer__body">
+                    <div className="dpi-selector">
+                        <label htmlFor="dpi-select">DPI</label>
+                        <select
+                            id="dpi-select"
+                            value={exportDPI}
+                            onChange={(e) => setExportDPI(Number(e.target.value) as 1 | 2 | 4)}
+                            aria-label="Export DPI"
+                        >
+                            <option value={1}>1x</option>
+                            <option value={2}>2x</option>
+                            <option value={4}>4x</option>
+                        </select>
+                    </div>
+
+                    <div className="size-selector">
+                        <label htmlFor="size-select">Size</label>
+                        <select
+                            id="size-select"
+                            value={exportSize}
+                            onChange={(e) => setExportSize(e.target.value as ExportSize)}
+                            aria-label="Export size"
+                        >
+                            <option value="native">Native</option>
+                            <option value="A4">A4</option>
+                            <option value="A3">A3</option>
+                            <option value="A2">A2</option>
+                            <option value="A1">A1</option>
+                            <option value="Square">Square</option>
+                            <option value="Poster18x24">Poster 18x24</option>
+                            <option value="Poster24x36">Poster 24x36</option>
+                        </select>
+                        <label className="bleed-toggle">
+                            <input
+                                type="checkbox"
+                                checked={bleedEnabled}
+                                onChange={(e) => setBleedEnabled(e.target.checked)}
+                            />
+                            Add 0.125 in bleed
+                        </label>
+                        <label className="bleed-toggle">
+                            <input
+                                type="checkbox"
+                                checked={cropMarksEnabled}
+                                onChange={(e) => setCropMarksEnabled(e.target.checked)}
+                            />
+                            Show crop marks
+                        </label>
+                        <label className="bleed-toggle">
+                            <input
+                                type="checkbox"
+                                checked={safeAreaEnabled}
+                                onChange={(e) => setSafeAreaEnabled(e.target.checked)}
+                            />
+                            Show safe area
+                        </label>
+                    </div>
+
+                            <div className="export-drawer__actions">
                     <button
                         type="button"
                         className="control-btn control-btn--labeled"
@@ -740,6 +654,9 @@ export function ControlsOverlay() {
                         </svg>
                         <span>PDF</span>
                     </button>
+                            </div>
+                        </div>
+                    </details>
                     {exportStatus && (
                         <div className="export-status" role="status" aria-live="polite">
                             {exportStatus}
@@ -860,8 +777,8 @@ export function ControlsOverlay() {
           max-width: calc(100% - 5.5rem);
           z-index: 10;
           padding: 0.35rem;
-          background: rgba(12, 14, 12, 0.76);
-          border: 1px solid rgba(244, 240, 232, 0.12);
+          background: rgba(var(--rp-surface-rgb), 0.76);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.12);
           border-radius: 1rem;
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 70px rgba(0, 0, 0, 0.24);
           backdrop-filter: blur(18px);
@@ -870,8 +787,8 @@ export function ControlsOverlay() {
         .mode-toggle {
           display: flex;
           align-items: center;
-          background: rgba(244, 240, 232, 0.045);
-          border: 1px solid rgba(244, 240, 232, 0.08);
+          background: rgba(var(--rp-text-rgb), 0.045);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.08);
           border-radius: 0.75rem;
           padding: 0.2rem;
         }
@@ -881,7 +798,7 @@ export function ControlsOverlay() {
           border-radius: 8px;
           border: none;
           background: transparent;
-          color: rgba(244, 240, 232, 0.62);
+          color: rgba(var(--rp-text-rgb), 0.62);
           font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.02em;
@@ -889,7 +806,7 @@ export function ControlsOverlay() {
         }
 
         .mode-btn--active {
-          background: rgba(242, 179, 109, 0.18);
+          background: rgba(217, 43, 37, 0.18);
           color: var(--rp-gold);
         }
 
@@ -897,8 +814,8 @@ export function ControlsOverlay() {
           display: flex;
           align-items: center;
           gap: 0.35rem;
-          background: rgba(244, 240, 232, 0.045);
-          border: 1px solid rgba(244, 240, 232, 0.08);
+          background: rgba(var(--rp-text-rgb), 0.045);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.08);
           border-radius: 0.75rem;
           padding: 0.2rem 0.5rem;
         }
@@ -906,13 +823,13 @@ export function ControlsOverlay() {
         .dpi-selector label {
           font-size: 0.7rem;
           font-weight: 600;
-          color: rgba(244, 240, 232, 0.62);
+          color: rgba(var(--rp-text-rgb), 0.62);
           letter-spacing: 0.02em;
         }
 
         .dpi-selector select {
-          background: rgba(8, 9, 8, 0.72);
-          border: 1px solid rgba(244, 240, 232, 0.1);
+          background: rgba(var(--rp-surface-rgb), 0.72);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.1);
           border-radius: 6px;
           padding: 0.2rem 0.4rem;
           font-size: 0.75rem;
@@ -924,8 +841,8 @@ export function ControlsOverlay() {
         }
 
         .dpi-selector select:hover {
-          border-color: rgba(143, 211, 199, 0.35);
-          background: rgba(8, 9, 8, 0.9);
+          border-color: rgba(var(--rp-text-rgb), 0.35);
+          background: rgba(var(--rp-surface-rgb), 0.9);
         }
 
         .dpi-selector select:focus {
@@ -936,8 +853,8 @@ export function ControlsOverlay() {
           display: flex;
           align-items: center;
           gap: 0.35rem;
-          background: rgba(244, 240, 232, 0.045);
-          border: 1px solid rgba(244, 240, 232, 0.08);
+          background: rgba(var(--rp-text-rgb), 0.045);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.08);
           border-radius: 0.75rem;
           padding: 0.2rem 0.5rem;
         }
@@ -945,13 +862,13 @@ export function ControlsOverlay() {
         .layout-selector label {
           font-size: 0.7rem;
           font-weight: 600;
-          color: rgba(244, 240, 232, 0.62);
+          color: rgba(var(--rp-text-rgb), 0.62);
           letter-spacing: 0.02em;
         }
 
         .layout-selector select {
-          background: rgba(8, 9, 8, 0.72);
-          border: 1px solid rgba(244, 240, 232, 0.1);
+          background: rgba(var(--rp-surface-rgb), 0.72);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.1);
           border-radius: 6px;
           padding: 0.2rem 0.4rem;
           font-size: 0.75rem;
@@ -963,8 +880,8 @@ export function ControlsOverlay() {
         }
 
         .layout-selector select:hover {
-          border-color: rgba(143, 211, 199, 0.35);
-          background: rgba(8, 9, 8, 0.9);
+          border-color: rgba(var(--rp-text-rgb), 0.35);
+          background: rgba(var(--rp-surface-rgb), 0.9);
         }
 
         .layout-selector select:focus {
@@ -984,15 +901,15 @@ export function ControlsOverlay() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.08em;
-          color: rgba(244, 240, 232, 0.62);
+          color: rgba(var(--rp-text-rgb), 0.62);
         }
 
         .background-selector select,
         .size-selector select {
           padding: 0.45rem 0.65rem;
-          border: 1px solid rgba(244, 240, 232, 0.1);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.1);
           border-radius: 8px;
-          background: rgba(8, 9, 8, 0.72);
+          background: rgba(var(--rp-surface-rgb), 0.72);
           backdrop-filter: blur(12px);
           color: var(--rp-text);
           font-size: 0.75rem;
@@ -1007,7 +924,7 @@ export function ControlsOverlay() {
           align-items: center;
           gap: 0.4rem;
           font-size: 0.7rem;
-          color: rgba(244, 240, 232, 0.62);
+          color: rgba(var(--rp-text-rgb), 0.62);
         }
 
         .bleed-toggle input {
@@ -1016,8 +933,8 @@ export function ControlsOverlay() {
 
         .background-selector select:hover,
         .size-selector select:hover {
-          border-color: rgba(143, 211, 199, 0.35);
-          background: rgba(8, 9, 8, 0.9);
+          border-color: rgba(var(--rp-text-rgb), 0.35);
+          background: rgba(var(--rp-surface-rgb), 0.9);
         }
 
         .background-selector select:focus,
@@ -1036,14 +953,14 @@ export function ControlsOverlay() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.08em;
-          color: rgba(244, 240, 232, 0.62);
+          color: rgba(var(--rp-text-rgb), 0.62);
         }
 
         .theme-selector select {
           padding: 0.45rem 0.65rem;
-          border: 1px solid rgba(244, 240, 232, 0.1);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.1);
           border-radius: 8px;
-          background: rgba(8, 9, 8, 0.72);
+          background: rgba(var(--rp-surface-rgb), 0.72);
           backdrop-filter: blur(12px);
           color: var(--rp-text);
           font-size: 0.75rem;
@@ -1054,8 +971,8 @@ export function ControlsOverlay() {
         }
 
         .theme-selector select:hover {
-          border-color: rgba(143, 211, 199, 0.35);
-          background: rgba(8, 9, 8, 0.9);
+          border-color: rgba(var(--rp-text-rgb), 0.35);
+          background: rgba(var(--rp-surface-rgb), 0.9);
         }
 
         .theme-selector select:focus {
@@ -1068,9 +985,9 @@ export function ControlsOverlay() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid rgba(244, 240, 232, 0.11);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.11);
           border-radius: 0.75rem;
-          background: rgba(8, 9, 8, 0.72);
+          background: rgba(var(--rp-surface-rgb), 0.72);
           backdrop-filter: blur(16px);
           color: var(--rp-text);
           cursor: pointer;
@@ -1091,8 +1008,8 @@ export function ControlsOverlay() {
         }
 
         .control-btn--active {
-          border-color: rgba(242, 179, 109, 0.5);
-          background: rgba(242, 179, 109, 0.13);
+          border-color: rgba(217, 43, 37, 0.5);
+          background: rgba(217, 43, 37, 0.13);
           color: var(--rp-gold);
         }
 
@@ -1123,9 +1040,9 @@ export function ControlsOverlay() {
           min-width: 150px;
           max-width: 250px;
           padding: 0.5rem 0.75rem;
-          border: 1px solid rgba(244, 240, 232, 0.1);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.1);
           border-radius: 10px;
-          background: rgba(8, 9, 8, 0.72);
+          background: rgba(var(--rp-surface-rgb), 0.72);
           backdrop-filter: blur(16px);
           color: var(--rp-text);
           font-size: 0.75rem;
@@ -1153,9 +1070,9 @@ export function ControlsOverlay() {
           min-width: 150px;
           max-width: 250px;
           padding: 0.35rem 0.6rem;
-          border: 1px solid rgba(244, 240, 232, 0.08);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.08);
           border-radius: 8px;
-          background: rgba(8, 9, 8, 0.62);
+          background: rgba(var(--rp-surface-rgb), 0.62);
           backdrop-filter: blur(16px);
           color: var(--rp-subtle);
           font-size: 0.7rem;
@@ -1197,8 +1114,8 @@ export function ControlsOverlay() {
         }
 
         .control-btn:hover {
-          background: rgba(143, 211, 199, 0.1);
-          border-color: rgba(143, 211, 199, 0.35);
+          background: rgba(var(--rp-text-rgb), 0.1);
+          border-color: rgba(var(--rp-text-rgb), 0.35);
           transform: translateY(-1px);
         }
 
@@ -1207,10 +1124,10 @@ export function ControlsOverlay() {
           align-items: center;
           min-height: 32px;
           padding: 0 0.7rem;
-          border: 1px solid rgba(143, 211, 199, 0.2);
+          border: 1px solid rgba(var(--rp-text-rgb), 0.2);
           border-radius: 999px;
-          background: rgba(143, 211, 199, 0.09);
-          color: rgba(244, 240, 232, 0.82);
+          background: rgba(var(--rp-text-rgb), 0.09);
+          color: rgba(var(--rp-text-rgb), 0.82);
           font-size: 0.74rem;
           font-weight: 700;
           white-space: nowrap;
@@ -1294,7 +1211,7 @@ export function ControlsOverlay() {
           border-radius: 20px;
           box-shadow:
             0 30px 60px -12px rgba(0, 0, 0, 0.5),
-            0 0 40px rgba(156, 207, 216, 0.15);
+            0 0 40px rgba(var(--rp-text-rgb), 0.15);
           backdrop-filter: blur(20px);
         }
 
@@ -1365,7 +1282,7 @@ export function ControlsOverlay() {
 
         .shortcut-row:hover kbd {
           transform: translateY(-1px);
-          box-shadow: 0 3px 8px rgba(156, 207, 216, 0.25);
+          box-shadow: 0 3px 8px rgba(var(--rp-text-rgb), 0.25);
         }
 
         .shortcut-keys {
@@ -1401,7 +1318,7 @@ export function ControlsOverlay() {
           justify-content: center;
           gap: 0.5rem;
           padding: 0.75rem 1rem;
-          background: linear-gradient(135deg, rgba(156, 207, 216, 0.08), rgba(196, 167, 231, 0.08));
+          background: linear-gradient(135deg, rgba(var(--rp-text-rgb), 0.08), rgba(196, 167, 231, 0.08));
           border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 10px;
           font-size: 0.8rem;
@@ -1505,13 +1422,13 @@ export function ControlsOverlay() {
 
         .shortcut:hover kbd {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(156, 207, 216, 0.3);
+          box-shadow: 0 4px 12px rgba(var(--rp-text-rgb), 0.3);
         }
 
         .help-tip {
           margin: 1.75rem 0 0;
           padding: 1rem 1.25rem;
-          background: linear-gradient(135deg, rgba(156, 207, 216, 0.1), rgba(196, 167, 231, 0.1));
+          background: linear-gradient(135deg, rgba(var(--rp-text-rgb), 0.1), rgba(196, 167, 231, 0.1));
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 10px;
           font-size: 0.9rem;

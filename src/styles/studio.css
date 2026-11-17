@@ -1,0 +1,1321 @@
+/* =========================================================================
+   Poster studio: the framing bench
+   ========================================================================= */
+.poster-studio {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body[data-view-mode="poster"] .poster-studio {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr) 21rem;
+}
+
+.ps-h {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.005em;
+}
+
+/* ---------- Style rail ---------- */
+.ps-rail {
+  padding: 1rem 0.9rem 2.5rem;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+  /* Fade the last row out so it reads as "more below", not as cut off. */
+  mask-image: linear-gradient(#000 calc(100% - 3rem), transparent);
+}
+
+.ps-thumbs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 0.7rem;
+  align-items: start;
+}
+
+.ps-thumb {
+  position: relative;
+  padding: 0;
+  background: none;
+  color: var(--ink-2);
+  text-align: left;
+}
+
+/* Every style sits in the same 3:4 cell, whatever shape its sheet is, so the
+   rail reads as one even grid. */
+.ps-thumb__cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 3 / 4;
+  padding: 0.45rem;
+  background: var(--seg);
+  transition: background-color 0.15s ease;
+}
+
+.ps-thumb:hover .ps-thumb__cell {
+  background: var(--line);
+}
+
+.ps-thumb__art {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  background: #cfd2cd;
+  box-shadow: 0 0.1rem 0.3rem rgba(20, 22, 24, 0.3);
+}
+
+/* After hours each tile lifts off the rail and each sheet takes a pale edge. */
+html[data-lights="off"] .ps-thumb__cell {
+  background: #2b312f;
+}
+
+html[data-lights="off"] .ps-thumb__art {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.ps-thumb__art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: ps-fade 0.3s ease both;
+}
+
+@keyframes ps-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+
+.ps-thumb__name {
+  display: block;
+  margin-top: 0.4rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ps-thumb[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+.ps-thumb[aria-pressed="true"] .ps-thumb__name {
+  font-weight: 700;
+}
+
+.ps-thumb[aria-pressed="true"] .ps-thumb__cell {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* The red dot marks the piece you have picked. */
+.ps-thumb[aria-pressed="true"]::after,
+.ps-vars button[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Stage: a neutral viewing booth ---------- */
+.ps-stage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--booth-hi), var(--booth-lo));
+  transition: background 0.5s ease;
+}
+
+/* After hours the booth drops to a mid grey: still neutral, no longer the brightest thing in the room. */
+html[data-lights="off"] .ps-stage {
+  --booth-hi: #8c8e8a;
+  --booth-lo: #767874;
+}
+
+.ps-where {
+  position: absolute;
+  top: 0.9rem;
+  left: 0.9rem;
+  z-index: 3;
+  background: rgba(var(--paper-rgb), 0.9);
+}
+
+.ps-easel {
+  perspective: 90rem;
+  position: absolute;
+  inset: 3.5rem 0 5.5rem 0;
+  display: grid;
+  place-items: center;
+  transition: transform 0.65s var(--ease-out);
+}
+
+/* "On the bench": the sheet stands on the framer's oak worktop, leaning on the
+   back wall. The worktop's back edge sits just above the sheet's foot, so the two meet. */
+.ps-stage::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 5.5rem 0;
+  height: var(--ledge, 2.5rem);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 2px),
+    repeating-linear-gradient(90deg, rgba(90, 60, 30, 0.05) 0 2px, transparent 2px 9px, rgba(90, 60, 30, 0.035) 9px 10px, transparent 10px 23px),
+    linear-gradient(180deg, #caa477, #b98f5f);
+  /* The shadow the wall casts at the back, and the worktop's front edge facing you. */
+  box-shadow: 0 -1px 0 rgba(20, 22, 24, 0.35), inset 0 -0.6rem 0 #8e6a42, inset 0 calc(-0.6rem - 1px) 0 rgba(255, 240, 214, 0.55);
+  transition: opacity 0.4s ease, filter 0.5s ease;
+}
+
+.is-wall .ps-stage::before {
+  opacity: 0;
+}
+
+html[data-lights="off"] .ps-stage::before {
+  filter: brightness(0.72);
+}
+
+/* The sheet leans a few degrees toward the pointer, and light slides across it. */
+.ps-sheet {
+  position: relative;
+  line-height: 0;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.25s var(--ease-out);
+}
+
+/* Where the sheet's foot meets the worktop. */
+.ps-sheet::before {
+  content: "";
+  position: absolute;
+  left: 1.5%;
+  right: 1.5%;
+  bottom: -0.45rem;
+  height: 0.9rem;
+  z-index: -1;
+  background: radial-gradient(ellipse closest-side, rgba(40, 24, 8, 0.6), transparent);
+  transition: opacity 0.3s ease;
+}
+
+.is-wall .ps-sheet::before {
+  opacity: 0;
+}
+
+.ps-rail__count {
+  display: none;
+}
+
+.ps-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 36%, rgba(255, 255, 255, 0.13) 48%, rgba(255, 255, 255, 0.03) 55%, transparent 66%);
+  background-size: 260% 100%;
+  background-position: var(--sheen, 50%) 0;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.ps-stage:hover .ps-sheet::after {
+  opacity: 1;
+}
+
+/* Hung on the wall, the frame swings once on its nail and comes to rest. */
+.is-wall .ps-sheet {
+  transform: none;
+  transform-origin: 50% 0;
+  animation: g-sway 1.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+.is-wall .ps-sheet::after {
+  display: none;
+}
+
+/* A soft shadow on the wall behind the sheet and a tight one where it stands. */
+.ps-canvas {
+  display: block;
+  position: relative;
+  box-shadow: 0 0.5rem 2.6rem rgba(20, 22, 24, 0.3), 0 0.5rem 0.5rem -0.2rem rgba(20, 22, 24, 0.5);
+}
+
+.ps-empty {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+}
+
+/* On a wall: a gallery elevation at true scale. Plaster under a spotlight, a
+   strip of floor, a museum bench for size, and the sheet's measurements. */
+.ps-room {
+  position: absolute;
+  inset: 0 0 5.5rem 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.is-wall .ps-room {
+  opacity: 1;
+}
+
+.is-wall .ps-stage {
+  background:
+    radial-gradient(ellipse 46% 62% at 50% 34%, var(--spot), transparent 72%),
+    linear-gradient(180deg, var(--wall-lo), var(--wall-hi) 38%, var(--wall-end));
+}
+
+html:not([data-lights="off"]) .is-wall .ps-stage {
+  --spot: rgba(255, 255, 255, 0.95);
+}
+
+html[data-lights="off"] .is-wall .ps-stage {
+  --spot: rgba(255, 240, 214, 0.26);
+}
+
+.ps-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--floor, 34px);
+  /* Polished concrete, darker toward the wall where the light falls off. */
+  background: linear-gradient(180deg, #4b4944 0, #6a6760 45%, #807d75);
+  /* The skirting board: a pale board with a shadow line above and below it. */
+  box-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 -9px 0 var(--skirting),
+    0 -10px 0 rgba(0, 0, 0, 0.14);
+}
+
+/* Museum bench: an oak slab on two steel legs, drawn in elevation. */
+.ps-bench {
+  position: absolute;
+  left: 50%;
+  bottom: var(--floor, 34px);
+  width: calc(var(--ppi, 8) * 60px);
+  height: calc(var(--ppi, 8) * 18px);
+  transform: translate(-50%, 1.2rem);
+  transition: transform 0.7s var(--ease-out);
+}
+
+.is-wall .ps-bench {
+  transform: translate(-50%, 0);
+}
+
+.ps-bench::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 1;
+  height: calc(var(--ppi, 8) * 3px);
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.12), transparent 3%, transparent 97%, rgba(0, 0, 0, 0.14)),
+    linear-gradient(180deg, #d9b17c, #bf9462 40%, #a17848);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 3px rgba(0, 0, 0, 0.28);
+}
+
+.ps-bench::after {
+  content: "";
+  position: absolute;
+  left: 2%;
+  right: 2%;
+  bottom: -6px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.36), transparent 70%);
+}
+
+.ps-bench i {
+  position: absolute;
+  top: calc(var(--ppi, 8) * 3px);
+  bottom: 0;
+  left: 11%;
+  width: calc(var(--ppi, 8) * 2.4px);
+  background: linear-gradient(90deg, #0f1011, #303235 50%, #151617);
+}
+
+.ps-bench i + i {
+  left: auto;
+  right: 11%;
+}
+
+/* Dimension lines, as on an architect's elevation. */
+.ps-dim {
+  position: absolute;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.ps-dim--w {
+  height: 9px;
+  border-left: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  background: linear-gradient(currentColor, currentColor) 0 50% / 100% 1.5px no-repeat;
+}
+
+.ps-dim--w span {
+  position: absolute;
+  left: 50%;
+  top: 11px;
+  transform: translateX(-50%);
+}
+
+.ps-dim--h {
+  width: 9px;
+  border-top: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  background: linear-gradient(currentColor, currentColor) 50% 0 / 1.5px 100% no-repeat;
+}
+
+.ps-dim--h span {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ps-dim--centre {
+  color: var(--ink-2);
+}
+
+/* Dashed leader from the height dimension to the sheet's centre line. */
+.ps-dim--leader {
+  height: 0;
+  border-top: 1px dashed currentColor;
+  color: var(--ink-3);
+}
+
+.ps-dim--centre span {
+  left: auto;
+  right: 15px;
+}
+
+.is-wall .ps-easel {
+  transform: translateY(var(--wall-shift, 0px));
+}
+
+/* Mat, then frame, then the shadow the frame throws on the wall. */
+.is-wall .ps-canvas {
+  box-shadow:
+    inset 0 0 0 1px rgba(20, 22, 24, 0.06),
+    0 0 0 var(--mat, 0px) #fbfbf8,
+    0 0 0 calc(var(--mat, 0px) + var(--frame, 0px)) var(--frame-color, transparent),
+    0 22px 30px calc(var(--mat, 0px) + var(--frame, 0px)) rgba(20, 22, 24, 0.28),
+    0 3px 6px calc(var(--mat, 0px) + var(--frame, 0px)) rgba(20, 22, 24, 0.22);
+}
+
+.is-wall.is-white-frame .ps-canvas {
+  box-shadow:
+    0 0 0 var(--mat, 0px) #fbfbf8,
+    0 0 0 calc(var(--mat, 0px) + var(--frame, 0px)) #f6f6f3,
+    0 0 0 calc(var(--mat, 0px) + var(--frame, 0px) + 1px) rgba(20, 22, 24, 0.22),
+    0 22px 30px calc(var(--mat, 0px) + var(--frame, 0px)) rgba(20, 22, 24, 0.28),
+    0 3px 6px calc(var(--mat, 0px) + var(--frame, 0px)) rgba(20, 22, 24, 0.22);
+}
+
+.ps-framing {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+.is-wall .ps-framing {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+.ps-framing .g-seg {
+  background: rgba(var(--paper-rgb), 0.9);
+}
+
+/* Frame choices are corner samples, as on a framer's counter. */
+.ps-corner {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.4rem;
+  border-top: 0.22rem solid #1a1b1c;
+  border-left: 0.22rem solid #1a1b1c;
+  vertical-align: -0.05rem;
+}
+
+.ps-corner--oak {
+  border-color: #b58a5a;
+}
+
+.ps-corner--white {
+  border-color: #fff;
+  filter: drop-shadow(0 0 0.6px rgba(20, 22, 24, 1)) drop-shadow(0 0 0.6px rgba(20, 22, 24, 1));
+}
+
+.ps-corner--none {
+  border-width: 1px;
+  border-style: dashed;
+  border-color: #8a8f8b;
+}
+
+/* Frame and mat share one paper tab, so the checkbox reads as part of it. */
+.ps-framing {
+  padding: 0 0.7rem 0 0;
+  border-radius: 9px;
+  background: rgba(var(--paper-rgb), 0.9);
+}
+
+/* A hairline sets the mat option apart from the four frame finishes. */
+.ps-framing label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-left: 0.7rem;
+  border-left: 1px solid var(--line-2);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ps-framing label.is-off {
+  opacity: 0.45;
+}
+
+.ps-framing input {
+  accent-color: #16181a;
+}
+
+/* Controls mounted on the stage keep their daylight look after hours,
+   because the viewing booth they sit on does not change. */
+.ps-where,
+.ps-framing {
+  --seg: #e6e8e3;
+  --raised: #fff;
+  --ink: #16181a;
+  --ink-2: #353a3d;
+  --line-2: #b9bdb8;
+  --paper-rgb: 247, 247, 244;
+}
+
+.ps-wallnote {
+  position: absolute;
+  top: 4.4rem;
+  left: 1rem;
+  z-index: 3;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  font-style: italic;
+  color: var(--ink-2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.is-wall .ps-wallnote {
+  opacity: 1;
+}
+
+/* The wall label for this piece, as a gallery would print it. */
+.ps-plaque {
+  position: absolute;
+  left: 1rem;
+  bottom: 6.4rem;
+  z-index: 2;
+  max-width: 14rem;
+  font-size: 0.82rem;
+  transition: opacity 0.3s ease;
+}
+
+.ps-plaque b {
+  overflow: hidden;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The "sold" dot, pressed onto the label once a file has been saved. */
+.ps-plaque__sold {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  animation: ps-stick 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes ps-stick {
+  from {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+.ps-plaque__moment {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.is-wall .ps-plaque {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The edition seal that lands when a file is saved. */
+.ps-seal {
+  position: absolute;
+  right: clamp(1rem, 8%, 5rem);
+  bottom: 8.5rem;
+  z-index: 4;
+  width: clamp(6rem, 13vw, 9rem);
+  color: var(--dot);
+  font-family: var(--font-sans);
+  pointer-events: none;
+  animation: ps-stamp 2.8s cubic-bezier(0.3, 0, 0.1, 1) forwards;
+}
+
+@keyframes ps-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(2.4) rotate(-28deg);
+  }
+  9% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-11deg);
+  }
+  13%,
+  82% {
+    opacity: 0.95;
+    transform: scale(1) rotate(-12deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) rotate(-12deg);
+  }
+}
+
+html[data-lights="off"] .ps-floor {
+  background: linear-gradient(180deg, #0c0e0d, #1c1f1e);
+}
+
+/* ---------- Tray: shuffle and the rolls so far ---------- */
+.ps-tray {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  height: 5.5rem;
+  padding: 0 1rem;
+  background: rgba(var(--paper-rgb), 0.94);
+  border-top: 1px solid var(--line);
+}
+
+.ps-dice {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.6rem;
+  background: var(--ink);
+  transition: transform 0.12s var(--ease-out);
+}
+
+.ps-dice:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.ps-dice svg {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.ps-dice svg.is-rolling {
+  animation: ps-roll 0.45s cubic-bezier(0.3, 0.6, 0.3, 1);
+}
+
+@keyframes ps-roll {
+  0% {
+    transform: rotate(0) scale(1);
+  }
+  50% {
+    transform: rotate(200deg) scale(1.25);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.ps-tray__text {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.ps-tray__text b {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.ps-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  margin-left: auto;
+  padding: 0 0.8rem;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s var(--ease-out);
+}
+
+.ps-listen:hover:not(:disabled) {
+  background: var(--rp-overlay);
+  color: var(--ink);
+}
+
+.ps-listen:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.ps-listen[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: none;
+}
+
+.ps-listen svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.ps-playhead {
+  position: absolute;
+  left: 0;
+  top: -2px;
+  height: 3px;
+  background: var(--dot);
+  transition: width 0.15s linear;
+}
+
+.ps-vars__label {
+  color: var(--ink-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ps-vars {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.ps-vars button {
+  position: relative;
+  height: 3.1rem;
+  padding: 0;
+  background: none;
+}
+
+.ps-vars img {
+  display: block;
+  width: auto;
+  height: 100%;
+  box-shadow: 0 0.15rem 0.4rem rgba(0, 0, 0, 0.3);
+  animation: ps-deal 0.35s var(--ease-out) both;
+}
+
+@keyframes ps-deal {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem) rotate(-4deg);
+  }
+}
+
+.ps-vars button[aria-pressed="true"] img {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.ps-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 6.4rem;
+  z-index: 4;
+  max-width: calc(100% - 2rem);
+  padding: 0.6rem 0.95rem;
+  border-radius: 0.5rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+  box-shadow: var(--shadow-pop);
+  transform: translateX(-50%);
+  animation: ps-toast 0.25s var(--ease-out) both;
+}
+
+@keyframes ps-toast {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.6rem);
+  }
+}
+
+/* ---------- Controls ---------- */
+.ps-panel {
+  overflow-y: auto;
+  padding: 0 1.1rem 2rem;
+  border-left: 1px solid var(--line);
+}
+
+.ps-actions {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 -1.1rem 1.1rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.ps-download {
+  flex: 1;
+  min-height: 2.9rem;
+  border-radius: 0.5rem;
+}
+
+.ps-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 0.5rem;
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: background-color 0.15s ease;
+}
+
+.ps-icon:hover:not(:disabled) {
+  background: var(--rp-overlay);
+}
+
+/* Unavailable: the outline thins and the arrow fades. */
+.ps-icon:disabled {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: default;
+}
+
+.ps-icon:disabled svg {
+  opacity: 0.22;
+}
+
+.ps-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* After hours the buttons need a brighter edge and arrow to read at all. */
+html[data-lights="off"] .ps-icon {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34);
+}
+
+html[data-lights="off"] .ps-icon:disabled {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+html[data-lights="off"] .ps-icon:disabled svg {
+  opacity: 0.45;
+}
+
+.ps-pop {
+  position: absolute;
+  top: calc(100% - 0.2rem);
+  left: 0.6rem;
+  right: 0.6rem;
+  padding: 0.7rem;
+  border-radius: 0.75rem;
+  background: var(--raised);
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--line);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.4rem) scale(0.98);
+  transform-origin: 30% 0;
+  transition: opacity 0.16s ease, transform 0.2s var(--ease-out), visibility 0s 0.2s;
+}
+
+.ps-pop.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.16s ease, transform 0.2s var(--ease-out);
+}
+
+.ps-pop h3 {
+  margin: 0.2rem 0.5rem 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.ps-pop > button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.05rem 0.8rem;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.45rem;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+}
+
+.ps-pop > button:hover {
+  background: var(--rp-overlay);
+}
+
+.ps-pop > button b {
+  font-size: 0.92rem;
+}
+
+.ps-pop > button i {
+  align-self: center;
+  color: var(--dot);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.ps-pop > button span {
+  grid-column: 1 / -1;
+  color: var(--ink-3);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.ps-pop__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  padding: 0.6rem 0.5rem 0.1rem;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 0.8rem;
+}
+
+.ps-section {
+  margin-bottom: 1.5rem;
+}
+
+.ps-field {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.ps-field > span,
+.ps-choice > span,
+.ps-slider > span {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--ink-2);
+  font-size: 0.8rem;
+}
+
+.ps-panel .g-field {
+  min-height: 2.4rem;
+  border: 1px solid var(--line-2);
+  border-radius: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.ps-panel .g-field:focus-visible {
+  outline-offset: 0;
+  border-color: var(--ink);
+}
+
+.ps-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0.15rem 0 0.8rem;
+}
+
+.ps-swatches button {
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+  transition: transform 0.18s var(--ease-out);
+}
+
+.ps-swatches button:hover {
+  transform: scale(1.12);
+}
+
+html[data-lights="off"] .ps-swatches button {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.ps-swatches button[aria-pressed="true"] {
+  outline: 2.5px solid var(--ink);
+  outline-offset: 2.5px;
+}
+
+.ps-choice {
+  display: block;
+  margin-bottom: 0.7rem;
+}
+
+.ps-choice .g-seg {
+  flex-wrap: wrap;
+}
+
+.ps-panel .g-seg {
+  display: flex;
+}
+
+.ps-panel .g-seg button {
+  flex: 1;
+  padding: 0 0.6rem;
+}
+
+.ps-panel .g-seg button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The size picker, drawn like the other fields instead of a system menu. */
+.ps-select {
+  appearance: none;
+  font-size: 0.875rem !important;
+  padding-right: 2.2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%2316181a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1.5 1.5 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  background-size: 0.7rem;
+}
+
+.ps-slider {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 1.9rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.ps-slider > span {
+  margin: 0;
+}
+
+/* Sliders are desk faders: a slot with tick marks and a cap you can grab. */
+.ps-slider input {
+  appearance: none;
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  background:
+    linear-gradient(var(--ink), var(--ink)) 0 50% / 100% 2px no-repeat,
+    repeating-linear-gradient(90deg, var(--line-2) 0 1px, transparent 1px 10%) 0 50% / 100% 0.6rem no-repeat;
+  cursor: grab;
+}
+
+.ps-slider input:active {
+  cursor: grabbing;
+}
+
+.ps-slider input::-webkit-slider-thumb {
+  appearance: none;
+  width: 0.8rem;
+  height: 1.4rem;
+  border-radius: 0.15rem;
+  background: linear-gradient(90deg, #2b2e30 0 44%, #f4f5f1 44% 56%, #2b2e30 56%);
+  box-shadow: 0 0.12rem 0.25rem rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.ps-slider input::-moz-range-thumb {
+  width: 0.8rem;
+  height: 1.4rem;
+  border: 0;
+  border-radius: 0.15rem;
+  background: linear-gradient(90deg, #2b2e30 0 44%, #f4f5f1 44% 56%, #2b2e30 56%);
+  box-shadow: 0 0.12rem 0.25rem rgba(0, 0, 0, 0.4);
+}
+
+.ps-slider output {
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ps-checks {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.ps-checks label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-2);
+  font-size: 0.85rem;
+}
+
+.ps-checks input {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 0.25rem;
+  background: #fbfbf8;
+}
+
+.ps-checks input:checked {
+  border-color: #16181a;
+  background: #16181a;
+}
+
+/* After hours: an empty box is an outline, a ticked one is white with a dark tick. */
+html[data-lights="off"] .ps-checks input {
+  border-color: #8b918d;
+  background: transparent;
+}
+
+html[data-lights="off"] .ps-checks input:checked {
+  border-color: #fbfbf8;
+  background: #fbfbf8;
+}
+
+html[data-lights="off"] .ps-checks input:checked::after {
+  border-color: #16181a;
+}
+
+.ps-checks input:checked::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.28rem;
+  margin-top: -0.12rem;
+  border: solid #fff;
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg);
+}
+
+.ps-note {
+  margin: 0.6rem 0 0;
+  color: var(--ink-3);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.ps-reset {
+  margin-top: 0.2rem;
+  padding: 0.9rem 0 0.3rem;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  text-align: left;
+  background: none;
+  color: var(--ink-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.ps-reset:hover {
+  color: var(--ink);
+}
+
+/* ---------- Narrow screens: stage, then styles, then controls ---------- */
+@media (max-width: 900px) {
+  body[data-view-mode="poster"] .poster-studio {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .ps-stage {
+    order: -1;
+    flex: none;
+  }
+
+  .ps-rail,
+  .ps-panel {
+    flex: none;
+  }
+
+  /* Short enough that the style strip and the first controls show beneath it. */
+  /* Sized so the first screen is whole: stage, style strip, then the bar. */
+  .ps-stage {
+    height: calc(100dvh - 23.4rem);
+    min-height: 20rem;
+  }
+
+  .ps-rail {
+    padding: 0.9rem 0.9rem 0.6rem;
+    border-right: 0;
+    overflow: visible;
+  }
+
+  .ps-thumbs {
+    display: flex;
+    gap: 0.8rem;
+    overflow-x: auto;
+    padding: 0.4rem 0.4rem 0.6rem;
+    margin: 0 -0.4rem;
+    align-items: flex-start;
+  }
+
+  /* Shuffle and Listen sit together; the rolls keep the right edge. */
+  .ps-listen {
+    margin-left: 0;
+  }
+
+  .ps-vars__label {
+    display: none;
+  }
+
+  .ps-vars {
+    margin-left: auto;
+  }
+
+  .ps-thumb {
+    flex: none;
+    width: 4.7rem;
+  }
+
+  /* The strip fades out at the right edge, so the cut-off style reads as "more this way". */
+  .ps-thumbs {
+    padding-bottom: 1rem;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 3.2rem), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 3.2rem), transparent);
+  }
+
+  .ps-tray {
+    padding-inline: 1.1rem;
+  }
+
+  .ps-rail .ps-h {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .ps-rail__count {
+    display: inline;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .ps-thumb__name {
+    font-size: 0.7rem;
+  }
+
+  .ps-panel {
+    overflow: visible;
+    border-left: 0;
+  }
+
+  .ps-tray__text span,
+  .ps-plaque {
+    display: none;
+  }
+
+  .ps-framing {
+    top: 3.6rem;
+    left: 0.9rem;
+    right: auto;
+  }
+
+  .ps-wallnote {
+    display: none;
+  }
+
+  .ps-rail {
+    mask-image: none;
+  }
+
+
+  /* Download stays in reach: the panel dissolves into the page and its
+     actions pin to the bottom of the screen. */
+  .ps-panel {
+    display: contents;
+  }
+
+  .ps-actions {
+    position: sticky;
+    bottom: 0;
+    order: 99;
+    margin: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .ps-actions {
+    box-shadow: 0 -0.6rem 1.2rem rgba(20, 22, 24, 0.1);
+  }
+
+  .ps-pop {
+    top: auto;
+    bottom: calc(100% - 0.2rem);
+    transform-origin: 30% 100%;
+  }
+
+  .ps-section,
+  .ps-panel > .ps-note,
+  .ps-reset {
+    margin-inline: 1.1rem;
+  }
+
+  .ps-section:first-of-type {
+    margin-top: 1.1rem;
+  }
+
+  .ps-reset {
+    align-self: stretch;
+    width: auto;
+    margin-bottom: 1.5rem;
+  }
+}

@@ -33,7 +33,8 @@ function build(ctx: TemplateContext): Scene {
     const { nodes, edges, sampledFrom } = buildGraphScene(ctx, {
         layout: ctx.layout,
         box: artBox,
-        fitPadding: width * 0.02,
+        baseRadius: Math.max(4, width / 95),
+        fitPadding: width * 0.035,
     });
 
     // Promote a focal node (HEAD/biggest) as an accent hero.
@@ -120,7 +121,7 @@ function text(
 
 export const movieOneSheetTemplate: PosterTemplate = {
     id: 'movie-one-sheet',
-    name: 'Movie One-Sheet',
+    name: 'Movie poster',
     group: 'cinematic',
     description: 'Key-art graph, cinematic title, and an auto-generated billing block of contributors & stats.',
     defaultAspect: 24 / 36,
