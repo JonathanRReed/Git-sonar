@@ -22,20 +22,22 @@ interface Spec {
     medium: string;
 }
 
+// Ordered and themed so the wall alternates dark sheets, paper and colour
+// instead of bunching the dark ones together.
 const SPECS: Spec[] = [
     { id: 'pulsar', template: 'pulsar', themeId: 'night', label: 'Pulsar', medium: 'Commit cadence as ridgelines' },
     { id: 'growth-rings', template: 'growth-rings', themeId: 'paper', label: 'Growth rings', medium: 'One ring for every week' },
     { id: 'transit-map', template: 'transit-map', themeId: 'riso', label: 'Transit map', medium: 'Branches as lines, merges as interchanges' },
     { id: 'flow-field', template: 'flow-field', themeId: 'dawn', label: 'Flow field', medium: 'Authors as currents' },
-    { id: 'receipt', template: 'receipt', themeId: 'night', label: 'Receipt', medium: 'The whole history, itemised' },
+    { id: 'receipt', template: 'receipt', themeId: 'blueprint', label: 'Receipt', medium: 'The whole history, itemised' },
     { id: 'core-sample', template: 'core-sample', themeId: 'paper', label: 'Core sample', medium: 'A layer for every month' },
-    { id: 'punch-card', template: 'punch-card', themeId: 'blueprint', label: 'Punch card', medium: 'When the work happens' },
-    { id: 'weave', template: 'weave', themeId: 'night', label: 'Weave', medium: 'A row per week, dyed by its author' },
+    { id: 'punch-card', template: 'punch-card', themeId: 'night', label: 'Punch card', medium: 'When the work happens' },
+    { id: 'weave', template: 'weave', themeId: 'paper', label: 'Weave', medium: 'A row per week, dyed by its author' },
     { id: 'radial', template: 'radial-year', themeId: 'dawn', label: 'Year in code', medium: 'Twelve months in one orbit' },
     { id: 'album', template: 'album-tracklist', themeId: 'github', label: 'Album', medium: 'Top commits as a tracklist' },
     { id: 'movie', template: 'movie-one-sheet', themeId: 'night', label: 'Movie one-sheet', medium: 'The history, with full billing' },
+    { id: 'festival', template: 'festival', themeId: 'riso', label: 'Festival lineup', medium: 'Authors as the lineup' },
     { id: 'constellation', template: 'constellation', themeId: 'night', label: 'Constellation', medium: 'Every commit a star' },
-    { id: 'festival', template: 'festival', themeId: 'dracula', label: 'Festival lineup', medium: 'Authors as the lineup' },
     { id: 'swiss', template: 'swiss', themeId: 'paper', label: 'Swiss grid', medium: 'The numbers, set on a grid' },
 ];
 

@@ -20,13 +20,13 @@ const framing: Record<string, { oak?: boolean; mat?: boolean }> = {
 	receipt: {},
 	"core-sample": { mat: true },
 	"punch-card": { oak: true },
-	weave: {},
+	weave: { mat: true },
 	radial: { oak: true, mat: true },
 	album: {},
 	movie: { oak: true },
+	festival: { mat: true },
 	constellation: {},
-	festival: { oak: true },
-	swiss: { mat: true },
+	swiss: { oak: true, mat: true },
 };
 
 const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
@@ -238,7 +238,8 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					</p>
 				</div>
 				<div class="elevation">
-					<p class="elevation__centre" aria-hidden="true"><span>Centre line, 57 in above the floor</span></p>
+					<p class="elevation__centre" aria-hidden="true"></p>
+					<p class="elevation__height" aria-hidden="true"><span>57 in to centre</span></p>
 					<ul class="elevation__row">
 						{papers.map((paper) => (
 							<li class="sheet" style={`--w:${paper.w};--h:${paper.h}`}>
@@ -338,7 +339,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			.hero__grid {
 				display: grid;
-				grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+				grid-template-columns: minmax(0, 9fr) minmax(0, 14fr);
 				gap: clamp(1.5rem, 4vw, 4rem);
 				align-items: start;
 				width: min(80rem, calc(100% - 2.5rem));
@@ -347,7 +348,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.hero__text h1 {
-				font-size: clamp(3.1rem, 6.9vw, 6.4rem);
+				font-size: clamp(3rem, 5.9vw, 5.4rem);
 			}
 
 			.hero__lede {
@@ -683,14 +684,28 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				border-top: 1px dashed var(--ink-3);
 			}
 
-			.elevation__centre span {
+			/* How high that line is, as a dimension in a gutter of its own. */
+			.elevation__height {
 				position: absolute;
-				left: 0;
-				bottom: 0.35rem;
+				top: calc(var(--u) * 18);
+				left: 0.5rem;
+				width: 9px;
+				height: calc(var(--u) * 57);
+				margin: 0;
+				border-top: 1px solid var(--ink-2);
+				background: linear-gradient(var(--ink-2), var(--ink-2)) 50% 0 / 1px 100% no-repeat;
+			}
+
+			.elevation__height span {
+				position: absolute;
+				left: 15px;
+				top: 50%;
+				transform: translateY(-50%);
 				font-family: var(--font-serif);
-				font-size: 0.85rem;
+				font-size: 0.9rem;
 				font-style: italic;
 				color: var(--ink-2);
+				white-space: nowrap;
 			}
 
 			.elevation__row {
@@ -700,7 +715,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				align-items: center;
 				height: calc(var(--u) * 36);
 				margin: 0;
-				padding: 0;
+				padding: 0 0 0 clamp(0rem, 9vw, 8.5rem);
 				list-style: none;
 			}
 
@@ -866,7 +881,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				}
 
 				.sheet p span,
-				.elevation__centre span,
+				.elevation__height,
 				.yours__label {
 					display: none;
 				}

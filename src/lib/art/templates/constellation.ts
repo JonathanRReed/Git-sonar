@@ -43,7 +43,7 @@ function build(ctx: TemplateContext): Scene {
     // The sky is divided into loose cells in reading order, so time still runs
     // left to right and top to bottom; each cell holds one month's commits as
     // a small, stretched cluster. The roll moves and turns every cluster.
-    const starBase = Math.max(2, Math.min(sky.w, sky.h) / 120);
+    const starBase = Math.max(2, Math.min(sky.w, sky.h) / 100);
     const spanDays = Math.max(1, signals.timeSpanMs / 86_400_000);
     const groups = Math.max(3, Math.min(16, Math.round(spanDays / 30)));
     const cols = Math.max(2, Math.round(Math.sqrt(groups * (sky.w / sky.h))));
@@ -100,7 +100,7 @@ function build(ctx: TemplateContext): Scene {
             // Time-tinted star color: older = accent2, newer = accent.
             fill: isMerge ? palette.accent2 : palette.sequential(t),
             shape: isRoot ? 'diamond' : isMerge ? 'star' : 'circle',
-            opacity: 0.7 + 0.3 * bright,
+            opacity: 0.85 + 0.15 * bright,
             glow: bright > 0.78 ? Math.min(1, encoding.glow * 0.7 + bright * 0.3) : 0,
             sha: n.id.slice(0, 7),
             kind: isRoot ? 'root' : isMerge ? 'merge' : 'normal',
@@ -204,7 +204,7 @@ function build(ctx: TemplateContext): Scene {
             color: adjustLightness(palette.bg, 0.03),
             color2: adjustLightness(palette.bg, -0.04),
             angle: 90,
-            vignette: 0.55,
+            vignette: 0.3,
             grain: 0.04,
         },
         strokes: [],

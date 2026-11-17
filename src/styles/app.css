@@ -160,7 +160,7 @@
 
 /* Fields are paper: they stay white card with dark ink after hours. */
 html[data-lights="off"] .app .g-field {
-  background: #fbfbf8;
+  background-color: #fbfbf8;
 }
 
 .graph-container {

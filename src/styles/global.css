@@ -31,12 +31,12 @@
 
 :root {
   /* Gallery palette */
-  --wall: #dcdfdb;
-  --wall-hi: #dfe2de;
-  --wall-lo: #d0d4cf;
-  --wall-end: #d6d9d5;
+  --wall: #d3d7d2;
+  --wall-hi: #d8dcd7;
+  --wall-lo: #c5cac5;
+  --wall-end: #cdd1cc;
   /* How strongly the picture lights read on the plaster. */
-  --spot: rgba(255, 255, 255, 0.78);
+  --spot: rgba(255, 255, 255, 0.92);
   --skirting: #eceeeb;
   --paper: #f7f7f4;
   --paper-rgb: 247, 247, 244;
@@ -48,7 +48,7 @@
   --seg: #e6e8e3;
   --ink: #16181a;
   --ink-2: #43494c;
-  --ink-3: #596063;
+  --ink-3: #4f5558;
   --line: #d5d8d3;
   --line-2: #b9bdb8;
   --dot: #d92b25;
@@ -308,8 +308,8 @@ select {
   background: linear-gradient(
     112deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.16) 44%,
-    rgba(255, 255, 255, 0.04) 52%,
+    rgba(255, 255, 255, 0.07) 44%,
+    rgba(255, 255, 255, 0.02) 52%,
     transparent 62%
   );
   background-size: 260% 100%;
@@ -358,6 +358,7 @@ select {
   line-height: 1.35;
   color: var(--ink);
   text-decoration: none;
+  text-wrap: pretty;
 }
 
 /* After hours a black frame would vanish into the wall; give it a rim of light. */

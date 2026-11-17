@@ -885,6 +885,11 @@ html[data-lights="off"] .ps-swatches button {
   background: #16181a;
 }
 
+/* After hours the checked box keeps a pale edge so it still reads as a box. */
+html[data-lights="off"] .ps-checks input:checked {
+  border-color: #fbfbf8;
+}
+
 .ps-checks input:checked::after {
   content: "";
   width: 0.5rem;
@@ -942,7 +947,7 @@ html[data-lights="off"] .ps-swatches button {
 
   /* Short enough that the style strip and the first controls show beneath it. */
   .ps-stage {
-    height: 50dvh;
+    height: 57dvh;
     min-height: 20rem;
   }
 
@@ -977,7 +982,6 @@ html[data-lights="off"] .ps-swatches button {
   }
 
   .ps-tray__text span,
-  .ps-listen span,
   .ps-plaque {
     display: none;
   }
@@ -1013,6 +1017,18 @@ html[data-lights="off"] .ps-swatches button {
     margin: 0;
     border-top: 1px solid var(--line);
     border-bottom: 0;
+  }
+
+  /* Whatever scrolls beneath the bar fades out instead of being sliced. */
+  .ps-actions::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 1px);
+    height: 2.5rem;
+    background: linear-gradient(rgba(var(--paper-rgb), 0), var(--paper));
+    pointer-events: none;
   }
 
   .ps-pop {
