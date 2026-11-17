@@ -1145,6 +1145,9 @@ export function GraphCanvas() {
         const rect = container.getBoundingClientRect();
         const canvasWidth = rect.width;
         const canvasHeight = rect.height;
+        // The graph is hidden while the poster or calendar is showing. Fitting
+        // to a box with no size would leave the camera at NaN for good.
+        if (canvasWidth === 0 || canvasHeight === 0) return;
 
         let minX = Number.POSITIVE_INFINITY;
         let maxX = Number.NEGATIVE_INFINITY;

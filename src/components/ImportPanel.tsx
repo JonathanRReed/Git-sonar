@@ -88,8 +88,16 @@ export function ImportPanel() {
   const [repoUrl, setRepoUrl] = useState('');
   const [tokenInput, setTokenInput] = useState(authToken ?? '');
   const [showToken, setShowToken] = useState(false);
-  const [momentDate, setMomentDate] = useState(moment?.date ?? '');
+  // The day comes straight from the store, so the form always shows the cutoff
+  // that will be applied. The label is typed here, and is dropped when the
+  // moment is cleared from outside (Change repo) or replaced (a shared link).
+  const momentDate = moment?.date ?? '';
   const [momentLabel, setMomentLabel] = useState(moment?.label ?? '');
+  const [labelledMoment, setLabelledMoment] = useState(moment);
+  if (moment !== labelledMoment) {
+    setLabelledMoment(moment);
+    if (!moment || moment.label !== momentLabel.trim()) setMomentLabel(moment?.label ?? '');
+  }
   const [rememberToken, setRememberToken] = useState(() => {
     if (typeof window === 'undefined') return false;
     try {
@@ -367,10 +375,7 @@ export function ImportPanel() {
                   name="moment-date"
                   value={momentDate}
                   disabled={isLoading}
-                  onChange={(e) => {
-                    setMomentDate(e.target.value);
-                    setMoment(makeMoment(e.target.value, momentLabel));
-                  }}
+                  onChange={(e) => setMoment(makeMoment(e.target.value, momentLabel))}
                 />
               </label>
               <label>
