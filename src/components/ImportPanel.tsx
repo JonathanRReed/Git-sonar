@@ -360,6 +360,7 @@ export function ImportPanel() {
           </button>
         </div>
 
+        <div className="desk__extras">
         <details className="desk__more desk__moment">
           <summary>{moment ? `Capturing ${formatMomentDate(moment)}` : 'Capture an earlier moment'}</summary>
           <div className="desk__more-body">
@@ -439,6 +440,7 @@ export function ImportPanel() {
             </p>
           </div>
         </details>
+        </div>
 
         <input
           ref={zipInputRef}

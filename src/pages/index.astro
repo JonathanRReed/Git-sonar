@@ -149,17 +149,21 @@ const papers = [
 							<div class="g-frame g-frame--oak yours">
 								<form class="g-mat yours__mat" id="yours-form" action="/app" method="get">
 									<h2>This frame is yours.</h2>
-									<label for="yours-repo">Paste a repo link and see it hung.</label>
-									<input class="g-field" id="yours-repo" name="github" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github.com/you/your-repo" />
+									<label for="yours-repo">Paste a repo link to see it hung.</label>
+									<input class="g-field" id="yours-repo" name="github" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="you/your-repo" />
 									<button class="g-btn g-btn--red" type="submit">Make my poster</button>
 									<a class="yours__alt" href="/app?demo=showcase">or start with the sample repo</a>
 								</form>
+							</div>
+							<div class="g-label">
+								<b>Untitled</b>
+								<i>Yours</i>
+								Waiting for a repo
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="skirting" aria-hidden="true"></div>
 			</section>
 
 			<section class="collection g-wall" id="collection" aria-labelledby="collection-title">
@@ -233,20 +237,20 @@ const papers = [
 Everything below is drawn to one scale, bench included. Every export is vector-sharp, so the same poster holds up from a phone wallpaper to a one-sheet.
 					</p>
 				</div>
-				<div class="papers">
-					<ul class="papers__row">
+				<div class="elevation">
+					<ul class="elevation__row">
 						{papers.map((paper) => (
-							<li class="paper">
-								<div class="paper__sheet" style={`width:${(paper.w * 0.4).toFixed(2)}rem;height:${(paper.h * 0.4).toFixed(2)}rem`}>
+							<li class="sheet" style={`--w:${paper.w};--h:${paper.h}`}>
+								<div class="sheet__paper">
 									{paper.poster && <img src={paper.poster.src} alt="" loading="lazy" decoding="async" />}
 								</div>
-								<p><b>{paper.name}</b>{paper.note}</p>
+								<p><b>{paper.name}</b><span>{paper.note}</span></p>
 							</li>
 						))}
 					</ul>
-					<div class="papers__bench" aria-hidden="true"><i></i><i></i></div>
-					<p class="papers__scale">A 5 ft gallery bench, for scale</p>
+					<div class="elevation__bench" aria-hidden="true"><i></i><i></i></div>
 				</div>
+				<p class="elevation__scale">Drawn to one scale: each sheet hung at 57 in on centre, over a 5 ft gallery bench.</p>
 				<p class="sizes__formats">PNG for screens. SVG for the README. PDF for the print shop.</p>
 			</section>
 
@@ -338,7 +342,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				align-items: start;
 				width: min(80rem, calc(100% - 2.5rem));
 				margin: 0 auto;
-				padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(3.5rem, 7vw, 6rem);
+				padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(1rem, 3vw, 2.5rem);
 			}
 
 			.hero__text h1 {
@@ -361,6 +365,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				color: var(--ink-2);
 			}
 
+			/* Hung on one top line, each with its label a fixed drop below its frame. */
 			.hero__pieces {
 				display: grid;
 				grid-template-columns: 30fr 28fr 34fr;
@@ -390,16 +395,8 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				z-index: 1;
 			}
 
-			.piece--0 {
-				margin-top: 1.6rem;
-			}
-
 			.piece--0::before {
 				animation-delay: 0.15s;
-			}
-
-			.piece--1 {
-				margin-top: 4.2rem;
 			}
 
 			.piece--1::before {
@@ -438,6 +435,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.piece .g-label {
+				max-width: none;
 				margin-top: 1.4rem;
 			}
 
@@ -464,6 +462,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.yours__mat label {
+				text-wrap: balance;
 				font-family: var(--font-serif);
 				font-size: 0.98rem;
 				line-height: 1.35;
@@ -484,15 +483,6 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			.yours__alt:hover {
 				color: var(--ink);
-			}
-
-			/* Skirting board, then a strip of floor. */
-			.skirting {
-				height: clamp(3rem, 6vw, 5rem);
-				background:
-					linear-gradient(var(--skirting), var(--skirting)) top / 100% 0.7rem no-repeat,
-					var(--floor);
-				box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.08);
 			}
 
 			/* ---------- Shared section head ---------- */
@@ -517,8 +507,10 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			/* ---------- The collection: a salon hang ---------- */
+			/* The same wall as the hero: no seam where the two sections meet. */
 			.collection {
 				padding: clamp(4rem, 9vw, 8rem) 0 clamp(3rem, 7vw, 6rem);
+				background: linear-gradient(180deg, var(--wall-end), var(--wall-hi) 18%, var(--wall-end));
 			}
 
 			.salon {
@@ -533,8 +525,8 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				break-inside: avoid;
 			}
 
-			.salon__piece:nth-child(3n + 2) {
-				padding-top: clamp(0rem, 3vw, 2.4rem);
+			.salon__label {
+				max-width: none;
 			}
 
 			.salon__piece figcaption {
@@ -609,7 +601,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				max-width: 24rem;
 				margin: 0.7rem 0 0;
 				font-family: var(--font-serif);
-				font-size: 1.08rem;
+				font-size: 1.16rem;
 				line-height: 1.5;
 				color: var(--ink-2);
 			}
@@ -655,23 +647,34 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				padding: clamp(4rem, 9vw, 8rem) 0 clamp(3rem, 6vw, 5rem);
 			}
 
-			.papers {
+			/* A gallery elevation at one scale (--u is one inch): sheets on a shared
+			   centre line 57 in above the floor line, a 60 x 18 in bench beneath. */
+			.elevation {
+				--u: min(0.36rem, calc((100vw - 2.5rem) / 84));
 				width: min(80rem, calc(100% - 2.5rem));
 				margin: 0 auto;
+				border-bottom: 2px solid var(--ink);
 			}
 
-			.papers__row {
+			.elevation__row {
 				display: flex;
-				flex-wrap: wrap;
-				align-items: flex-end;
-				gap: clamp(1.2rem, 4vw, 3.5rem);
+				justify-content: space-around;
+				align-items: center;
+				height: calc(var(--u) * 36);
 				margin: 0;
 				padding: 0;
 				list-style: none;
 			}
 
-			.paper__sheet {
-				max-width: 100%;
+			.sheet {
+				position: relative;
+				width: calc(var(--u) * var(--w));
+				height: calc(var(--u) * var(--h));
+			}
+
+			.sheet__paper {
+				width: 100%;
+				height: 100%;
 				overflow: hidden;
 				background: var(--card);
 				box-shadow:
@@ -679,7 +682,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					0 0.1rem 0.3rem rgba(20, 22, 24, 0.28);
 			}
 
-			.paper__sheet img {
+			.sheet__paper img {
 				display: block;
 				width: 100%;
 				height: 100%;
@@ -687,33 +690,39 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				object-position: top;
 			}
 
-			.paper p {
-				margin: 0.9rem 0 0;
+			.sheet p {
+				position: absolute;
+				top: calc(100% + 0.7rem);
+				left: 50%;
+				margin: 0;
+				transform: translateX(-50%);
 				font-family: var(--font-serif);
-				font-size: 0.95rem;
+				font-size: 0.92rem;
+				line-height: 1.3;
 				color: var(--ink-2);
+				text-align: center;
+				white-space: nowrap;
 			}
 
-			.paper b {
+			.sheet b {
 				display: block;
 				font-family: var(--font-sans);
-				font-size: 1.05rem;
+				font-size: 1rem;
 				color: var(--ink);
 			}
 
-			/* The same bench as the studio's wall view: 60 in long, 18 in high. */
-			.papers__bench {
+			.elevation__bench {
 				position: relative;
-				width: min(24rem, 100%);
-				height: 7.2rem;
-				margin-top: clamp(2rem, 4vw, 3rem);
+				width: calc(var(--u) * 60);
+				height: calc(var(--u) * 18);
+				margin: calc(var(--u) * 21) auto 0;
 			}
 
-			.papers__bench::before {
+			.elevation__bench::before {
 				content: "";
 				position: absolute;
 				inset: 0 0 auto 0;
-				height: 1.2rem;
+				height: calc(var(--u) * 3);
 				border-radius: 2px;
 				background:
 					linear-gradient(90deg, rgba(0, 0, 0, 0.12), transparent 3%, transparent 97%, rgba(0, 0, 0, 0.14)),
@@ -721,22 +730,23 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 3px rgba(0, 0, 0, 0.28);
 			}
 
-			.papers__bench i {
+			.elevation__bench i {
 				position: absolute;
-				top: 1.2rem;
+				top: calc(var(--u) * 3);
 				bottom: 0;
 				left: 11%;
-				width: 0.95rem;
+				width: calc(var(--u) * 2.4);
 				background: linear-gradient(90deg, #0f1011, #303235 50%, #151617);
 			}
 
-			.papers__bench i + i {
+			.elevation__bench i + i {
 				left: auto;
 				right: 11%;
 			}
 
-			.papers__scale {
-				margin: 0.9rem 0 0;
+			.elevation__scale {
+				width: min(80rem, calc(100% - 2.5rem));
+				margin: 0.9rem auto 0;
 				font-family: var(--font-serif);
 				font-size: 0.95rem;
 				font-style: italic;
@@ -803,13 +813,23 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					padding: 1.4rem;
 				}
 
-				.piece--0,
-				.piece--1 {
-					margin-top: 0.6rem;
-				}
-
 				.salon {
 					columns: 2;
+					column-gap: 1rem;
+				}
+
+				.salon__label {
+					padding: 0.5rem 0.6rem 0.55rem;
+					font-size: 0.8rem;
+				}
+
+				.salon__label b {
+					font-size: 0.86rem;
+				}
+
+				.salon__label small,
+				.sheet p span {
+					display: none;
 				}
 
 				.steps,

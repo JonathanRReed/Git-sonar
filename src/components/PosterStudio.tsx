@@ -91,6 +91,8 @@ const FRAMES: { id: FrameStyle; label: string; color: string }[] = [
 const THUMB_W = 132;
 /** Height of the shuffle tray along the bottom of the stage, in px (5.5rem). */
 const TRAY_H = 88;
+/** Strip along the top of the stage kept clear for the bench/wall switch, in px. */
+const STAGE_TOP = 56;
 const MAX_VARIATIONS = 5;
 
 /**
@@ -403,7 +405,7 @@ export function PosterStudio() {
         const { scene } = result;
         // The easel is the stage minus the tray; leave air around the sheet.
         const stageW = stage.clientWidth - 56;
-        const stageH = stage.clientHeight - TRAY_H - 56;
+        const stageH = stage.clientHeight - TRAY_H - STAGE_TOP - 28;
         if (stageW <= 0 || stageH <= 0) return;
         const aspect = scene.width / scene.height;
         let scale = Math.min(stageW / scene.width, stageH / scene.height);
@@ -641,14 +643,14 @@ export function PosterStudio() {
     }, [graph]);
 
     // Only show the label when there is bare stage beside the sheet for it.
-    const benchW = Math.min(fit.stageW - 56, (fit.stageH - TRAY_H - 56) * fit.aspect);
+    const benchW = Math.min(fit.stageW - 56, (fit.stageH - TRAY_H - STAGE_TOP - 28) * fit.aspect);
     const plaqueFits = (fit.stageW - benchW) / 2 >= 250;
 
     // "On a wall": a gallery elevation at true scale. The sheet hangs with its
     // centre 57 in above the floor, over a museum bench for a sense of size.
     const wall = hang(fit.stageW, fit.stageH, fit.aspect, cfg.size, cfg.orientation, frame, mat);
     const { inches, ppi, centreY, framed } = wall;
-    const wallShift = centreY - (fit.stageH - TRAY_H) / 2;
+    const wallShift = centreY - (STAGE_TOP + (fit.stageH - TRAY_H - STAGE_TOP) / 2);
     const sizeLabel = wall.spec.inches ? wall.spec.name.replace('×', ' × ') : `${Math.round(inches.w)} × ${Math.round(inches.h)} in`;
     const fmtIn = (n: number) => `${Number.isInteger(n) ? n : n.toFixed(1)} in`;
     const frameColor = FRAMES.find((f) => f.id === frame)?.color ?? 'transparent';
@@ -704,6 +706,7 @@ export function PosterStudio() {
                             <div className="ps-dim ps-dim--h ps-dim--centre" style={{ top: centreY, height: wall.floorY - centreY, left: midX - Math.max(half.w, benchHalf) - 30 }}>
                                 <span>{WALL.centre} in to centre</span>
                             </div>
+                            <div className="ps-dim ps-dim--leader" style={{ top: centreY, left: midX - Math.max(half.w, benchHalf) - 21, width: Math.max(0, Math.max(half.w, benchHalf) - half.w + 13) }} />
                         </>
                     )}
                 </div>
@@ -757,8 +760,8 @@ export function PosterStudio() {
                     <label className={framed ? '' : 'is-off'}>
                         <input type="checkbox" tabIndex={onWall ? 0 : -1} checked={mat} disabled={!framed} onChange={(e) => setMat(e.target.checked)} /> Mat
                     </label>
-                    <p>{sizeLabel}, hung at gallery height</p>
                 </div>
+                <p className="ps-wallnote" aria-hidden={!onWall}>{sizeLabel}, hung at gallery height</p>
 
                 <div className="ps-tray">
                     {playing >= 0 && <div className="ps-playhead" style={{ width: `${playing * 100}%` }} />}
