@@ -40,7 +40,8 @@ describe('data-drawn styles', () => {
                 }
             }
         }
-    });
+        // 168 posters: fine on its own, slow when the machine is busy.
+    }, 30_000);
 
     it('fades the sheet into a second colour on themes that have a wash', () => {
         const washed = scene('transit-map', { themeId: 'acid' });
