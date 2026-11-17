@@ -208,7 +208,7 @@ const papers = [
 						<li>
 							<div class="steps__head">
 								<h3>{step.title}</h3>
-								<small aria-hidden="true">No. {i + 1}</small>
+								<small aria-hidden="true">No. {String(i + 1).padStart(2, "0")}</small>
 							</div>
 							<p>{step.text}</p>
 						</li>
@@ -342,7 +342,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			.hero__grid {
 				display: grid;
-				grid-template-columns: minmax(0, 9fr) minmax(0, 14fr);
+				grid-template-columns: minmax(0, 8fr) minmax(0, 15fr);
 				gap: clamp(1.5rem, 4vw, 4rem);
 				align-items: start;
 				width: min(80rem, calc(100% - 2.5rem));
@@ -351,7 +351,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.hero__text h1 {
-				font-size: clamp(2.8rem, 5vw, 4.6rem);
+				font-size: clamp(2.7rem, 4.5vw, 4.1rem);
 			}
 
 			.hero__lede {
@@ -523,10 +523,11 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				margin: 0 auto clamp(2.2rem, 5vw, 4rem);
 			}
 
+			/* One clear step below the hero headline. */
 			.section-head h2,
 			.private h2,
 			.closing h2 {
-				font-size: clamp(2.4rem, 5.2vw, 4.6rem);
+				font-size: clamp(2.1rem, 3.6vw, 3.3rem);
 			}
 
 			.section-head p {
@@ -562,26 +563,9 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				padding-top: clamp(0rem, 3vw, 2.4rem);
 			}
 
-			/* The red dot marks a piece you can remix. The word shows when the piece is
-			   pointed at, and always on a touch screen, where nothing can hover. */
+			/* The red dot marks a piece you can remix; one quiet word beside it says so. */
 			.salon__remix-text {
 				color: var(--ink-2);
-				opacity: 0;
-				transform: translateX(-0.25rem);
-				transition: opacity 0.2s ease, transform 0.25s var(--ease-out);
-			}
-
-			.salon__piece:hover .salon__remix-text,
-			.salon__label:focus-visible .salon__remix-text {
-				opacity: 1;
-				transform: none;
-			}
-
-			@media (hover: none) {
-				.salon__remix-text {
-					opacity: 1;
-					transform: none;
-				}
 			}
 
 			.salon__piece figcaption {
@@ -643,7 +627,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				display: flex;
 				align-items: baseline;
 				justify-content: space-between;
-				gap: 1rem;
+				gap: 1.5rem;
 			}
 
 			.steps small {
@@ -656,7 +640,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			.steps h3 {
 				margin: 0;
-				font-size: clamp(1.4rem, 2.1vw, 1.85rem);
+				font-size: clamp(1.35rem, 1.9vw, 1.7rem);
 				font-weight: 700;
 				letter-spacing: -0.01em;
 				line-height: 1.1;

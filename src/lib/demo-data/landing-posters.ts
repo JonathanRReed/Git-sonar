@@ -25,8 +25,8 @@ interface Spec {
 // Ordered and themed so the wall alternates dark sheets, paper and colour
 // instead of bunching the dark ones together.
 const SPECS: Spec[] = [
-    { id: 'pulsar', template: 'pulsar', themeId: 'night', label: 'Pulsar', medium: 'Commit cadence as ridgelines' },
     { id: 'growth-rings', template: 'growth-rings', themeId: 'paper', label: 'Growth rings', medium: 'One ring for every week' },
+    { id: 'pulsar', template: 'pulsar', themeId: 'night', label: 'Pulsar', medium: 'Commit cadence as ridgelines' },
     { id: 'transit-map', template: 'transit-map', themeId: 'riso', label: 'Transit map', medium: 'Branches as lines, merges as interchanges' },
     { id: 'flow-field', template: 'flow-field', themeId: 'dawn', label: 'Flow field', medium: 'Authors as currents' },
     { id: 'receipt', template: 'receipt', themeId: 'blueprint', label: 'Receipt', medium: 'The whole history, itemised' },
@@ -81,7 +81,7 @@ export const LANDING_POSTERS: LandingPoster[] = SPECS.map((s) => ({
 
 /** The framed posters hung beside the empty frame in the hero (by id). */
 // In catalogue order, so the hero labels read No. 01, No. 02.
-export const HERO_POSTER_IDS = ['pulsar', 'growth-rings'];
+export const HERO_POSTER_IDS = ['growth-rings', 'pulsar'];
 
 /** Facts about the sample repo, for wall labels. Build-time only. */
 export function showcaseFacts(): { commits: number; authors: number; merges: number } {

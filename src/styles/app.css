@@ -462,6 +462,7 @@ body[data-view-mode="calendar"] .controls-bar {
 
 .desk__meter {
   margin: 1.6rem 0 0;
+  text-wrap: pretty;
   font-family: var(--font-serif);
   font-size: 1.08rem;
   color: var(--ink);

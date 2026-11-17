@@ -128,7 +128,7 @@ html[data-lights="off"] {
   --ink-3: #9a9d98;
   --line: #2a302e;
   --line-2: #3b423f;
-  --spot: rgba(255, 240, 214, 0.2);
+  --spot: rgba(255, 240, 214, 0.26);
   --skirting: #2b302e;
   --floor: linear-gradient(180deg, #0c0e0d, #1a1d1c 60%, #222624);
   --night-wall: #0d100f;
@@ -376,7 +376,7 @@ select {
 /* After hours a black frame would vanish into the wall; it stays black but
    takes a rim of light from the picture lamp. */
 html[data-lights="off"] .g-frame:not(.g-frame--oak) {
-  background: #202324;
+  background: #2a2d2f;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),

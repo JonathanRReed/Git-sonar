@@ -69,8 +69,13 @@ body[data-view-mode="poster"] .poster-studio {
   box-shadow: 0 0.1rem 0.3rem rgba(20, 22, 24, 0.3);
 }
 
+/* After hours each tile lifts off the rail and each sheet takes a pale edge. */
+html[data-lights="off"] .ps-thumb__cell {
+  background: #2b312f;
+}
+
 html[data-lights="off"] .ps-thumb__art {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
 .ps-thumb__art img {
@@ -385,10 +390,13 @@ html[data-lights="off"] .is-wall .ps-stage {
   background: rgba(var(--paper-rgb), 0.9);
 }
 
+/* A hairline sets the mat option apart from the four frame finishes. */
 .ps-framing label {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  padding-left: 0.7rem;
+  border-left: 1px solid var(--line-2);
   color: var(--ink);
   font-size: 0.82rem;
   font-weight: 600;
@@ -712,13 +720,15 @@ html[data-lights="off"] .ps-floor {
   background: var(--rp-overlay);
 }
 
-/* Unavailable, but still plainly a button: only the arrow fades. */
+/* Unavailable: the outline thins and the arrow fades. */
 .ps-icon:disabled {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
   cursor: default;
 }
 
 .ps-icon:disabled svg {
-  opacity: 0.35;
+  opacity: 0.3;
 }
 
 .ps-icon svg {
@@ -1019,7 +1029,7 @@ html[data-lights="off"] .ps-checks input:checked::after {
   /* Short enough that the style strip and the first controls show beneath it. */
   /* Sized so the first screen is whole: stage, style strip, then the bar. */
   .ps-stage {
-    height: calc(100dvh - 24.9rem);
+    height: calc(100dvh - 23.4rem);
     min-height: 20rem;
   }
 
@@ -1040,6 +1050,15 @@ html[data-lights="off"] .ps-checks input:checked::after {
 
   .ps-vars__label {
     display: none;
+  }
+
+  /* Shuffle and Listen sit together; the rolls keep the right edge. */
+  .ps-listen {
+    margin-left: 0;
+  }
+
+  .ps-vars {
+    margin-left: auto;
   }
 
   /* Sized so a fifth style always peeks in from the right. */
