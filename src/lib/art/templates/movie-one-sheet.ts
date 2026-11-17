@@ -33,7 +33,8 @@ function build(ctx: TemplateContext): Scene {
     const { nodes, edges, sampledFrom } = buildGraphScene(ctx, {
         layout: ctx.layout,
         box: artBox,
-        fitPadding: width * 0.02,
+        baseRadius: Math.max(4, width / 95),
+        fitPadding: width * 0.035,
     });
 
     // Promote a focal node (HEAD/biggest) as an accent hero.

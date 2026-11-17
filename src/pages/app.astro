@@ -1,7 +1,12 @@
 ---
 import "@styles/global.css";
+import "@styles/app.css";
+import "@styles/studio.css";
+import "@styles/history.css";
 import "@styles/LoadingSkeleton.module.css";
 import "@styles/TimelineScrubber.module.css";
+import SiteHead from "@components/site/SiteHead.astro";
+import { BRAND } from "@lib/brand";
 import { ImportPanel } from "@components/ImportPanel";
 import { GraphCanvas } from "@components/GraphCanvas";
 import { CommitDetailsDialog } from "@components/CommitDetailsDialog";
@@ -13,653 +18,95 @@ import { CommitSidebar } from "@components/CommitSidebar";
 import { CalendarView } from "@components/CalendarView";
 import { PosterStudio } from "@components/PosterStudio";
 import { AppShellController } from "@components/AppShellController";
-
-const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
-const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
-const siteUrl = "https://gitsonar.jonathanrreed.com";
-const socialImageUrl = `${siteUrl}/og-image.png`;
 ---
 
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content={Astro.generator} />
-        <meta
-            name="description"
-            content="Turn any repo into a movie poster, album cover, or generative print from its commit history — in your browser, nothing uploaded."
-        />
-        <link rel="canonical" href={`${siteUrl}/app`} />
-        <meta name="author" content="Jonathan Reed" />
-        <title>Git Sonar — Poster Studio</title>
-        {analyticsDomain && (
-            <script is:inline defer data-domain={analyticsDomain} src={analyticsSrc}></script>
-        )}
-
-        <!-- Open Graph / Facebook -->
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={`${siteUrl}/app`} />
-        <meta
-            property="og:title"
-            content="Git Sonar — Poster Studio"
-        />
-        <meta
-            property="og:description"
-            content="Turn any repo into a movie poster, album cover, or generative print from its commit history — in your browser, nothing uploaded."
-        />
-        <meta property="og:image" content={socialImageUrl} />
-
-        <!-- Twitter -->
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={`${siteUrl}/app`} />
-        <meta
-            property="twitter:title"
-            content="Git Sonar — Poster Studio"
-        />
-        <meta
-            property="twitter:description"
-            content="Turn any repo into shareable, printable art from its commit history."
-        />
-        <meta property="twitter:image" content={socialImageUrl} />
-
-        <link rel="preconnect" href="https://api.fontshare.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap"
-            rel="stylesheet"
-        />
-        <link
-            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
-            rel="stylesheet"
-        />
-    </head>
-
-            <body>
-                <a href="#main-content" class="skip-link">Skip to content</a>
-                <noscript>
-                    <div class="noscript">
-                        Git Sonar requires JavaScript to load repositories and render the graph. Please enable JavaScript to continue.
-                    </div>
-                </noscript>
-                <ErrorBoundary>
-                    <div class="app" id="app">
-                        <!-- Mobile menu button -->
-                        <button
-                            type="button"
-                            class="mobile-menu-btn"
-                            id="mobile-menu-toggle"
-                            aria-label="Toggle menu"
-                            aria-controls="sidebar"
-                            aria-expanded="false"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 12h18M3 6h18M3 18h18"></path>
-                            </svg>
-                        </button>
-
-                        <!-- Header -->
-                        <header class="app-header">
-                <a href="/" class="app-logo">
-                    <svg
-                        class="app-logo__icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <circle cx="12" cy="6" r="3"></circle>
-                        <circle cx="6" cy="18" r="3"></circle>
-                        <circle cx="18" cy="18" r="3"></circle>
-                        <path d="M12 9v3m-3 3l3-3m3 3l-3-3"></path>
-                    </svg>
-                    <span class="app-logo__text">Git Sonar</span>
-                </a>
-
-                <div class="app-stats" id="app-stats">
-                    <!-- Stats populated by JS -->
-                </div>
-
-                <div class="app-actions">
-                    <button
-                        type="button"
-                        class="btn btn--ghost"
-                        id="btn-help"
-                        title="Keyboard shortcuts (?)"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3m0 4h.01"
-                            ></path>
-                        </svg>
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn--primary"
-                        id="btn-new"
-                        title="New repository"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M12 5v14m-7-7h14"></path>
-                        </svg>
-                        <span>Import</span>
-                    </button>
-                </div>
-            </header>
-
-            <!-- Mobile sidebar toggle -->
-            <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-            <!-- Main content -->
-            <main class="app-main" id="main-content" role="main" aria-label="Git visualization" tabindex="-1">
-                <!-- Import panel (shown when no graph) -->
-                <div class="import-container" id="import-container">
-                    <div class="import-header">
-                        <h1>Make a poster from your repo</h1>
-                        <p>
-                            Load any repository and turn its commit history into a
-                            movie poster, album cover, or generative print.
-                        </p>
-                    </div>
-                    <ImportPanel client:load />
-                </div>
-
-                <!-- Graph view (shown when graph loaded) -->
-                <div
-                    class="graph-container"
-                    id="graph-container"
-                    style="display: none;"
-                >
-                    <!-- Sidebar with commit list -->
-                    <aside class="sidebar" id="sidebar">
-                        <CommitSidebar client:load />
-                    </aside>
-
-                    <!-- Main graph canvas -->
-                    <div class="graph-main">
-                        <GraphCanvas client:load />
-                        <ControlsOverlay client:load />
-                        <TimelineScrubber client:load />
-                        <CalendarView client:load />
-                        <PosterStudio client:load />
-                        <LiveRegion client:load />
-                    </div>
-                </div>
-            </main>
-
-            <!-- Commit details modal -->
-            <CommitDetailsDialog client:load />
-            <AppShellController client:load />
-        </div>
-                </ErrorBoundary>
-
-        <style>
-            /* Keyboard skip link — visually hidden until focused. */
-            .skip-link {
-                position: fixed;
-                top: 0.5rem;
-                left: 0.5rem;
-                z-index: 1000;
-                padding: 0.6rem 1rem;
-                border-radius: 999px;
-                background: var(--rp-gold);
-                color: #10110f;
-                font-weight: 800;
-                text-decoration: none;
-                transform: translateY(-150%);
-                transition: transform 0.15s ease;
-            }
-
-            .skip-link:focus-visible,
-            .skip-link:focus {
-                transform: translateY(0);
-                outline: 2px solid #10110f;
-                outline-offset: 2px;
-            }
-
-            .app {
-                display: flex;
-                flex-direction: column;
-                height: 100dvh;
-                overflow: hidden;
-                position: relative;
-                isolation: isolate;
-                color: var(--rp-text);
-                background:
-                    radial-gradient(circle at 18% 8%, rgba(143, 211, 199, 0.16), transparent 32rem),
-                    radial-gradient(circle at 88% 14%, rgba(242, 179, 109, 0.13), transparent 30rem),
-                    linear-gradient(180deg, #080908 0%, #10120f 48%, #090a0a 100%);
-                font-family: "Cabinet Grotesk", var(--font-sans);
-            }
-
-            .app::before {
-                content: "";
-                position: fixed;
-                inset: 0;
-                z-index: -1;
-                pointer-events: none;
-                opacity: 0.16;
-                background-image:
-                    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-                background-size: 4px 4px, 4px 4px;
-                mask-image: radial-gradient(circle at center, black, transparent 82%);
-            }
-
-            /* Header */
-            .app-header {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                margin: 0.85rem 0.85rem 0;
-                padding: 0.65rem 0.75rem;
-                background: rgba(12, 14, 12, 0.76);
-                border: 1px solid rgba(244, 240, 232, 0.12);
-                border-radius: 999px;
-                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 70px rgba(0, 0, 0, 0.28);
-                backdrop-filter: blur(20px);
-                flex-shrink: 0;
-                z-index: 100;
-            }
-
-            .app-logo {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                text-decoration: none;
-                color: var(--rp-text);
-                font-weight: 800;
-                font-size: 1rem;
-            }
-
-            .app-logo__icon {
-                width: 2.25rem;
-                height: 2.25rem;
-                padding: 0.45rem;
-                border-radius: 999px;
-                color: #0b0c0a;
-                background: var(--rp-gold);
-                box-shadow: 0 0 34px rgba(242, 179, 109, 0.28);
-            }
-
-            .app-stats {
-                display: flex;
-                gap: 1.5rem;
-                margin-left: auto;
-            }
-
-            .stat {
-                display: flex;
-                align-items: baseline;
-                gap: 0.35rem;
-            }
-
-            .stat__value {
-                font-size: 1.1rem;
-                font-weight: 800;
-                color: var(--rp-text);
-                font-variant-numeric: tabular-nums;
-            }
-
-            .stat__label {
-                font-size: 0.8rem;
-                color: var(--rp-muted);
-            }
-
-            .app-actions {
-                display: flex;
-                gap: 0.5rem;
-                margin-left: 1rem;
-            }
-
-            .btn {
-                display: flex;
-                align-items: center;
-                gap: 0.4rem;
-                min-height: 42px;
-                padding: 0.5rem 0.85rem;
-                border: 1px solid rgba(244, 240, 232, 0.1);
-                border-radius: 999px;
-                font-size: 0.85rem;
-                font-weight: 800;
-                cursor: pointer;
-                transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-            }
-
-            .btn svg {
-                width: 16px;
-                height: 16px;
-            }
-
-            .btn--ghost {
-                background: rgba(244, 240, 232, 0.04);
-                color: var(--rp-subtle);
-                padding: 0.5rem;
-            }
-
-            .btn--ghost:hover {
-                background: rgba(143, 211, 199, 0.1);
-                border-color: rgba(143, 211, 199, 0.35);
-                color: var(--rp-text);
-                transform: translateY(-1px);
-            }
-
-            .btn--primary {
-                background: var(--rp-gold);
-                color: #10110f;
-                box-shadow: 0 12px 38px rgba(242, 179, 109, 0.22);
-            }
-
-            .btn--primary:hover {
-                background: #ffd08f;
-                transform: translateY(-1px);
-            }
-
-            /* Main layout */
-            .app-main {
-                flex: 1;
-                overflow: hidden;
-                min-height: 0;
-            }
-
-            /* Import view */
-            .import-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                padding: clamp(1.2rem, 4vw, 3rem);
-                animation: fadeIn 0.3s ease;
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .import-header {
-                text-align: center;
-                margin-bottom: 2.25rem;
-            }
-
-            .import-header h1 {
-                margin: 0 0 0.75rem;
-                max-width: 52rem;
-                font-size: clamp(3rem, 7vw, 6.5rem);
-                line-height: 0.92;
-                font-weight: 800;
-                text-wrap: balance;
-                color: var(--rp-text);
-            }
-
-            .import-header p {
-                margin: 0;
-                color: rgba(244, 240, 232, 0.7);
-                font-size: clamp(1.05rem, 1.5vw, 1.28rem);
-            }
-
-            /* Graph view */
-            .graph-container {
-                display: flex;
-                height: 100%;
-                gap: 0.75rem;
-                padding: 0.85rem;
-                box-sizing: border-box;
-            }
-
-            body[data-view-mode="poster"] .app-header,
-            body[data-view-mode="poster"] .sidebar,
-            body[data-view-mode="poster"] .sidebar-overlay,
-            body[data-view-mode="poster"] .mobile-menu-btn {
-                display: none;
-            }
-
-            body[data-view-mode="poster"] .graph-container {
-                display: block;
-            }
-
-            body[data-view-mode="poster"] .graph-main {
-                width: 100%;
-                height: 100%;
-            }
-
-            body[data-view-mode="poster"] .timeline-scrubber {
-                display: none;
-            }
-
-            /* Sidebar */
-            .sidebar {
-                width: 328px;
-                flex-shrink: 0;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                background: rgba(16, 18, 15, 0.78);
-                border: 1px solid rgba(244, 240, 232, 0.11);
-                border-radius: 1rem;
-                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.24);
-                backdrop-filter: blur(18px);
-            }
-
-            .sidebar__header {
-                padding: 1rem;
-                border-bottom: 1px solid var(--rp-highlight-low);
-            }
-
-            .sidebar__header h2 {
-                margin: 0 0 0.75rem;
-                font-size: 0.85rem;
-                font-weight: 600;
-                color: var(--rp-subtle);
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
-
-            .search-input {
-                width: 100%;
-                padding: 0.5rem 0.75rem;
-                background: var(--rp-overlay);
-                border: 1px solid var(--rp-highlight-med);
-                border-radius: 6px;
-                color: var(--rp-text);
-                font-size: 0.85rem;
-            }
-
-            .search-input::placeholder {
-                color: var(--rp-muted);
-            }
-
-            .search-input:focus {
-                outline: none;
-                border-color: var(--rp-foam);
-            }
-
-            .commit-list {
-                flex: 1;
-                overflow-y: auto;
-                padding: 0.5rem;
-            }
-
-            .commit-item {
-                display: flex;
-                align-items: flex-start;
-                gap: 0.75rem;
-                padding: 0.6rem 0.75rem;
-                border-radius: 6px;
-                cursor: pointer;
-                transition: background 0.1s ease;
-            }
-
-            .commit-item:hover {
-                background: var(--rp-overlay);
-            }
-
-            .commit-item--selected {
-                background: var(--rp-highlight-low);
-            }
-
-            .commit-item__dot {
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                background: var(--rp-foam);
-                margin-top: 0.25rem;
-                flex-shrink: 0;
-            }
-
-            .commit-item__dot--merge {
-                background: var(--rp-iris);
-                border-radius: 2px;
-            }
-
-            .commit-item__content {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .commit-item__message {
-                font-size: 0.85rem;
-                color: var(--rp-text);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                margin-bottom: 0.25rem;
-            }
-
-            .commit-item__meta {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                row-gap: 0.2rem;
-                font-size: 0.75rem;
-                color: var(--rp-muted);
-                min-width: 0;
-            }
-
-            .commit-item__sha {
-                font-family: "JetBrains Mono", monospace;
-                color: var(--rp-subtle);
-                white-space: nowrap;
-            }
-
-            .commit-item__author {
-                min-width: 0;
-                max-width: 100%;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-            .commit-item__time {
-                white-space: nowrap;
-            }
-
-            /* Graph main area */
-            .graph-main {
-                flex: 1;
-                position: relative;
-                overflow: hidden;
-                min-width: 0;
-                border: 1px solid rgba(244, 240, 232, 0.11);
-                border-radius: 1rem;
-                background: rgba(8, 9, 8, 0.52);
-                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 28px 80px rgba(0, 0, 0, 0.25);
-            }
-
-            body[data-view-mode="calendar"] .graph-canvas,
-            body[data-view-mode="calendar"] .timeline-scrubber,
-            body[data-view-mode="calendar"] .controls-bar {
-                display: none;
-            }
-
-            /* Mobile menu button */
-            .mobile-menu-btn {
-                display: none;
-                width: 44px;
-                height: 44px;
-                background: transparent;
-                border: 1px solid rgba(244, 240, 232, 0.12);
-                border-radius: 999px;
-                color: var(--rp-subtle);
-                cursor: pointer;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .mobile-menu-btn:hover {
-                background: var(--rp-overlay);
-                color: var(--rp-text);
-            }
-
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 150;
-            }
-
-            @media (max-width: 768px) {
-                .mobile-menu-btn {
-                    display: flex;
-                }
-
-                .sidebar {
-                    position: fixed;
-                    left: -100%;
-                    top: 5.35rem;
-                    bottom: 0.85rem;
-                    z-index: 200;
-                    transition: left 0.3s ease;
-                }
-
-                .sidebar.open {
-                    left: 0;
-                }
-
-                .sidebar-overlay.open {
-                    display: block;
-                }
-
-                .app-header {
-                    margin: 0.5rem 0.5rem 0;
-                    padding: 0.55rem 0.65rem;
-                }
-
-                .app-logo__text {
-                    display: none;
-                }
-
-                .app-stats {
-                    display: none;
-                }
-
-                .app-actions {
-                    margin-left: auto;
-                }
-
-                .app-actions .btn span {
-                    display: none;
-                }
-            }
-        </style>
-    </body>
+	<head>
+		<SiteHead
+			title={`${BRAND.name} studio: make a poster from your repo`}
+			description="Turn any repo into a poster from its commit history. It runs in your browser, so your code is never uploaded."
+			path="/app"
+		/>
+	</head>
+
+	<body>
+		<a href="#main-content" class="skip-link">Skip to content</a>
+		<noscript>
+			<div class="noscript">
+				{BRAND.name} needs JavaScript to read repositories and draw posters. Please turn it on to continue.
+			</div>
+		</noscript>
+		<ErrorBoundary>
+			<div class="app" id="app">
+				<header class="app-header">
+					<button
+						type="button"
+						class="app-icon-btn mobile-menu-btn"
+						id="mobile-menu-toggle"
+						aria-label="Show the commit list"
+						aria-controls="sidebar"
+						aria-expanded="false"
+					>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+							<path d="M4 7h16M4 12h16M4 17h16"></path>
+						</svg>
+					</button>
+
+					<a href="/" class="app-brand">{BRAND.name}</a>
+
+					<div class="app-stats" id="app-stats" aria-live="polite"></div>
+
+					<div class="g-seg app-views" id="app-views" role="group" aria-label="View" hidden>
+						<button type="button" data-view="poster" aria-pressed="true">Poster</button>
+						<button type="button" data-view="inspect" aria-pressed="false">History</button>
+						<button type="button" data-view="calendar" aria-pressed="false">Calendar</button>
+					</div>
+
+					<div class="app-actions">
+						<button class="g-switch app-switch" type="button" data-light-switch aria-pressed="true" aria-label="Gallery lights" title="Gallery lights"></button>
+						<button type="button" class="app-icon-btn" id="btn-help" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+								<circle cx="12" cy="12" r="9"></circle>
+								<path d="M9.4 9.3a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.2-2.6 3.9M12 17.2h.01"></path>
+							</svg>
+						</button>
+						<button type="button" class="g-btn g-btn--line" id="btn-new" style="display: none;">
+							<span>Change repo</span>
+						</button>
+					</div>
+				</header>
+
+				<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+				<main class="app-main" id="main-content" aria-label="Poster studio" tabindex="-1">
+					<!-- Front desk (shown until a repo is loaded) -->
+					<div class="import-container" id="import-container">
+						<ImportPanel client:load />
+					</div>
+
+					<!-- Views (shown once a repo is loaded) -->
+					<div class="graph-container" id="graph-container" style="display: none;">
+						<aside class="sidebar" id="sidebar">
+							<CommitSidebar client:load />
+						</aside>
+
+						<div class="graph-main">
+							<GraphCanvas client:load />
+							<ControlsOverlay client:load />
+							<TimelineScrubber client:load />
+							<CalendarView client:load />
+							<PosterStudio client:only="react" />
+							<LiveRegion client:load />
+						</div>
+					</div>
+				</main>
+
+				<CommitDetailsDialog client:load />
+				<AppShellController client:load />
+			</div>
+		</ErrorBoundary>
+		<script>
+			import "../scripts/lights";
+		</script>
+	</body>
 </html>

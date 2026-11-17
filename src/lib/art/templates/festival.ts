@@ -10,7 +10,7 @@
  */
 
 import type { PosterTemplate, TemplateContext } from '../template';
-import type { Scene, SceneText, SceneNode } from '../scene';
+import type { Scene, SceneText, SceneNode, SceneStroke } from '../scene';
 import { buildGraphScene, typeScale, formatDate, type Box } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha } from '../palette';
@@ -72,6 +72,30 @@ function build(ctx: TemplateContext): Scene {
         shape: 'circle',
     }));
 
+    // --- SUNBURST: alternating rays behind the lineup, as on a gig poster ---
+    const rays: SceneStroke[] = [];
+    const rayCount = 18 + Math.floor(rng() * 5) * 2;
+    const turn = rng() * Math.PI * 2;
+    const hub = { x: width / 2, y: height * 0.5 };
+    const reach = Math.hypot(width, height);
+    for (let i = 0; i < rayCount; i += 2) {
+        const a0 = turn + (i / rayCount) * Math.PI * 2;
+        const a1 = turn + ((i + 1) / rayCount) * Math.PI * 2;
+        rays.push({
+            id: `ray-${i}`,
+            points: [
+                hub,
+                { x: hub.x + Math.cos(a0) * reach, y: hub.y + Math.sin(a0) * reach },
+                { x: hub.x + Math.cos(a1) * reach, y: hub.y + Math.sin(a1) * reach },
+            ],
+            color: palette.accent,
+            width: 0,
+            opacity: palette.variant === 'dark' ? 0.07 : 0.1,
+            closed: true,
+            fill: i % 4 === 0 ? palette.accent : palette.accent2,
+        });
+    }
+
     // --- HEADER: festival name + date range ---
     const festivalName = (options.title || options.repoName || 'GIT FEST').toString().toUpperCase();
     // Single expressive line; shrink if the name is long so it always fits.
@@ -99,8 +123,8 @@ function build(ctx: TemplateContext): Scene {
     const tierRows = buildTiers(capped, cap);
 
     // Vertical space available for the lineup (below header, above footer).
-    const lineupTop = height * 0.3;
-    const lineupBottom = height * 0.86;
+    const lineupTop = height * 0.27;
+    const lineupBottom = height * 0.875;
     const lineupH = lineupBottom - lineupTop;
     // Headliner gets the most vertical weight; weights decay per tier.
     const rowWeights = tierRows.map((_, i) => 1 / (i * 0.55 + 1));
@@ -111,10 +135,11 @@ function build(ctx: TemplateContext): Scene {
         const slotH = (lineupH * rowWeights[ti]) / weightSum;
         const cy = cursorY + slotH * 0.5;
         // Headliner is biggest & accent; lower tiers shrink and fade.
-        const tierSize = scale(1.6 - ti * 0.62);
-        let size = Math.max(scale(-2.2), tierSize);
+        // Sized to fill the sheet: the headliner spans it, each tier steps down.
+        const tierSize = scale(3.4 - ti * 0.95);
+        let size = Math.max(scale(-0.6), tierSize);
         const color = ti === 0 ? palette.accent : palette.fg;
-        const opacity = ti === 0 ? 1 : Math.max(0.4, 1 - ti * 0.16);
+        const opacity = ti === 0 ? 1 : Math.max(0.62, 1 - ti * 0.1);
         const joined = names.join('  ·  ');
         // Shrink the row so long real names don't overrun the frame (no canvas
         // text metrics here — estimate width from condensed-glyph average ~0.46em).
@@ -122,6 +147,7 @@ function build(ctx: TemplateContext): Scene {
         const tracking = width * (ti === 0 ? 0.002 : 0.004);
         const estWidth = joined.length * size * 0.46 + (joined.length - 1) * tracking;
         if (estWidth > usable) size = Math.max(scale(-3), size * (usable / estWidth));
+        size = Math.min(size, slotH * 0.78);
         texts.push(text(joined, width / 2, cy + size * 0.32, {
             font: fontStack(NAME_FONT), size, weight: ti === 0 ? 700 : 600,
             color, align: 'middle', spacing: tracking, opacity,
@@ -186,7 +212,7 @@ function build(ctx: TemplateContext): Scene {
             vignette: 0.35,
             grain: 0.05,
         },
-        strokes: [],
+        strokes: rays,
         edges: [],
         nodes: sceneNodes,
         texts,

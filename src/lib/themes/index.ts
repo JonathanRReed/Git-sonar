@@ -143,48 +143,104 @@ const DRACULA: Theme = {
     },
 };
 
+/**
+ * Gallery Paper
+ * Off-white stock with ink and primaries: the house look, made for framing.
+ */
+const GALLERY_PAPER: Theme = {
+    id: 'paper',
+    name: 'Gallery Paper',
+    variant: 'light',
+    colors: {
+        base: '#fbfaf5',
+        surface: '#f1efe8',
+        overlay: '#e4e1d8',
+        muted: '#6f6d67',
+        subtle: '#4a4844',
+        text: '#16181a',
+        love: '#b3261e',
+        gold: '#e2a019',
+        rose: '#7a4fb5',
+        pine: '#2f7d5b',
+        foam: '#d92b25',
+        iris: '#1f4b8f',
+        highlightLow: '#f1efe8',
+        highlightMed: '#dcd9cf',
+        highlightHigh: '#b9b6ac',
+    },
+};
+
+/**
+ * Blueprint
+ * White line on cyanotype blue, like an architect's print.
+ */
+const BLUEPRINT: Theme = {
+    id: 'blueprint',
+    name: 'Blueprint',
+    variant: 'dark',
+    colors: {
+        base: '#123a6b',
+        surface: '#17457d',
+        overlay: '#1d5192',
+        muted: '#9dbde4',
+        subtle: '#c9dcf3',
+        text: '#f2f7ff',
+        love: '#ff9d8a',
+        gold: '#ffe08a',
+        rose: '#ffc2e0',
+        pine: '#a8f0c6',
+        foam: '#eaf3ff',
+        iris: '#8ec1ff',
+        highlightLow: '#17457d',
+        highlightMed: '#2a62a8',
+        highlightHigh: '#8ec1ff',
+    },
+};
+
+/**
+ * Riso
+ * Two-drum risograph inks on newsprint: federal blue and fluorescent pink.
+ */
+const RISO: Theme = {
+    id: 'riso',
+    name: 'Riso',
+    variant: 'light',
+    colors: {
+        base: '#f2efe6',
+        surface: '#e9e5da',
+        overlay: '#dcd7ca',
+        muted: '#62616b',
+        subtle: '#3d3c44',
+        text: '#1d2a6d',
+        love: '#ff4c3b',
+        gold: '#ffb511',
+        rose: '#ff6f4c',
+        pine: '#00a95c',
+        foam: '#ff48b0',
+        iris: '#3255a4',
+        highlightLow: '#e9e5da',
+        highlightMed: '#d3cec0',
+        highlightHigh: '#a9a495',
+    },
+};
+
 export const THEMES = {
     night: ROSE_PINE_NIGHT,
     dawn: ROSE_PINE_DAWN,
+    paper: GALLERY_PAPER,
+    riso: RISO,
+    blueprint: BLUEPRINT,
     github: GITHUB_DARK,
     nord: NORD,
     dracula: DRACULA,
 } as const;
 
+/** Every theme id, for validating links and saved settings. */
+export const THEME_IDS = Object.keys(THEMES) as (keyof typeof THEMES)[];
+
 export type ThemeId = keyof typeof THEMES;
 
 const THEME_STORAGE_KEY = 'git-sonar-theme';
-
-/**
- * RGB color maps for new themes
- */
-const THEME_RGB: Record<ThemeId, { base: string; surface: string; text: string }> = {
-    night: {
-        base: '8, 9, 8',
-        surface: '16, 18, 15',
-        text: '244, 240, 232',
-    },
-    dawn: {
-        base: '250, 244, 237',
-        surface: '255, 250, 243',
-        text: '87, 82, 121',
-    },
-    github: {
-        base: '13, 17, 23',
-        surface: '22, 27, 34',
-        text: '201, 209, 217',
-    },
-    nord: {
-        base: '46, 52, 64',
-        surface: '59, 66, 82',
-        text: '236, 239, 244',
-    },
-    dracula: {
-        base: '40, 42, 54',
-        surface: '52, 55, 70',
-        text: '248, 248, 242',
-    },
-};
 
 export const DEFAULT_THEME: ThemeId = 'night';
 
@@ -229,42 +285,23 @@ export function getTheme(id: ThemeId): Theme {
 }
 
 /**
- * Apply theme colors to CSS variables.
+ * Publish the art theme as CSS variables. The page chrome is a fixed gallery
+ * palette (see global.css), so these are namespaced --art-* and only style
+ * things that sit on the artwork itself.
  */
 export function applyThemeToCSS(theme: Theme): void {
     if (typeof document === 'undefined') return;
 
     const root = document.documentElement;
     const c = theme.colors;
-    const rgb = THEME_RGB[theme.id as ThemeId];
-    
-    const toRgb = (hex: string) => {
-        const num = parseInt(hex.slice(1), 16);
-        const r = (num >> 16) & 255;
-        const g = (num >> 8) & 255;
-        const b = num & 255;
-        return `${r}, ${g}, ${b}`;
-    };
 
-    root.style.setProperty('--rp-base', c.base);
-    root.style.setProperty('--rp-surface', c.surface);
-    root.style.setProperty('--rp-overlay', c.overlay);
-    root.style.setProperty('--rp-muted', c.muted);
-    root.style.setProperty('--rp-subtle', c.subtle);
-    root.style.setProperty('--rp-text', c.text);
-    root.style.setProperty('--rp-love', c.love);
-    root.style.setProperty('--rp-gold', c.gold);
-    root.style.setProperty('--rp-rose', c.rose);
-    root.style.setProperty('--rp-pine', c.pine);
-    root.style.setProperty('--rp-foam', c.foam);
-    root.style.setProperty('--rp-iris', c.iris);
-    root.style.setProperty('--rp-highlight-low', c.highlightLow);
-    root.style.setProperty('--rp-highlight-med', c.highlightMed);
-    root.style.setProperty('--rp-highlight-high', c.highlightHigh);
-    
-    // Use pre-computed RGB values or fallback to computed values
-    root.style.setProperty('--rp-base-rgb', rgb?.base ?? toRgb(c.base));
-    root.style.setProperty('--rp-surface-rgb', rgb?.surface ?? toRgb(c.surface));
-    root.style.setProperty('--rp-overlay-rgb', toRgb(c.overlay));
-    root.style.setProperty('--rp-text-rgb', rgb?.text ?? toRgb(c.text));
+    root.style.setProperty('--art-base', c.base);
+    root.style.setProperty('--art-surface', c.surface);
+    root.style.setProperty('--art-overlay', c.overlay);
+    root.style.setProperty('--art-muted', c.muted);
+    root.style.setProperty('--art-subtle', c.subtle);
+    root.style.setProperty('--art-text', c.text);
+    root.style.setProperty('--art-accent', c.foam);
+    root.style.setProperty('--art-accent-2', c.gold);
+    root.dataset.artVariant = theme.variant;
 }

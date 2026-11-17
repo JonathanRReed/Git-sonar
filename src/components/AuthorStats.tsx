@@ -153,8 +153,8 @@ export function AuthorStats() {
 
             <style>{`
                 .author-stats {
-                    border-top: 1px solid rgba(244, 240, 232, 0.1);
-                    background: rgba(8, 9, 8, 0.2);
+                    border-top: 1px solid rgba(var(--rp-text-rgb), 0.1);
+                    background: rgba(var(--rp-surface-rgb), 0.2);
                 }
 
                 .author-stats__header {
@@ -171,7 +171,7 @@ export function AuthorStats() {
                 }
 
                 .author-stats__header:hover {
-                    background: rgba(244, 240, 232, 0.045);
+                    background: rgba(var(--rp-text-rgb), 0.045);
                 }
 
                 .author-stats__title {
@@ -180,7 +180,7 @@ export function AuthorStats() {
                     gap: 0.5rem;
                     font-size: 0.85rem;
                     font-weight: 600;
-                    color: rgba(244, 240, 232, 0.62);
+                    color: rgba(var(--rp-text-rgb), 0.62);
                     font-family: 'JetBrains Mono', monospace;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
@@ -188,7 +188,7 @@ export function AuthorStats() {
 
                 .author-stats__count {
                     padding: 0.15rem 0.5rem;
-                    background: rgba(242, 179, 109, 0.14);
+                    background: rgba(217, 43, 37, 0.14);
                     border-radius: 999px;
                     font-size: 0.7rem;
                     color: var(--rp-foam);
@@ -209,7 +209,7 @@ export function AuthorStats() {
                     align-items: center;
                     gap: 0.35rem;
                     padding: 0.35rem 0.6rem;
-                    border: 1px solid rgba(244, 240, 232, 0.12);
+                    border: 1px solid rgba(var(--rp-text-rgb), 0.12);
                     border-radius: 999px;
                     background: transparent;
                     color: var(--rp-subtle);
@@ -220,13 +220,13 @@ export function AuthorStats() {
                 }
 
                 .sort-btn:hover {
-                    border-color: rgba(143, 211, 199, 0.45);
+                    border-color: rgba(var(--rp-text-rgb), 0.45);
                     color: var(--rp-text);
                 }
 
                 .sort-btn--active {
-                    background: rgba(242, 179, 109, 0.13);
-                    border-color: rgba(242, 179, 109, 0.5);
+                    background: rgba(217, 43, 37, 0.13);
+                    border-color: rgba(217, 43, 37, 0.5);
                     color: var(--rp-gold);
                 }
 
@@ -242,8 +242,8 @@ export function AuthorStats() {
                     align-items: center;
                     gap: 0.5rem;
                     padding: 0.5rem;
-                    background: rgba(244, 240, 232, 0.045);
-                    border: 1px solid rgba(244, 240, 232, 0.06);
+                    background: rgba(var(--rp-text-rgb), 0.045);
+                    border: 1px solid rgba(var(--rp-text-rgb), 0.06);
                     border-radius: 0.75rem;
                     transition: background 0.15s;
                 }
@@ -264,7 +264,7 @@ export function AuthorStats() {
                     height: 28px;
                     border-radius: 6px;
                     background: var(--rp-highlight-med);
-                    border: 1px solid rgba(244, 240, 232, 0.08);
+                    border: 1px solid rgba(var(--rp-text-rgb), 0.08);
                 }
 
                 .author-item__info {

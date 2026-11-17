@@ -14,11 +14,16 @@ import type { Scene, SceneText, SceneNode, SceneEdge, Vec2 } from '../scene';
 import { typeScale, formatDate, type Box, inset, sampleNodes } from '../compose';
 import { fontStack } from '../fonts';
 import { withAlpha, adjustLightness } from '../palette';
-import { rangeOf } from '../rng';
+import { gaussian, rangeOf } from '../rng';
+import { monthYear } from './kit';
 
 const TITLE_FONT = 'Cormorant';
 const SUB_FONT = 'PlayfairDisplay';
 const MONO_FONT = 'JetBrainsMono';
+
+function clampTo(v: number, lo: number, hi: number): number {
+    return Math.max(lo, Math.min(hi, v));
+}
 
 function build(ctx: TemplateContext): Scene {
     const { width, height, palette, signals, options, edges, rng, encoding } = ctx;
@@ -34,22 +39,46 @@ function build(ctx: TemplateContext): Scene {
         { t: margin, r: margin, b: margin * 0.5, l: margin }
     );
 
-    // --- Place each commit as a star via a seeded, jittered scatter ----------
-    // A loose horizontal-band layout (time → x, lane/jitter → y) keeps a sense
-    // of chronology while jitter dissolves any grid into a sky.
-    const starBase = Math.max(2.2, Math.min(sky.w, sky.h) / 95);
-    const maxLane = nodes.reduce((m, n) => Math.max(m, n.lane), 0);
+    // --- Each stretch of time is its own constellation -----------------------
+    // The sky is divided into loose cells in reading order, so time still runs
+    // left to right and top to bottom; each cell holds one month's commits as
+    // a small, stretched cluster. The roll moves and turns every cluster.
+    const starBase = Math.max(2, Math.min(sky.w, sky.h) / 120);
+    const spanDays = Math.max(1, signals.timeSpanMs / 86_400_000);
+    const groups = Math.max(3, Math.min(16, Math.round(spanDays / 30)));
+    const cols = Math.max(2, Math.round(Math.sqrt(groups * (sky.w / sky.h))));
+    const rows = Math.ceil(groups / cols);
+    const cellW = sky.w / cols;
+    const cellH = sky.h / rows;
+    const clusters = Array.from({ length: groups }, (_, g) => {
+        const row = Math.floor(g / cols);
+        const colInRow = g % cols;
+        // The last row may be short; centre it.
+        const inRow = row === rows - 1 ? groups - row * cols : cols;
+        const offset = ((cols - inRow) * cellW) / 2;
+        return {
+            x: sky.x + offset + (colInRow + 0.5) * cellW + (rng() - 0.5) * cellW * 0.3,
+            y: sky.y + (row + 0.5) * cellH + (rng() - 0.5) * cellH * 0.3,
+            angle: rng() * Math.PI,
+            count: 0,
+        };
+    });
+    const spread = Math.min(cellW, cellH) * 0.2;
+    const groupOf = new Map<string, number>();
     const placed = new Map<string, Vec2>();
     const stars: SceneNode[] = [];
 
     for (const n of nodes) {
         const t = Number.isFinite(n.t) ? n.t : 0.5;
-        // Lay time left→right; spread lanes vertically, then jitter both axes.
-        const laneT = maxLane > 0 ? n.lane / maxLane : 0.5;
-        const jx = ctx.noise2D(t * 6, n.lane * 1.7) * 0.06;
-        const jy = (rng() - 0.5) * 0.5;
-        const px = sky.x + sky.w * clamp01(0.06 + t * 0.88 + jx);
-        const py = sky.y + sky.h * clamp01(0.12 + laneT * 0.5 + 0.25 + jy * 0.4);
+        const g = Math.min(groups - 1, Math.floor(t * groups));
+        const c = clusters[g];
+        c.count++;
+        groupOf.set(n.id, g);
+        // Long along the cluster's axis, narrow across it.
+        const along = gaussian(rng) * spread * 1.7;
+        const across = gaussian(rng) * spread * 0.62;
+        const px = clampTo(c.x + along * Math.cos(c.angle) - across * Math.sin(c.angle), sky.x, sky.x + sky.w);
+        const py = clampTo(c.y + along * Math.sin(c.angle) + across * Math.cos(c.angle), sky.y, sky.y + sky.h);
         placed.set(n.id, { x: px, y: py });
 
         // Brightness/size from churn when available, otherwise gentle variation.
@@ -59,7 +88,7 @@ function build(ctx: TemplateContext): Scene {
         const bright = signals.hasChurn && signals.maxChurn > 0
             ? 0.35 + 0.65 * Math.min(1, churn / signals.maxChurn)
             : 0.45 + 0.4 * rng();
-        const r = starBase * (0.7 + 1.7 * bright) * encoding.sizeScale;
+        const r = starBase * (0.6 + 1.5 * bright) * encoding.sizeScale;
         const isMerge = n.commit.parents.length > 1;
         const isRoot = n.commit.parents.length === 0;
 
@@ -72,7 +101,7 @@ function build(ctx: TemplateContext): Scene {
             fill: isMerge ? palette.accent2 : palette.sequential(t),
             shape: isRoot ? 'diamond' : isMerge ? 'star' : 'circle',
             opacity: 0.7 + 0.3 * bright,
-            glow: bright > 0.7 ? Math.min(1, encoding.glow + bright * 0.5) : encoding.glow * 0.4,
+            glow: bright > 0.78 ? Math.min(1, encoding.glow * 0.7 + bright * 0.3) : 0,
             sha: n.id.slice(0, 7),
             kind: isRoot ? 'root' : isMerge ? 'merge' : 'normal',
         });
@@ -93,16 +122,27 @@ function build(ctx: TemplateContext): Scene {
         const from = placed.get(e.from);
         const to = placed.get(e.to);
         if (!from || !to) continue;
+        // Lines are drawn within a constellation; the sky between them stays dark.
+        if (groupOf.get(e.from) !== groupOf.get(e.to)) continue;
         sceneEdges.push({
             id: `c-${e.from}->${e.to}`,
             points: [from, to],
-            color: withAlpha(palette.fg, e.isMerge ? 0.34 : 0.22),
-            width: (e.isMerge ? 1.0 : 0.7) * encoding.weightScale,
+            color: withAlpha(palette.fg, e.isMerge ? 0.5 : 0.36),
+            width: Math.max(0.8, width * 0.0011) * (e.isMerge ? 1.3 : 1) * encoding.weightScale,
             opacity: e.isMerge ? 0.85 : 0.7,
             merge: e.isMerge,
             curve: 'line',
         });
     }
+
+    // Name each constellation after its month, as star charts do.
+    const groupMs = signals.timeSpanMs / groups;
+    clusters.forEach((c, g) => {
+        if (c.count === 0) return;
+        texts.push(text(monthYear(signals.firstCommitMs + (g + 0.5) * groupMs), c.x, Math.min(sky.y + sky.h, c.y + spread * 2.5), {
+            font: fontStack(MONO_FONT), size: scale(-3.6), weight: 500, color: withAlpha(palette.fgMuted, 0.8), align: 'middle', spacing: width * 0.003,
+        }));
+    });
 
     // --- Dust: tiny low-opacity filler stars across the whole sky -----------
     // Count scales gently with poster area and the density slider; deterministic.
@@ -183,10 +223,6 @@ function defaultTagline(signals: { commitCount: number; timeSpanMs: number }): s
         return `A constellation charted over ${y} year${y === 1 ? '' : 's'}`;
     }
     return 'A map of every commit';
-}
-
-function clamp01(n: number): number {
-    return !Number.isFinite(n) ? 0.5 : n < 0 ? 0 : n > 1 ? 1 : n;
 }
 
 function text(

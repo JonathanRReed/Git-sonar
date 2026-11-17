@@ -1,30 +1,103 @@
-import { useCallback, useState, useRef, type DragEvent, type ChangeEvent, type KeyboardEvent, type SubmitEvent } from 'react';
-import { useGraphStore } from '@lib/store/graph-store';
-import { getDemoDatasets } from '@lib/demo-data/catalog';
+/**
+ * The front desk: one question ("Which repo are we hanging?"), one box, and an
+ * empty frame that fills with commits while the repo is read.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type SubmitEvent } from 'react';
+import { formatMomentDate, makeMoment, useGraphStore } from '@lib/store/graph-store';
+import { snapshotGraphAt } from '@lib/git/graph';
+import type { RepoGraph } from '@lib/git/types';
+import { cleanSourceName, repoDisplayName } from '@lib/utils/repo-name';
 import { debugError } from '@lib/utils/debug';
-import { FileText, GitBranch, Network, Package, AlertTriangle, Link as LinkIcon } from 'lucide-react';
 
 const DEFAULT_MAX_COMMITS = 1000;
-const DEMO_SIZE_PRESETS = {
-  small: { label: 'Small', dataset: 'simple' },
-  medium: { label: 'Medium', dataset: 'branching' },
-  large: { label: 'Large', dataset: 'complex' },
-} as const;
+const SAMPLE_DEMO = 'showcase';
+const SUGGESTED_REPOS = ['sveltejs/svelte', 'facebook/react', 'rust-lang/rust', 'torvalds/linux'];
+/** Most dots the frame will draw, however large the history. */
+const MAX_DOTS = 84;
 
-// Map icon names to components
-const ICON_MAP = {
-  'file-text': FileText,
-  'git-branch': GitBranch,
-  'network': Network,
-} as const;
+type Provider = 'github' | 'gitlab' | 'bitbucket';
+
+/** One file from an opened folder (structurally matches import-git's GitFolderEntry). */
+interface GitFolderEntry {
+  path: string;
+  read: () => Promise<ArrayBuffer>;
+}
+
+function providerOf(url: string): Provider {
+  if (url.includes('gitlab.com')) return 'gitlab';
+  if (url.includes('bitbucket.org')) return 'bitbucket';
+  return 'github';
+}
+
+/** Cut a freshly read history back to the chosen moment, if there is one. */
+function asOfMoment(graph: RepoGraph): RepoGraph {
+  const moment = useGraphStore.getState().moment;
+  return moment ? snapshotGraphAt(graph, moment.untilMs) : graph;
+}
+
+/** Minimal shape of the File System Access API we use (not in every TS lib). */
+interface DirHandle {
+  kind: 'directory';
+  name: string;
+  getDirectoryHandle(name: string): Promise<DirHandle>;
+  values(): AsyncIterable<DirHandle | FileHandle>;
+}
+interface FileHandle {
+  kind: 'file';
+  name: string;
+  getFile(): Promise<File>;
+}
+
+/** Collect the files under a .git directory handle that history parsing needs. */
+async function collectGitDir(gitDir: DirHandle): Promise<GitFolderEntry[]> {
+  const entries: GitFolderEntry[] = [];
+  const walk = async (dir: DirHandle, path: string): Promise<void> => {
+    for await (const child of dir.values()) {
+      const childPath = `${path}/${child.name}`;
+      if (child.kind === 'file') {
+        entries.push({ path: childPath, read: async () => (await child.getFile()).arrayBuffer() });
+      } else {
+        await walk(child, childPath);
+      }
+    }
+  };
+  for await (const child of gitDir.values()) {
+    if (child.kind === 'file') {
+      if (child.name === 'HEAD' || child.name === 'packed-refs') {
+        entries.push({ path: `.git/${child.name}`, read: async () => (await child.getFile()).arrayBuffer() });
+      }
+    } else if (child.name === 'refs' || child.name === 'objects') {
+      await walk(child, `.git/${child.name}`);
+    }
+  }
+  return entries;
+}
+
+/** Deterministic spot for the nth commit dot: an outward spiral inside the mat. */
+function dotPosition(i: number): { left: string; top: string; big: boolean } {
+  const t = i / MAX_DOTS;
+  const angle = t * Math.PI * 2 * 3.4;
+  const radius = 5 + t * 37;
+  const jitter = ((i * 7919) % 13) / 13 - 0.5;
+  return {
+    left: `${50 + Math.cos(angle) * radius * 0.92 + jitter * 3}%`,
+    top: `${50 + Math.sin(angle) * radius * 0.66 + jitter * 2}%`,
+    big: i % 9 === 4,
+  };
+}
 
 export function ImportPanel() {
-  const { setGraph, setLoading, setError, setRepoPath, setAuthToken, authToken, isLoading, error } = useGraphStore();
+  const {
+    setGraph, setLoading, setError, setRepoPath, setAuthToken, setCurrentDemo, setSourceName, setImportStatus, setMoment,
+    authToken, isLoading, error, importStatus, moment,
+  } = useGraphStore();
   const [isDragging, setIsDragging] = useState(false);
-  const [demoSize, setDemoSize] = useState<keyof typeof DEMO_SIZE_PRESETS>('medium');
-  const [githubUrl, setGithubUrl] = useState('');
+  const [repoUrl, setRepoUrl] = useState('');
   const [tokenInput, setTokenInput] = useState(authToken ?? '');
   const [showToken, setShowToken] = useState(false);
+  const [momentDate, setMomentDate] = useState(moment?.date ?? '');
+  const [momentLabel, setMomentLabel] = useState(moment?.label ?? '');
   const [rememberToken, setRememberToken] = useState(() => {
     if (typeof window === 'undefined') return false;
     try {
@@ -33,58 +106,174 @@ export function ImportPanel() {
       return false;
     }
   });
+  // While a local file is being read there is no commit count to report, so the
+  // frame fills on a timer instead.
+  const [pulse, setPulse] = useState(0);
   const zipInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
-  const demoDatasets = getDemoDatasets();
-  const selectedDemo = DEMO_SIZE_PRESETS[demoSize].dataset;
+  const [wasLoading, setWasLoading] = useState(isLoading);
+  if (wasLoading !== isLoading) {
+    setWasLoading(isLoading);
+    setPulse(0);
+  }
 
-  const handleDemoClick = useCallback(async (key: string) => {
+  useEffect(() => {
+    if (!isLoading) return;
+    const id = window.setInterval(() => setPulse((p) => p + 1), 140);
+    return () => window.clearInterval(id);
+  }, [isLoading]);
+
+  const loadSample = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setImportStatus({ name: repoDisplayName(null, SAMPLE_DEMO), found: 0 });
     try {
       const { loadDemoDataset } = await import('@lib/demo-data');
-      const graph = await loadDemoDataset(key);
+      const graph = asOfMoment(await loadDemoDataset(SAMPLE_DEMO));
       setGraph(graph);
+      setCurrentDemo(SAMPLE_DEMO);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load demo');
+      setError(err instanceof Error ? err.message : 'Could not load the sample repo.');
     }
-  }, [setGraph, setLoading, setError]);
+  }, [setGraph, setLoading, setError, setCurrentDemo, setImportStatus]);
+
+  const importFromUrl = useCallback(
+    async (rawUrl: string) => {
+      const url = rawUrl.trim();
+      if (!url) return;
+
+      const provider = providerOf(url);
+      const name = repoDisplayName(url, null);
+      setLoading(true);
+      setError(null);
+      setImportStatus({ name, found: 0 });
+
+      try {
+        const token = tokenInput.trim() || undefined;
+        const imports = await import('@lib/git/import-git');
+        const options = {
+          maxCommits: DEFAULT_MAX_COMMITS,
+          authToken: token,
+          // GitHub and GitLab can be asked for the history as of a day.
+          until: useGraphStore.getState().moment?.untilMs,
+          onProgress: (found: number) => setImportStatus({ name, found }),
+        };
+        const graph = provider === 'gitlab'
+          ? await imports.parseGitLabRepo(url, options)
+          : provider === 'bitbucket'
+            ? asOfMoment(await imports.parseBitbucketRepo(url, options))
+            : await imports.parseGitHubRepo(url, options);
+
+        setAuthToken(token ?? null, rememberToken);
+        setGraph(graph);
+        setRepoPath(url, provider, graph.commits.size >= DEFAULT_MAX_COMMITS);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Could not fetch that repo.');
+      }
+    },
+    [tokenInput, rememberToken, setGraph, setLoading, setError, setRepoPath, setAuthToken, setImportStatus]
+  );
+
+  const handleSubmit = useCallback(
+    (e: SubmitEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!repoUrl.trim()) {
+        e.currentTarget.querySelector('input')?.focus();
+        return;
+      }
+      void importFromUrl(repoUrl);
+    },
+    [importFromUrl, repoUrl]
+  );
 
   const handleFile = useCallback(
     async (file: File) => {
+      const name = cleanSourceName(file.name);
       setLoading(true);
       setError(null);
+      setImportStatus({ name, found: 0 });
 
       try {
         if (file.name.endsWith('.zip')) {
-          // ZIP file containing .git folder
           const { parseGitZip } = await import('@lib/git/import-git');
-          const graph = await parseGitZip(file);
-          setGraph(graph);
+          setGraph(asOfMoment(await parseGitZip(file)));
+          setSourceName(name);
         } else if (file.name.endsWith('.json')) {
-          // Legacy JSON export
           const { importFromFile } = await import('@lib/git/import-local');
-          const graph = await importFromFile(file);
-          setGraph(graph);
+          setGraph(asOfMoment(await importFromFile(file)));
+          setSourceName(name);
         } else {
-          setError('Please drop a .zip or .json file');
+          setError('That file is not a .zip. Zip the .git folder, or open the project folder instead.');
         }
       } catch (err) {
         debugError('handleFile', err);
-        setError(err instanceof Error ? err.message : 'Failed to parse file');
-      } finally {
-        setLoading(false);
+        setError(err instanceof Error ? err.message : 'Could not read that file.');
       }
     },
-    [setGraph, setLoading, setError]
+    [setGraph, setLoading, setError, setSourceName, setImportStatus]
+  );
+
+  const importFolder = useCallback(
+    async (entries: GitFolderEntry[], folderName: string) => {
+      const name = cleanSourceName(folderName);
+      setLoading(true);
+      setError(null);
+      setImportStatus({ name, found: 0 });
+      try {
+        const { parseGitFolder } = await import('@lib/git/import-git');
+        setGraph(asOfMoment(await parseGitFolder(entries)));
+        setSourceName(name);
+      } catch (err) {
+        debugError('importFolder', err);
+        setError(err instanceof Error ? err.message : 'Could not read that folder.');
+      }
+    },
+    [setGraph, setLoading, setError, setSourceName, setImportStatus]
+  );
+
+  const openFolder = useCallback(async () => {
+    const picker = (window as unknown as { showDirectoryPicker?: (o?: { mode?: 'read' }) => Promise<DirHandle> }).showDirectoryPicker;
+    if (!picker) {
+      folderInputRef.current?.click();
+      return;
+    }
+    let dir: DirHandle;
+    try {
+      dir = await picker.call(window, { mode: 'read' });
+    } catch {
+      return; // the picker was dismissed
+    }
+    try {
+      const gitDir = dir.name === '.git' ? dir : await dir.getDirectoryHandle('.git');
+      setLoading(true);
+      await importFolder(await collectGitDir(gitDir), dir.name === '.git' ? 'Local repo' : dir.name);
+    } catch (err) {
+      debugError('openFolder', err);
+      setError('No .git folder found there. Pick the project folder that contains .git.');
+    }
+  }, [importFolder, setLoading, setError]);
+
+  const handleFolderSelect = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      e.target.value = '';
+      if (files.length === 0) return;
+      const entries: GitFolderEntry[] = files.map((file) => ({
+        path: (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name,
+        read: () => file.arrayBuffer(),
+      }));
+      const root = entries[0].path.split('/')[0] ?? 'Local repo';
+      await importFolder(entries, root);
+    },
+    [importFolder]
   );
 
   const handleZipSelect = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file) {
-        await handleFile(file);
-      }
+      e.target.value = '';
+      if (file) await handleFile(file);
     },
     [handleFile]
   );
@@ -93,11 +282,8 @@ export function ImportPanel() {
     async (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
-
       const file = e.dataTransfer.files[0];
-      if (file) {
-        await handleFile(file);
-      }
+      if (file) await handleFile(file);
     },
     [handleFile]
   );
@@ -108,685 +294,198 @@ export function ImportPanel() {
   }, []);
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
     setIsDragging(false);
   }, []);
 
-  const handleDropzoneKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      zipInputRef.current?.click();
-    }
-  }, []);
+  const found = importStatus?.found ?? 0;
+  const dotCount = !isLoading ? 0 : found > 0 ? Math.min(MAX_DOTS, Math.ceil(found / 12)) : Math.min(MAX_DOTS, pulse);
+  const dots = useMemo(() => Array.from({ length: MAX_DOTS }, (_, i) => dotPosition(i)), []);
 
-  const handleGitHubSubmit = useCallback(
-    async (e: SubmitEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      if (!githubUrl.trim()) return;
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const trimmedUrl = githubUrl.trim();
-        const authTokenValue = tokenInput.trim() || undefined;
-        const imports = await import('@lib/git/import-git');
-        let graph;
-        let provider: 'github' | 'gitlab' | 'bitbucket' = 'github';
-
-        if (trimmedUrl.includes('gitlab.com')) {
-          provider = 'gitlab';
-          graph = await imports.parseGitLabRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
-        } else if (trimmedUrl.includes('bitbucket.org')) {
-          provider = 'bitbucket';
-          graph = await imports.parseBitbucketRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
-        } else {
-          graph = await imports.parseGitHubRepo(trimmedUrl, { maxCommits: DEFAULT_MAX_COMMITS, authToken: authTokenValue });
-        }
-
-        setAuthToken(authTokenValue ?? null, rememberToken);
-        setGraph(graph);
-        const hasMore = graph.commits.size >= DEFAULT_MAX_COMMITS;
-        setRepoPath(trimmedUrl, provider, hasMore);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch repository');
-      }
-    },
-    [githubUrl, tokenInput, rememberToken, setGraph, setLoading, setError, setRepoPath, setAuthToken]
-  );
+  const labelTitle = isLoading ? importStatus?.name ?? 'Reading' : 'Untitled';
+  const labelLine = !isLoading
+    ? moment ? `Waiting for a repo, as of ${formatMomentDate(moment)}` : 'Waiting for a repo'
+    : found > 0
+      ? `${found.toLocaleString()} commits found`
+      : 'Reading the history';
 
   return (
-    <div className="import-panel">
-      <div className="import-options">
-        {/* Demo button with dropdown */}
-        <div className="demo-section">
-          <div className="demo-size" role="group" aria-label="Demo size">
-            {Object.entries(DEMO_SIZE_PRESETS).map(([key, preset]) => (
-              <button
-                key={key}
-                type="button"
-                className={`demo-size__btn ${demoSize === key ? 'demo-size__btn--active' : ''}`}
-                onClick={() => {
-                  setDemoSize(key as keyof typeof DEMO_SIZE_PRESETS);
-                }}
-                disabled={isLoading}
-                aria-pressed={demoSize === key}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => handleDemoClick(selectedDemo)}
+    <div
+      className={`desk ${isDragging ? 'desk--dragging' : ''}`}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+    >
+      <div className="desk__ask">
+        <h1>Which repo are we hanging?</h1>
+
+        <form className="desk__form" onSubmit={handleSubmit}>
+          <input
+            id="repository-url"
+            name="repository-url"
+            className="g-field"
+            type="text"
+            inputMode="url"
+            autoComplete="url"
+            autoCapitalize="off"
+            spellCheck={false}
+            value={repoUrl}
+            onChange={(e) => setRepoUrl(e.target.value)}
+            placeholder="Paste a GitHub, GitLab or Bitbucket link"
             disabled={isLoading}
-            className="import-btn import-btn--demo"
-            aria-label="Load Demo"
-          >
-            <span className="import-btn__icon">
-              {(() => {
-                const IconComponent = ICON_MAP[demoDatasets[selectedDemo]?.iconName ?? 'git-branch'];
-                return <IconComponent size={32} />;
-              })()}
-            </span>
-            <span className="import-btn__label">Load Demo</span>
-            <span className="import-btn__desc">Choose a sample repository</span>
+            aria-label="Repository URL"
+          />
+          <button type="submit" className="g-btn g-btn--red" disabled={isLoading} aria-busy={isLoading}>
+            {isLoading ? 'Hanging' : 'Make poster'}
+          </button>
+        </form>
+
+        <div className="desk__chips" role="group" aria-label="Public repos to try">
+          <span>Or try</span>
+          {SUGGESTED_REPOS.map((repo) => (
+            <button key={repo} type="button" disabled={isLoading} onClick={() => { setRepoUrl(repo); void importFromUrl(repo); }}>
+              {repo}
+            </button>
+          ))}
+        </div>
+
+        <div className="desk__alts">
+          <button type="button" onClick={openFolder} disabled={isLoading}>
+            <b>Open a folder on this computer</b>
+            <span>Pick the project folder. No zipping, and it works offline.</span>
+          </button>
+          <button type="button" onClick={loadSample} disabled={isLoading}>
+            <b>Use the sample repo</b>
+            <span>Project Atlas: a year of work by eight people.</span>
           </button>
         </div>
 
-        {/* Git hosting URL input */}
-        <form onSubmit={handleGitHubSubmit} className="github-form">
-          <label className="github-form__header" htmlFor="repository-url">
-            <span className="github-form__icon"><LinkIcon aria-hidden="true" size={20} /></span>
-            <span className="github-form__label">Import from GitHub / GitLab / Bitbucket</span>
-          </label>
-          <div className="github-form__input-row">
-            <input
-              id="repository-url"
-              name="repository-url"
-              type="text"
-              autoComplete="url"
-              value={githubUrl}
-              onChange={(e) => setGithubUrl(e.target.value)}
-              placeholder="https://github.com/owner/repo or https://gitlab.com/owner/repo"
-              className="github-form__input"
-              disabled={isLoading}
-              aria-label="Repository URL"
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !githubUrl.trim()}
-              className="github-form__submit"
-              aria-busy={isLoading}
-            >
-              {isLoading ? 'Importing...' : 'Import'}
-            </button>
+        <details className="desk__more desk__moment">
+          <summary>{moment ? `Capturing ${formatMomentDate(moment)}` : 'Capture an earlier moment'}</summary>
+          <div className="desk__more-body">
+            <p>
+              Make the poster of the repo as it stood on a day worth remembering: a launch, a release, a star count.
+            </p>
+            <div className="desk__moment-row">
+              <label>
+                The day
+                <input
+                  className="g-field"
+                  type="date"
+                  name="moment-date"
+                  value={momentDate}
+                  disabled={isLoading}
+                  onChange={(e) => {
+                    setMomentDate(e.target.value);
+                    setMoment(makeMoment(e.target.value, momentLabel));
+                  }}
+                />
+              </label>
+              <label>
+                What happened
+                <input
+                  className="g-field"
+                  type="text"
+                  name="moment-label"
+                  maxLength={80}
+                  placeholder="Reached 1,000 stars"
+                  value={momentLabel}
+                  disabled={isLoading}
+                  onChange={(e) => {
+                    setMomentLabel(e.target.value);
+                    setMoment(makeMoment(momentDate, e.target.value));
+                  }}
+                />
+              </label>
+            </div>
+            <p>GitHub does not share the dates stars were given, so enter the day yourself. Leave the day empty for the repo as it is now.</p>
           </div>
-          <div className="github-form__token">
-            <div className="github-form__token-row">
+        </details>
+
+        <details className="desk__more">
+          <summary>Private repo, rate limit, or a .git zip</summary>
+          <div className="desk__more-body">
+            <label htmlFor="repository-access-token">Access token</label>
+            <div className="desk__token">
               <input
                 id="repository-access-token"
                 name="repository-access-token"
-                type={showToken ? "text" : "password"}
+                className="g-field"
+                type={showToken ? 'text' : 'password'}
                 autoComplete="off"
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
-                placeholder="Access token (optional)"
-                className="github-form__input"
+                placeholder="Optional"
                 disabled={isLoading}
-                aria-label="Access token"
                 aria-describedby="token-hint"
               />
-              <button
-                type="button"
-                className="github-form__token-toggle"
-                onClick={() => setShowToken((prev) => !prev)}
-                aria-label={showToken ? "Hide token" : "Show token"}
-                title={showToken ? "Hide token" : "Show token"}
-              >
-                {showToken ? "Hide" : "Show"}
+              <button type="button" className="g-btn g-btn--line" onClick={() => setShowToken((prev) => !prev)} aria-label={showToken ? 'Hide token' : 'Show token'}>
+                {showToken ? 'Hide' : 'Show'}
               </button>
             </div>
-            <span id="token-hint" className="github-form__token-hint">
-              Use a GitHub or GitLab token to avoid rate limits, or Bitbucket username:appPassword. Tokens stay in your browser.
-            </span>
-            <label className="github-form__remember">
-              <input
-                name="remember-repository-token"
-                type="checkbox"
-                checked={rememberToken}
-                onChange={(e) => setRememberToken(e.target.checked)}
-              />
-              Remember token on this device (avoid shared computers)
-            </label>
-          </div>
-          <span className="github-form__desc">Supports public repos on GitHub, GitLab, and Bitbucket</span>
-        </form>
-
-        {/* ZIP drop zone */}
-        <div
-          className={`dropzone ${isDragging ? 'dropzone--active' : ''}`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => zipInputRef.current?.click()}
-          onKeyDown={handleDropzoneKeyDown}
-          role="button"
-          tabIndex={0}
-          aria-label="Drop .git.zip or click to choose"
-        >
-          <input
-            ref={zipInputRef}
-            id="repository-archive"
-            name="repository-archive"
-            type="file"
-            accept=".zip,.json"
-            onChange={handleZipSelect}
-            aria-label="Repository archive"
-            style={{ display: 'none' }}
-          />
-          <span className="dropzone__icon"><Package size={32} /></span>
-            <span className="dropzone__label">
-            {isDragging ? 'Drop the archive' : 'Drop .git.zip (your .git folder)'}
-          </span>
-          <span className="dropzone__desc">
-            Or click to browse for a ZIP that contains your .git folder
-          </span>
-        </div>
-      </div>
-
-      {/* Instructions */}
-      <div className="import-help">
-        <details>
-          <summary>How do I create a .git.zip?</summary>
-          <div className="import-help__content">
-            <p>The .git folder is a hidden folder inside your repo. Zip only the .git folder:</p>
-            <code>cd your-repo && zip -r ../git-export.zip .git</code>
-            <p className="import-help__note">
-              If your repo uses worktrees, run <code>git rev-parse --git-dir</code> and zip that path instead.
+            <p id="token-hint">
+              A GitHub or GitLab token lifts rate limits and reaches private repos. For Bitbucket use username:appPassword. The token goes only to that provider.
             </p>
-            <p className="import-help__note">
-              Only the <code>.git</code> folder is needed, not your source files.
+            <label className="desk__remember">
+              <input name="remember-repository-token" type="checkbox" checked={rememberToken} onChange={(e) => setRememberToken(e.target.checked)} />
+              Remember the token on this device
+            </label>
+
+            <button type="button" className="g-btn g-btn--line desk__zip" onClick={() => zipInputRef.current?.click()} disabled={isLoading}>
+              Choose a .git zip
+            </button>
+            <p>
+              You can also drop a zip anywhere on this page. To make one: <code>cd your-repo &amp;&amp; zip -r ../repo-git.zip .git</code>
             </p>
           </div>
         </details>
+
+        <input
+          ref={zipInputRef}
+          id="repository-archive"
+          name="repository-archive"
+          type="file"
+          accept=".zip,.json"
+          onChange={handleZipSelect}
+          aria-label="Repository archive"
+          hidden
+        />
+        <input
+          ref={folderInputRef}
+          name="repository-folder"
+          type="file"
+          onChange={handleFolderSelect}
+          aria-label="Repository folder"
+          hidden
+          {...({ webkitdirectory: '', directory: '' } as Record<string, string>)}
+        />
+
+        {error && (
+          <p className="desk__error" role="alert">
+            <span className="g-dot" aria-hidden="true" />
+            {error}
+          </p>
+        )}
+
+        <p className="desk__meter">
+          Code sent to our servers: <b>0 bytes</b>. We do not have any.
+        </p>
       </div>
 
-      {/* Error display */}
-      {error && (
-        <div className="import-error" role="alert">
-          <span className="import-error__icon"><AlertTriangle size={18} /></span>
-          <span>{error}</span>
+      <div className="desk__wall" aria-live="polite">
+        <div className="g-frame g-frame--oak desk__frame">
+          <div className={`g-mat desk__mat ${isLoading ? 'is-busy' : ''}`}>
+            <em>{isDragging ? 'Drop the zip here' : 'Empty, for now'}</em>
+            {dots.slice(0, dotCount).map((d, i) => (
+              <i key={i} className={d.big ? 'is-big' : undefined} style={{ left: d.left, top: d.top }} />
+            ))}
+          </div>
         </div>
-      )}
-
-      {/* Loading state */}
-      {isLoading && (
-        <div className="import-loading" aria-live="polite">
-          <div className="import-loading__spinner" />
-          <span>Parsing repository...</span>
+        <div className="g-label desk__label">
+          <b>{labelTitle}</b>
+          <span>{labelLine}</span>
         </div>
-      )}
-
-      <style>{`
-        .import-panel {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          width: min(100%, 64rem);
-          max-width: 64rem;
-          margin: 0 auto;
-        }
-
-        .import-options {
-          display: grid;
-          grid-template-columns: minmax(18rem, 0.8fr) minmax(20rem, 1.2fr);
-          gap: 1rem;
-          align-items: stretch;
-        }
-
-        .import-btn {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          min-height: 13rem;
-          padding: 1.5rem;
-          border: 1px solid rgba(244, 240, 232, 0.12);
-          border-radius: 1rem;
-          background:
-            radial-gradient(circle at 78% 18%, rgba(242, 179, 109, 0.16), transparent 12rem),
-            rgba(16, 18, 15, 0.78);
-          color: var(--rp-text);
-          cursor: pointer;
-          transition: all 0.2s ease;
-          text-align: center;
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.22);
-          backdrop-filter: blur(18px);
-        }
-
-        .import-btn:hover:not(:disabled) {
-          border-color: rgba(143, 211, 199, 0.45);
-          background:
-            radial-gradient(circle at 78% 18%, rgba(143, 211, 199, 0.16), transparent 12rem),
-            rgba(26, 31, 27, 0.82);
-          transform: translateY(-2px);
-        }
-
-        .import-btn:focus-visible {
-          outline: 2px solid var(--rp-iris);
-          outline-offset: 2px;
-        }
-
-        .import-btn--disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .demo-section {
-          position: relative;
-        }
-
-        .demo-size {
-          display: inline-flex;
-          gap: 0.35rem;
-          padding: 0.35rem;
-          background: rgba(244, 240, 232, 0.045);
-          border: 1px solid rgba(244, 240, 232, 0.09);
-          border-radius: 999px;
-          margin-bottom: 0.5rem;
-        }
-
-        .demo-size__btn {
-          border: 1px solid transparent;
-          background: transparent;
-          color: var(--rp-subtle);
-          font-size: 0.7rem;
-          font-weight: 600;
-          padding: 0.35rem 0.6rem;
-          border-radius: 999px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .demo-size__btn--active {
-          border-color: rgba(242, 179, 109, 0.5);
-          color: var(--rp-gold);
-          background: rgba(242, 179, 109, 0.14);
-        }
-
-        .demo-size__btn:hover:not(:disabled) {
-          border-color: rgba(143, 211, 199, 0.45);
-          color: var(--rp-text);
-        }
-
-        .demo-dropdown {
-          position: absolute;
-          top: calc(100% + 0.5rem);
-          left: 0;
-          right: 0;
-          z-index: 10;
-          background: rgba(12, 14, 12, 0.94);
-          border: 1px solid rgba(244, 240, 232, 0.12);
-          border-radius: 1rem;
-          box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.4);
-          padding: 0.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          animation: fadeIn 0.2s ease-out;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .demo-option {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 1rem;
-          border-radius: 0.75rem;
-          background: transparent;
-          border: 1px solid transparent;
-          color: var(--rp-text);
-          cursor: pointer;
-          transition: all 0.2s ease;
-          text-align: left;
-          width: 100%;
-        }
-
-        .demo-option:hover {
-          background: rgba(143, 211, 199, 0.1);
-          border-color: rgba(143, 211, 199, 0.45);
-        }
-
-        .demo-option--selected {
-          background: rgba(242, 179, 109, 0.12);
-          border-color: rgba(242, 179, 109, 0.5);
-        }
-
-        .demo-option__icon {
-          font-size: 1.5rem;
-        }
-
-        .demo-option__content {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .demo-option__name {
-          font-size: 0.95rem;
-          font-weight: 600;
-        }
-
-        .demo-option__desc {
-          font-size: 0.8rem;
-          color: var(--rp-subtle);
-        }
-
-        .github-form {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-          padding: 1.25rem;
-          border: 1px solid rgba(244, 240, 232, 0.12);
-          border-radius: 1rem;
-          background:
-            linear-gradient(120deg, rgba(143, 211, 199, 0.08), transparent 46%),
-            rgba(16, 18, 15, 0.78);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 70px rgba(0, 0, 0, 0.2);
-          backdrop-filter: blur(18px);
-        }
-
-        .github-form:focus-within {
-          border-color: rgba(143, 211, 199, 0.45);
-        }
-
-        .github-form__header {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .github-form__icon {
-          font-size: 1.25rem;
-        }
-
-        .github-form__label {
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--rp-text);
-        }
-
-        .github-form__input-row {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .github-form__token {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          margin-top: 0.5rem;
-        }
-
-        .github-form__token-row {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .github-form__token-toggle {
-          padding: 0.625rem 0.85rem;
-          border: 1px solid rgba(244, 240, 232, 0.12);
-          border-radius: 999px;
-          background: rgba(8, 9, 8, 0.55);
-          color: var(--rp-text);
-          font-size: 0.8rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .github-form__token-toggle:hover:not(:disabled) {
-          border-color: rgba(143, 211, 199, 0.45);
-          transform: translateY(-1px);
-        }
-
-        .github-form__token-toggle:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .github-form__token-hint {
-          font-size: 0.75rem;
-          color: var(--rp-muted);
-        }
-
-        .github-form__remember {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.75rem;
-          color: var(--rp-subtle);
-        }
-
-        .github-form__remember input {
-          accent-color: var(--rp-gold);
-        }
-
-        .github-form__input {
-          flex: 1;
-          padding: 0.625rem 0.875rem;
-          border: 1px solid rgba(244, 240, 232, 0.12);
-          border-radius: 0.75rem;
-          background: rgba(8, 9, 8, 0.62);
-          color: var(--rp-text);
-          font-size: 0.9rem;
-        }
-
-        .github-form__input::placeholder {
-          color: var(--rp-muted);
-        }
-
-        .github-form__input:focus {
-          outline: none;
-          border-color: rgba(143, 211, 199, 0.55);
-        }
-
-        .github-form__submit {
-          padding: 0.625rem 1rem;
-          border: none;
-          border-radius: 999px;
-          background: var(--rp-gold);
-          color: #10110f;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .github-form__submit:hover:not(:disabled) {
-          background: #ffd08f;
-          transform: translateY(-1px);
-        }
-
-        .github-form__submit:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .github-form__desc {
-          font-size: 0.8rem;
-          color: var(--rp-subtle);
-          text-align: center;
-        }
-
-        .import-btn__icon {
-          font-size: 2rem;
-        }
-
-        .import-btn__label {
-          font-size: 1.1rem;
-          font-weight: 600;
-        }
-
-        .import-btn__desc {
-          font-size: 0.85rem;
-          color: var(--rp-subtle);
-        }
-
-        .dropzone {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 2rem 1.5rem;
-          grid-column: 1 / -1;
-          border: 1px dashed rgba(244, 240, 232, 0.18);
-          border-radius: 1rem;
-          background:
-            linear-gradient(90deg, rgba(143, 211, 199, 0.07) 1px, transparent 1px),
-            linear-gradient(rgba(143, 211, 199, 0.05) 1px, transparent 1px),
-            rgba(16, 18, 15, 0.64);
-          background-size: 24px 24px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          text-align: center;
-        }
-
-        .dropzone:hover,
-        .dropzone--active {
-          border-color: rgba(143, 211, 199, 0.5);
-          background-color: rgba(26, 31, 27, 0.82);
-        }
-
-        .dropzone--active {
-          transform: scale(1.02);
-          border-style: solid;
-        }
-
-        .dropzone__icon {
-          font-size: 2rem;
-        }
-
-        .dropzone__label {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--rp-text);
-        }
-
-        .dropzone__desc {
-          font-size: 0.85rem;
-          color: var(--rp-subtle);
-        }
-
-        .import-help {
-          padding: 0.75rem 1rem;
-          background: rgba(16, 18, 15, 0.72);
-          border: 1px solid rgba(244, 240, 232, 0.1);
-          border-radius: 1rem;
-        }
-
-        .import-help summary {
-          cursor: pointer;
-          color: var(--rp-subtle);
-          font-size: 0.9rem;
-        }
-
-        .import-help summary:hover {
-          color: var(--rp-text);
-        }
-
-        .import-help__content {
-          margin-top: 0.75rem;
-          padding-top: 0.75rem;
-          border-top: 1px solid var(--rp-highlight-low);
-        }
-
-        .import-help__content p {
-          margin: 0 0 0.5rem;
-          color: var(--rp-subtle);
-          font-size: 0.85rem;
-        }
-
-        .import-help__content code {
-          display: block;
-          padding: 0.75rem 1rem;
-          background: rgba(8, 9, 8, 0.72);
-          border: 1px solid rgba(244, 240, 232, 0.08);
-          border-radius: 0.75rem;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.8rem;
-          color: var(--rp-foam);
-          word-break: break-all;
-        }
-
-        .import-help__note {
-          margin-top: 0.75rem !important;
-        }
-
-        .import-help__note code {
-          display: inline;
-          padding: 0.1em 0.3em;
-        }
-
-        .import-error {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1rem;
-          background: rgba(216, 111, 97, 0.15);
-          border: 1px solid var(--rp-love);
-          border-radius: 0.75rem;
-          color: var(--rp-love);
-          font-size: 0.9rem;
-        }
-
-        .import-loading {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          padding: 1rem;
-          color: var(--rp-subtle);
-        }
-
-        .import-loading__spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid var(--rp-highlight-med);
-          border-top-color: var(--rp-gold);
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @media (max-width: 820px) {
-          .import-options {
-            grid-template-columns: 1fr;
-          }
-
-          .dropzone {
-            grid-column: auto;
-          }
-
-          .github-form__input-row,
-          .github-form__token-row {
-            flex-direction: column;
-          }
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      </div>
     </div>
   );
 }

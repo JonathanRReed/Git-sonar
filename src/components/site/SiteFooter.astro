@@ -1,0 +1,75 @@
+---
+import { BRAND } from "@lib/brand";
+---
+
+<footer class="site-floor">
+	<div class="site-floor__base" aria-hidden="true"></div>
+	<div class="site-floor__inner">
+		<a class="site-floor__brand" href="/">{BRAND.name}</a>
+		<div class="site-floor__links">
+			<a href="/app">Studio</a>
+			<a href="/#collection">The collection</a>
+			<a href="/about">About</a>
+			<a href={BRAND.repoUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
+		</div>
+		<p>Free and open source. Made by {BRAND.author}.</p>
+	</div>
+</footer>
+
+<style>
+	.site-floor {
+		background: var(--floor);
+		color: #f1f0ec;
+	}
+
+	.site-floor__base {
+		height: 0.7rem;
+		background: var(--skirting);
+		box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
+	}
+
+	.site-floor__inner {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.8rem 2rem;
+		width: min(80rem, calc(100% - 2.5rem));
+		margin: 0 auto;
+		padding: 2.2rem 0 2.6rem;
+	}
+
+	.site-floor__brand {
+		color: inherit;
+		font-size: 1.2rem;
+		font-weight: 800;
+		text-decoration: none;
+	}
+
+	.site-floor__links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem 1.6rem;
+	}
+
+	.site-floor__links a {
+		color: inherit;
+		font-size: 0.95rem;
+		font-weight: 500;
+		text-decoration: underline;
+		text-decoration-color: rgba(241, 240, 236, 0.4);
+		text-underline-offset: 0.25em;
+	}
+
+	.site-floor__links a:hover {
+		text-decoration-color: currentColor;
+	}
+
+	.site-floor p {
+		margin: 0;
+		font-family: var(--font-serif);
+		font-size: 0.95rem;
+		font-style: italic;
+		color: rgba(241, 240, 236, 0.82);
+	}
+</style>

@@ -1,448 +1,215 @@
 ---
 import "@styles/global.css";
+import SiteHead from "@components/site/SiteHead.astro";
+import SiteNav from "@components/site/SiteNav.astro";
+import SiteFooter from "@components/site/SiteFooter.astro";
+import { BRAND } from "@lib/brand";
 
-const siteUrl = "https://gitsonar.jonathanrreed.com";
-const analyticsDomain = import.meta.env.PUBLIC_ANALYTICS_DOMAIN;
-const analyticsSrc = import.meta.env.PUBLIC_ANALYTICS_SRC ?? "https://plausible.io/js/script.js";
 const defaultProfileImageUrl = "https://img.jonathanrreed.com/personal/jonathan.avif";
 const profileImageUrl = import.meta.env.PUBLIC_PROFILE_IMAGE_URL ?? defaultProfileImageUrl;
-const socialImageUrl = profileImageUrl;
 const structuredData = JSON.stringify({
 	"@context": "https://schema.org",
 	"@type": "Person",
-	name: "Jonathan Reed",
-	url: `${siteUrl}/about`,
-	image: socialImageUrl,
+	name: BRAND.author,
+	url: `${BRAND.siteUrl}/about`,
+	image: profileImageUrl,
 	jobTitle: "Software developer",
-	knowsAbout: [
-		"Developer tools",
-		"Generative art",
-		"Local-first software",
-		"Frontend product design",
-	],
-	worksFor: {
-		"@type": "Organization",
-		name: "Git Sonar",
-	},
+	knowsAbout: ["Developer tools", "Generative art", "Local-first software", "Frontend product design"],
+	worksFor: { "@type": "Organization", name: BRAND.name },
 });
+
+const notes = [
+	{
+		title: "The work",
+		text: "I build software for reading project data, commit history and the decisions behind them.",
+	},
+	{
+		title: "The tool",
+		text: `${BRAND.name} reads commits, branches, authors and cadence from a folder, a zip or a repo link, then draws them as a poster.`,
+	},
+	{
+		title: "The output",
+		text: "A PNG for screens, an SVG for the README, a PDF at true print size, or a link that reopens the same poster.",
+	},
+];
 ---
 
 <html lang="en">
 	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="generator" content={Astro.generator} />
-		<meta
-			name="description"
-			content="About Jonathan Reed, software developer behind Git Sonar, a browser tool that turns any repo into shareable, printable art."
+		<SiteHead
+			title={`About ${BRAND.name} and ${BRAND.author}`}
+			description={`${BRAND.author} builds ${BRAND.name}, a browser tool that turns a commit history into a poster you can print and frame.`}
+			path="/about"
 		/>
-		<link rel="canonical" href={`${siteUrl}/about`} />
-		<meta name="author" content="Jonathan Reed" />
-		<title>About Jonathan Reed, Git Sonar</title>
-		{analyticsDomain && (
-			<script is:inline defer data-domain={analyticsDomain} src={analyticsSrc}></script>
-		)}
-
-		<meta property="og:type" content="profile" />
-		<meta property="og:url" content={`${siteUrl}/about`} />
-		<meta property="og:title" content="About Jonathan Reed, Git Sonar" />
-		<meta
-			property="og:description"
-			content="Jonathan Reed builds Git Sonar, a browser app that turns any repo into shareable, printable art."
-		/>
-		<meta property="og:image" content={socialImageUrl} />
-
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={`${siteUrl}/about`} />
-		<meta property="twitter:title" content="About Jonathan Reed, Git Sonar" />
-		<meta
-			property="twitter:description"
-			content="Jonathan Reed builds Git Sonar, a browser app that turns any repo into art."
-		/>
-		<meta property="twitter:image" content={socialImageUrl} />
-
-		<script is:inline type="application/ld+json" set:html={structuredData} />
-
-		<link rel="preconnect" href="https://api.fontshare.com" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap"
-			rel="stylesheet"
-		/>
-		<link
-			href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
-			rel="stylesheet"
-		/>
+		<script is:inline type="application/ld+json" set:html={structuredData}></script>
 	</head>
 	<body>
-		<main class="about-shell">
-			<div class="noise" aria-hidden="true"></div>
-			<div class="ambient ambient--one" aria-hidden="true"></div>
-			<div class="ambient ambient--two" aria-hidden="true"></div>
+		<main id="main-content">
+			<section class="about g-wall" aria-labelledby="about-title">
+				<SiteNav current="about" />
+				<div class="about__grid">
+					<div class="about__text">
+						<h1 id="about-title">Jonathan Reed builds Git Sonar.</h1>
+						<p>{BRAND.description}</p>
+					</div>
 
-			<nav class="nav-shell" aria-label="Primary navigation">
-				<a href="/" class="brand-mark" aria-label="Git Sonar home">
-					<span class="brand-mark__icon" aria-hidden="true">
-						<svg viewBox="0 0 32 32" fill="none">
-							<path d="M16 5v22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
-							<circle cx="16" cy="7" r="4" fill="currentColor" />
-							<circle cx="9" cy="22" r="4" fill="currentColor" />
-							<circle cx="23" cy="22" r="4" fill="currentColor" />
-						</svg>
-					</span>
-					<span>Git Sonar</span>
-				</a>
-				<div class="nav-actions">
-					<a href="/">Home</a>
-					<a class="nav-cta" href="/app">Open app</a>
+					<figure class="about__portrait">
+						<div class="g-frame g-frame--oak">
+							<div class="g-mat">
+								<img src={profileImageUrl} alt="Portrait of Jonathan Reed" width="720" height="720" loading="eager" />
+							</div>
+						</div>
+						<figcaption class="g-label">
+							<b>Jonathan Reed</b>
+							<i>Software developer</i>
+							Maker of {BRAND.name}
+						</figcaption>
+					</figure>
 				</div>
-			</nav>
-
-			<section class="about-hero" aria-labelledby="about-title">
-				<div class="about-copy">
-					<p class="eyebrow">About</p>
-					<h1 id="about-title">Jonathan Reed builds Git Sonar.</h1>
-					<p>
-						Git Sonar turns any repository’s commit history into shareable, printable art — movie posters, album covers, and generative prints — right in the browser, without uploading your code.
-					</p>
-				</div>
-
-				<figure class="profile-card">
-					<img src={profileImageUrl} alt="Jonathan Reed profile portrait" width="720" height="720" loading="eager" />
-					<figcaption>
-						<strong>Jonathan Reed</strong>
-						<span>Software developer</span>
-					</figcaption>
-				</figure>
 			</section>
 
-			<section class="about-grid" aria-label="Profile details">
-				<article>
-					<span>01</span>
-					<h2>Work</h2>
-					<p>
-						I build software for reviewing project data, commit history, and technical decisions.
-					</p>
-				</article>
-				<article>
-					<span>02</span>
-					<h2>Git Sonar</h2>
-					<p>
-						It reads commits, branches, authors, and cadence from a local archive or a repo URL, then renders them as a poster.
-					</p>
-				</article>
-				<article>
-					<span>03</span>
-					<h2>Output</h2>
-					<p>
-						Export a high-resolution PNG, a vector SVG, or a print-dimensioned PDF — or share a permalink.
-					</p>
-				</article>
+			<section class="notes" aria-label="About the project">
+				{notes.map((note) => (
+					<article>
+						<h2>{note.title}</h2>
+						<p>{note.text}</p>
+					</article>
+				))}
 			</section>
 
-			<section class="about-cta" aria-labelledby="about-cta-title">
-				<p class="eyebrow">App</p>
-				<h2 id="about-cta-title">Open Git Sonar.</h2>
-				<a class="button button--primary" href="/app">Launch Git Sonar</a>
+			<section class="about-cta g-wall" aria-labelledby="about-cta-title">
+				<h2 id="about-cta-title">See your own repo on the wall.</h2>
+				<div class="about-cta__actions">
+					<a class="g-btn g-btn--red" href="/app">Make a poster</a>
+					<a class="g-btn g-btn--line" href={BRAND.repoUrl} target="_blank" rel="noopener noreferrer">View the source</a>
+				</div>
 			</section>
 		</main>
 
+		<SiteFooter />
+
 		<style>
 			:global(html) {
-				scroll-behavior: smooth;
-				background: #090a0a;
+				background: var(--wall);
 			}
 
-			.about-shell {
-				min-height: 100dvh;
-				position: relative;
-				isolation: isolate;
-				overflow: hidden;
-				background:
-					radial-gradient(circle at 18% 8%, rgba(143, 211, 199, 0.18), transparent 32rem),
-					radial-gradient(circle at 86% 12%, rgba(242, 179, 109, 0.14), transparent 30rem),
-					linear-gradient(180deg, #080908 0%, #10120f 48%, #090a0a 100%);
-				color: #f4f0e8;
-				font-family: "Cabinet Grotesk", var(--font-sans);
+			:global(body) {
+				background: var(--wall);
+				color: var(--ink);
 			}
 
-			.noise {
-				position: fixed;
-				inset: 0;
-				z-index: -1;
-				pointer-events: none;
-				opacity: 0.17;
-				background-image:
-					linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-					linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-				background-size: 4px 4px, 4px 4px;
-				mask-image: radial-gradient(circle at center, black, transparent 82%);
-			}
-
-			.ambient {
-				position: fixed;
-				z-index: -2;
-				border-radius: 999px;
-				filter: blur(80px);
-				opacity: 0.36;
-				pointer-events: none;
-			}
-
-			.ambient--one {
-				width: 26rem;
-				height: 26rem;
-				left: -9rem;
-				top: 26rem;
-				background: #29423d;
-			}
-
-			.ambient--two {
-				width: 31rem;
-				height: 31rem;
-				right: -12rem;
-				top: 50rem;
-				background: #5f3b23;
-			}
-
-			.nav-shell {
-				position: sticky;
-				top: 1rem;
-				z-index: 20;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 1rem;
-				width: min(92rem, calc(100% - 2rem));
-				margin: 1rem auto 0;
-				padding: 0.7rem;
-				border: 1px solid rgba(244, 240, 232, 0.12);
-				border-radius: 999px;
-				background: rgba(12, 14, 12, 0.72);
-				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 70px rgba(0, 0, 0, 0.28);
-				backdrop-filter: blur(20px);
-			}
-
-			.brand-mark,
-			.nav-actions {
-				display: flex;
-				align-items: center;
-			}
-
-			.brand-mark {
-				gap: 0.7rem;
-				color: #f4f0e8;
-				text-decoration: none;
-				font-weight: 800;
-			}
-
-			.brand-mark__icon {
-				display: grid;
-				place-items: center;
-				width: 2.45rem;
-				height: 2.45rem;
-				border-radius: 50%;
-				color: #0b0c0a;
-				background: #f2b36d;
-			}
-
-			.brand-mark__icon svg {
-				width: 1.2rem;
-				height: 1.2rem;
-			}
-
-			.nav-actions {
-				gap: 0.45rem;
-			}
-
-			.nav-actions a,
-			.button {
-				min-height: 44px;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				border-radius: 999px;
-				font-weight: 800;
-				text-decoration: none;
-				transition: transform 180ms ease, background 180ms ease, color 180ms ease;
-			}
-
-			.nav-actions a {
-				padding: 0 0.95rem;
-				color: rgba(244, 240, 232, 0.72);
-			}
-
-			.nav-cta,
-			.button--primary {
-				color: #10110f !important;
-				background: #f2b36d;
-			}
-
-			.nav-actions a:hover,
-			.button:hover {
-				transform: translateY(-2px);
-			}
-
-			.about-hero {
-				width: min(92rem, calc(100% - 2rem));
-				margin: 0 auto;
-				min-height: calc(100dvh - 5rem);
-				display: grid;
-				grid-template-columns: minmax(0, 1fr) minmax(21rem, 0.46fr);
-				gap: clamp(2rem, 7vw, 7rem);
-				align-items: center;
-				padding: clamp(5rem, 9vw, 8rem) 0;
-			}
-
-			.eyebrow {
-				margin: 0 0 1.15rem;
-				color: #8fd3c7;
-				font-family: var(--font-mono);
-				font-size: 0.78rem;
-				font-weight: 600;
-				letter-spacing: 0.08em;
-				text-transform: uppercase;
-			}
-
-			.about-copy h1,
+			h1,
 			.about-cta h2 {
 				margin: 0;
-				max-width: 68rem;
-				font-size: clamp(3.2rem, 6.8vw, 6.7rem);
-				line-height: 0.92;
 				font-weight: 800;
+				font-stretch: 75%;
+				letter-spacing: -0.02em;
+				line-height: 0.92;
 				text-wrap: balance;
 			}
 
-			.about-copy p,
-			.about-grid p {
-				max-width: 43rem;
-				color: rgba(244, 240, 232, 0.72);
-				font-size: clamp(1.05rem, 1.4vw, 1.24rem);
-				line-height: 1.65;
-			}
-
-			.profile-card {
-				margin: 0;
-				position: relative;
-				overflow: hidden;
-				border-radius: 1.25rem;
-				border: 1px solid rgba(244, 240, 232, 0.13);
-				background:
-					radial-gradient(circle at 70% 20%, rgba(242, 179, 109, 0.22), transparent 16rem),
-					linear-gradient(135deg, rgba(244, 240, 232, 0.1), rgba(244, 240, 232, 0.04));
-				box-shadow: 0 34px 100px rgba(0, 0, 0, 0.32);
-			}
-
-			.profile-card img,
-			.profile-fallback {
-				width: 100%;
-				aspect-ratio: 1;
-				display: block;
-				object-fit: cover;
-			}
-
-			.profile-fallback {
+			.about__grid {
 				display: grid;
-				place-items: center;
-				color: #10110f;
-				background:
-					linear-gradient(90deg, rgba(16, 17, 15, 0.12) 1px, transparent 1px),
-					linear-gradient(rgba(16, 17, 15, 0.1) 1px, transparent 1px),
-					#f2b36d;
-				background-size: 34px 34px;
-				font-size: clamp(5rem, 10vw, 9rem);
-				font-weight: 800;
+				grid-template-columns: minmax(0, 7fr) minmax(14rem, 4fr);
+				gap: clamp(2rem, 6vw, 6rem);
+				align-items: start;
+				width: min(80rem, calc(100% - 2.5rem));
+				margin: 0 auto;
+				padding: clamp(2.5rem, 7vw, 6rem) 0 clamp(3.5rem, 8vw, 7rem);
 			}
 
-			.profile-card figcaption {
-				display: grid;
-				gap: 0.35rem;
-				padding: 1.1rem;
+			.about__text h1 {
+				font-size: clamp(3rem, 6.6vw, 6rem);
 			}
 
-			.profile-card strong {
-				color: #fffaf2;
-				font-size: 1.25rem;
-			}
-
-			.profile-card span {
-				color: rgba(244, 240, 232, 0.62);
+			.about__text p {
+				max-width: 34rem;
+				margin: clamp(1.4rem, 2.6vw, 2.2rem) 0 0;
+				font-family: var(--font-serif);
+				font-size: clamp(1.15rem, 1.5vw, 1.4rem);
 				line-height: 1.45;
 			}
 
-			.about-grid {
-				width: min(92rem, calc(100% - 2rem));
-				margin: 0 auto;
-				padding: 0 0 clamp(7rem, 12vw, 12rem);
+			.about__portrait {
+				position: relative;
+				margin: 0;
+			}
+
+			.about__portrait img {
+				aspect-ratio: 1;
+				object-fit: cover;
+			}
+
+			.about__portrait .g-label {
+				margin-top: 1.4rem;
+			}
+
+			.notes {
 				display: grid;
 				grid-template-columns: repeat(3, minmax(0, 1fr));
-				gap: 1rem;
+				gap: clamp(1.5rem, 4vw, 4rem);
+				padding: clamp(3.5rem, 8vw, 7rem) max(1.25rem, calc((100% - 80rem) / 2));
+				background: var(--paper);
+				color: var(--ink);
+				transition: background-color 0.6s ease, color 0.6s ease;
 			}
 
-			.about-grid article {
-				min-height: 23rem;
-				padding: clamp(1.25rem, 3vw, 2rem);
-				border-radius: 1rem;
-				border: 1px solid rgba(244, 240, 232, 0.11);
-				background: linear-gradient(155deg, rgba(244, 240, 232, 0.1), rgba(244, 240, 232, 0.035));
+			.notes article {
+				padding-top: 1.1rem;
+				border-top: 2px solid var(--ink);
 			}
 
-			.about-grid span {
-				color: #f2b36d;
-				font-family: var(--font-mono);
+			.notes h2 {
+				margin: 0;
+				font-size: clamp(1.35rem, 2vw, 1.75rem);
+				font-weight: 700;
+				letter-spacing: -0.01em;
 			}
 
-			.about-grid h2 {
-				margin: 4rem 0 0;
-				color: #fffaf2;
-				font-size: clamp(1.8rem, 3vw, 2.6rem);
-				line-height: 1;
+			.notes p {
+				max-width: 24rem;
+				margin: 0.7rem 0 0;
+				font-family: var(--font-serif);
+				font-size: 1.08rem;
+				line-height: 1.5;
+				color: var(--ink-2);
 			}
 
 			.about-cta {
-				width: min(92rem, calc(100% - 2rem));
-				margin: 0 auto 6rem;
-				padding: clamp(2rem, 6vw, 5rem);
-				border-radius: 1.25rem;
-				border: 1px solid rgba(244, 240, 232, 0.13);
-				background:
-					linear-gradient(120deg, rgba(242, 179, 109, 0.2), transparent 45%),
-					radial-gradient(circle at 85% 12%, rgba(143, 211, 199, 0.18), transparent 24rem),
-					rgba(244, 240, 232, 0.065);
+				padding: clamp(3.5rem, 8vw, 7rem) 0 clamp(4.5rem, 10vw, 8rem);
 			}
 
-			.about-cta .button {
-				margin-top: 2rem;
-				padding: 0 1.25rem;
+			.about-cta h2,
+			.about-cta__actions {
+				width: min(80rem, calc(100% - 2.5rem));
+				margin-inline: auto;
 			}
 
-			@media (max-width: 860px) {
-				.about-hero,
-				.about-grid {
+			.about-cta h2 {
+				font-size: clamp(2.4rem, 5.2vw, 4.6rem);
+			}
+
+			.about-cta__actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.8rem;
+				margin-top: clamp(1.6rem, 3vw, 2.4rem);
+			}
+
+			.about-cta .g-btn {
+				min-height: 3.25rem;
+				padding: 0 1.5rem;
+				font-size: 1.08rem;
+			}
+
+			@media (max-width: 760px) {
+				.about__grid,
+				.notes {
 					grid-template-columns: 1fr;
 				}
 
-				.profile-card {
-					max-width: 28rem;
-				}
-			}
-
-			@media (max-width: 640px) {
-				.nav-shell,
-				.about-hero,
-				.about-grid,
-				.about-cta {
-					width: min(100% - 1.2rem, 92rem);
-				}
-
-				.nav-shell {
-					border-radius: 1.2rem;
-				}
-
-				.about-copy h1 {
-					font-size: clamp(3rem, 15vw, 4.8rem);
+				.about__portrait {
+					max-width: 18rem;
 				}
 			}
 		</style>

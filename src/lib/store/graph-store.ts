@@ -38,6 +38,37 @@ function saveAuthToken(token: string | null, remember: boolean): void {
     }
 }
 
+/** What the import in flight is doing, shown in the empty frame while it loads. */
+export interface ImportStatus {
+    /** Repo or file being read. */
+    name: string;
+    /** Commits found so far (0 while the count is unknown). */
+    found: number;
+}
+
+/** An earlier moment to capture: the repo as it stood at the end of that day. */
+export interface Moment {
+    /** End of the chosen day, Unix ms (UTC). */
+    untilMs: number;
+    /** The day as typed, YYYY-MM-DD. */
+    date: string;
+    /** What happened that day, e.g. "Reached 1,000 stars". May be empty. */
+    label: string;
+}
+
+/** Build a Moment from a YYYY-MM-DD date and an optional label; null if the date is not valid. */
+export function makeMoment(date: string | null | undefined, label: string | null | undefined = ''): Moment | null {
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+    const untilMs = Date.parse(`${date}T23:59:59.999Z`);
+    if (!Number.isFinite(untilMs)) return null;
+    return { untilMs, date, label: (label ?? '').trim().slice(0, 80) };
+}
+
+/** "Mar 3, 2024" for a Moment's day. */
+export function formatMomentDate(moment: Moment): string {
+    return new Date(moment.untilMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+
 /** View modes for visualization */
 export type ViewMode = 'inspect' | 'poster' | 'calendar';
 
@@ -82,6 +113,12 @@ interface GraphState {
     currentRepoPath: string | null;
     /** Active demo dataset id (e.g. "showcase"), so share links can reload it. */
     currentDemo: string | null;
+    /** Name of a locally opened folder or archive, for display and filenames. */
+    currentSourceName: string | null;
+    /** Live progress of the import in flight (null when idle). */
+    importStatus: ImportStatus | null;
+    /** The earlier moment being captured, or null for the repo as it is now. */
+    moment: Moment | null;
     /** Current repo provider (GitHub/GitLab/Bitbucket) */
     currentRepoProvider: 'github' | 'gitlab' | 'bitbucket' | null;
     /** Optional auth token for imports */
@@ -144,6 +181,12 @@ interface GraphActions {
     setRepoPath: (path: string | null, provider: 'github' | 'gitlab' | 'bitbucket' | null, hasMore: boolean) => void;
     /** Record which demo dataset is active (for shareable demo permalinks). */
     setCurrentDemo: (demo: string | null) => void;
+    /** Record the name of a locally opened folder or archive. */
+    setSourceName: (name: string | null) => void;
+    /** Report import progress (null clears it). */
+    setImportStatus: (status: ImportStatus | null) => void;
+    /** Choose an earlier moment to capture (null for now). */
+    setMoment: (moment: Moment | null) => void;
     /** Set auth token for imports */
     setAuthToken: (token: string | null, remember?: boolean) => void;
     /** Set poster title */
@@ -176,6 +219,15 @@ interface GraphActions {
 
 export type GraphStore = GraphState & GraphActions;
 
+/**
+ * The poster a new session opens on: Pulsar, the style that holds up for any
+ * repo size. Values mirror its preset in art/templates (kept literal here so
+ * the store does not pull the template code into every island).
+ */
+function freshPosterConfig(themeId: ThemeId, title = ''): PosterConfig {
+    return makePosterConfig({ themeId, title, template: 'pulsar', paletteMood: 'mono', seed: 'pulse' });
+}
+
 export const useGraphStore = create<GraphStore>((set, get) => {
     const savedThemeId = getSavedTheme();
     const initialTheme = getTheme(savedThemeId);
@@ -187,7 +239,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         nodes: [],
         edges: [],
         selectedId: null,
-        viewMode: 'inspect',
+        viewMode: 'poster',
         layoutMode: 'vertical',
         themeId: savedThemeId,
         theme: initialTheme,
@@ -202,6 +254,9 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         currentRepoPath: null,
         currentRepoProvider: null,
         currentDemo: null,
+        currentSourceName: null,
+        importStatus: null,
+        moment: null,
         authToken: savedAuthToken,
         loadedCommitCount: 0,
         posterTitle: '',
@@ -211,7 +266,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         showWatermark: true,
         showSignature: true,
         showHeatmap: false,
-        posterConfig: makePosterConfig({ themeId: savedThemeId }),
+        posterConfig: freshPosterConfig(savedThemeId),
         setGraph: (graph) => {
             const nodes = generatePositionedNodes(graph);
             const edges = generateEdges(graph);
@@ -224,6 +279,8 @@ export const useGraphStore = create<GraphStore>((set, get) => {
                 isLoading: false,
                 loadedCommitCount: graph.commits.size,
                 currentDemo: null,
+                currentSourceName: null,
+                importStatus: null,
             });
         },
         clearGraph: () => {
@@ -240,6 +297,9 @@ export const useGraphStore = create<GraphStore>((set, get) => {
                 currentRepoPath: null,
                 currentRepoProvider: null,
                 currentDemo: null,
+                currentSourceName: null,
+                importStatus: null,
+                moment: null,
                 loadedCommitCount: 0,
                 posterTitle: '',
                 posterSubtitle: '',
@@ -248,7 +308,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
                 showWatermark: true,
                 showSignature: true,
                 showHeatmap: false,
-                posterConfig: makePosterConfig({ themeId: get().themeId }),
+                posterConfig: freshPosterConfig(get().themeId),
             });
         },
         selectCommit: (id) => {
@@ -356,13 +416,24 @@ export const useGraphStore = create<GraphStore>((set, get) => {
             set({ isLoading: loading });
         },
         setError: (error) => {
-            set({ error, isLoading: false });
+            // Only a real error ends the import in flight; clearing the last
+            // error (done at the start of every import) must not.
+            set(error ? { error, isLoading: false, importStatus: null } : { error: null });
         },
         setRepoPath: (path, provider, hasMore) => {
             set({ currentRepoPath: path, currentRepoProvider: provider, hasMoreCommits: hasMore, currentDemo: null });
         },
         setCurrentDemo: (demo) => {
             set({ currentDemo: demo });
+        },
+        setSourceName: (name) => {
+            set({ currentSourceName: name });
+        },
+        setImportStatus: (status) => {
+            set({ importStatus: status });
+        },
+        setMoment: (moment) => {
+            set({ moment });
         },
         setAuthToken: (token, remember = false) => {
             saveAuthToken(token, remember);
@@ -397,7 +468,7 @@ export const useGraphStore = create<GraphStore>((set, get) => {
         },
         resetPosterConfig: () => {
             set((state) => ({
-                posterConfig: makePosterConfig({ themeId: state.themeId, title: state.posterConfig.title }),
+                posterConfig: freshPosterConfig(state.themeId, state.posterConfig.title),
             }));
         },
         // Zoom control callbacks - initialized as no-ops, registered by GraphCanvas

@@ -84,6 +84,20 @@ export interface GitRepoImportOptions {
     onProgress?: (loaded: number, total: number | null) => void;
     /** Optional auth token (for rate limits/private repos) */
     authToken?: string;
+    /** Only take history up to this moment (Unix ms): the repo as it stood then. */
+    until?: number;
+}
+
+/**
+ * When a history is cut off at an earlier moment, today's branch heads no
+ * longer exist in it. Drop those and point the default branch at the newest
+ * commit that does.
+ */
+function refsAsOf(refs: Map<string, string>, commits: Map<string, CommitNode>, defaultBranch: string, newest: string | null): void {
+    for (const [name, sha] of refs) {
+        if (!commits.has(sha)) refs.delete(name);
+    }
+    if (!refs.has(defaultBranch) && newest && commits.has(newest)) refs.set(defaultBranch, newest);
 }
 
 function createGitHubHeaders(authToken?: string) {
@@ -112,7 +126,9 @@ export async function parseGitHubRepo(
     urlOrPath: string, 
     options: GitRepoImportOptions = {}
 ): Promise<RepoGraph> {
-    const { maxCommits = 1000, onProgress, authToken } = options;
+    const { maxCommits = 1000, onProgress, authToken, until } = options;
+    const untilParam = until ? `&until=${encodeURIComponent(new Date(until).toISOString())}` : '';
+    let newestSha: string | null = null;
     const parsed = parseGitHubUrl(urlOrPath);
     if (!parsed) {
         throw new Error('Invalid GitHub URL. Use format: https://github.com/owner/repo or owner/repo');
@@ -183,7 +199,7 @@ export async function parseGitHubRepo(
 
         while (page <= maxPages && commits.size < maxCommits) {
             const commitsRes = await fetch(
-                `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}`,
+                `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}${untilParam}`,
                 { headers: createGitHubHeaders(authToken) }
             );
 
@@ -210,6 +226,7 @@ export async function parseGitHubRepo(
             }>;
 
             if (pageCommits.length === 0) break;
+            if (page === 1) newestSha = pageCommits[0].sha;
 
             for (const commit of pageCommits) {
                 if (commits.has(commit.sha)) continue;
@@ -241,7 +258,13 @@ export async function parseGitHubRepo(
         }
 
         if (commits.size === 0) {
-            throw new Error('No commits found in repository');
+            throw new Error(until ? 'No commits on or before that date. Pick a later day.' : 'No commits found in repository');
+        }
+
+        if (until) {
+            refsAsOf(refs, commits, defaultBranch, newestSha);
+        } else if (authToken) {
+            await addGitHubLineCounts(owner, repo, defaultBranch, authToken, commits);
         }
 
         return buildRepoGraph(commits, refs, defaultBranch);
@@ -250,6 +273,69 @@ export async function parseGitHubRepo(
             throw new Error('Network error. Please check your connection and try again.', { cause: err });
         }
         throw err;
+    }
+}
+
+/**
+ * Fill in lines added/removed for commits already fetched over REST.
+ *
+ * The REST commit list carries no line counts and asking per commit would burn
+ * the rate limit, but GraphQL returns them 100 at a time. GraphQL needs a
+ * token, so this only runs when one was supplied. It is strictly best-effort:
+ * any failure leaves the commits as they were and the import still succeeds.
+ */
+async function addGitHubLineCounts(
+    owner: string,
+    repo: string,
+    branch: string,
+    authToken: string,
+    commits: Map<string, CommitNode>
+): Promise<void> {
+    const query = `query($owner: String!, $repo: String!, $branch: String!, $after: String) {
+  repository(owner: $owner, name: $repo) {
+    object(expression: $branch) {
+      ... on Commit {
+        history(first: 100, after: $after) {
+          pageInfo { hasNextPage endCursor }
+          nodes { oid additions deletions }
+        }
+      }
+    }
+  }
+}`;
+    try {
+        let after: string | null = null;
+        const maxPages = Math.ceil(commits.size / 100) + 1;
+        for (let page = 0; page < maxPages; page++) {
+            const res: Response = await fetch('https://api.github.com/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `bearer ${authToken}` },
+                body: JSON.stringify({ query, variables: { owner, repo, branch, after } }),
+            });
+            if (!res.ok) return;
+            const body = (await res.json()) as {
+                data?: {
+                    repository?: {
+                        object?: {
+                            history?: {
+                                pageInfo: { hasNextPage: boolean; endCursor: string | null };
+                                nodes: Array<{ oid: string; additions: number; deletions: number }>;
+                            };
+                        } | null;
+                    } | null;
+                };
+            };
+            const history = body.data?.repository?.object?.history;
+            if (!history) return;
+            for (const node of history.nodes) {
+                const commit = commits.get(node.oid);
+                if (commit) commit.stats = { additions: node.additions, deletions: node.deletions };
+            }
+            if (!history.pageInfo.hasNextPage || !history.pageInfo.endCursor) return;
+            after = history.pageInfo.endCursor;
+        }
+    } catch {
+        // Line counts are a bonus; the history itself is already loaded.
     }
 }
 
@@ -364,7 +450,9 @@ export async function parseGitLabRepo(
     urlOrPath: string,
     options: GitRepoImportOptions = {}
 ): Promise<RepoGraph> {
-    const { maxCommits = 1000, onProgress, authToken } = options;
+    const { maxCommits = 1000, onProgress, authToken, until } = options;
+    const untilParam = until ? `&until=${encodeURIComponent(new Date(until).toISOString())}` : '';
+    let newestId: string | null = null;
     const projectPath = parseGitLabProjectPath(urlOrPath);
     if (!projectPath) {
         throw new Error('Invalid GitLab URL. Use format: https://gitlab.com/group/repo, https://gitlab.com/group/subgroup/repo, or group/subgroup/repo');
@@ -400,7 +488,7 @@ export async function parseGitLabRepo(
 
         while (page <= maxPages && commits.size < maxCommits) {
             const commitsRes = await fetch(
-                `https://gitlab.com/api/v4/projects/${encodedProjectPath}/repository/commits?per_page=${perPage}&page=${page}`,
+                `https://gitlab.com/api/v4/projects/${encodedProjectPath}/repository/commits?per_page=${perPage}&page=${page}&with_stats=true${untilParam}`,
                 { headers: createGitLabHeaders(authToken) }
             );
 
@@ -422,7 +510,10 @@ export async function parseGitLabRepo(
                 created_at: string;
                 parent_ids: string[];
                 message: string;
+                stats?: { additions?: number; deletions?: number };
             }>;
+
+            if (page === 1 && pageCommits.length > 0) newestId = pageCommits[0].id;
 
             for (const commit of pageCommits) {
                 if (commits.has(commit.id)) continue;
@@ -433,6 +524,9 @@ export async function parseGitLabRepo(
                     authorName: commit.author_name,
                     authoredAt: new Date(commit.created_at).getTime(),
                     messageSubject: commit.message.split('\n')[0],
+                    stats: commit.stats
+                        ? { additions: commit.stats.additions ?? 0, deletions: commit.stats.deletions ?? 0 }
+                        : undefined,
                 });
             }
 
@@ -459,8 +553,10 @@ export async function parseGitLabRepo(
         }
 
         if (commits.size === 0) {
-            throw new Error('No commits found in repository');
+            throw new Error(until ? 'No commits on or before that date. Pick a later day.' : 'No commits found in repository');
         }
+
+        if (until) refsAsOf(refs, commits, defaultBranch, newestId);
 
         return buildRepoGraph(commits, refs, defaultBranch);
     } catch (err) {
@@ -500,6 +596,54 @@ export async function parseGitZip(zipFile: File): Promise<RepoGraph> {
         }
 
         await fs.writeFile(normalizedPath, content);
+    }
+
+    return parseFromFS(fs, '.');
+}
+
+/** One file from a folder the user opened: its path and a way to read it. */
+export interface GitFolderEntry {
+    /** Path as the browser reports it, e.g. "my-repo/.git/HEAD". */
+    path: string;
+    read: () => Promise<ArrayBuffer>;
+}
+
+/** The parts of .git that history parsing reads; everything else is skipped. */
+const GIT_DIR_NEEDED = /^\.git\/(HEAD$|packed-refs$|refs\/|objects\/)/;
+
+/** Where the ".git/" segment starts in a path, or -1. */
+function gitDirOffset(path: string): number {
+    if (path.startsWith('.git/')) return 0;
+    const idx = path.indexOf('/.git/');
+    return idx === -1 ? -1 : idx + 1;
+}
+
+/**
+ * Parse a repository straight from a folder the user picked (no zip needed).
+ * Only the outermost .git is read, and only its refs and objects, so source
+ * files, nested repos and submodules are never touched.
+ */
+export async function parseGitFolder(entries: GitFolderEntry[]): Promise<RepoGraph> {
+    const candidates = entries
+        .map((entry) => {
+            const path = entry.path.replace(/\\/g, '/').replace(/^\.\/+/, '');
+            return { entry, path, offset: gitDirOffset(path) };
+        })
+        .filter((c) => c.offset !== -1);
+
+    if (candidates.length === 0) {
+        throw new Error('No .git folder found there. Pick the project folder that contains .git.');
+    }
+
+    const outermost = candidates.reduce((min, c) => Math.min(min, c.offset), Infinity);
+    const prefix = candidates.find((c) => c.offset === outermost)!.path.slice(0, outermost);
+    const fs = createMemoryFS();
+
+    for (const { entry, path, offset } of candidates) {
+        if (offset !== outermost || !path.startsWith(prefix)) continue;
+        const gitPath = path.slice(offset);
+        if (!GIT_DIR_NEEDED.test(gitPath)) continue;
+        await fs.writeFile(gitPath, new Uint8Array(await entry.read()));
     }
 
     return parseFromFS(fs, '.');
@@ -740,7 +884,8 @@ async function loadPackIndex(fs: MemoryFS): Promise<PackIndex | null> {
             extendedOffsets: allOffsets,
         };
     } catch (err) {
-        debugError('loadPackIndex', 'Error:', err);
+        // A repo with no packfiles (everything still loose) is normal, not an error.
+        if ((err as { code?: string }).code !== 'ENOENT') debugError('loadPackIndex', 'Error:', err);
         return null;
     }
 }

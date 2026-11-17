@@ -1,0 +1,580 @@
+/* =========================================================================
+   App shell: header, front desk (import), and the frame around the views.
+   Global on purpose: much of this DOM is created by React islands and by
+   AppShellController, which Astro's scoped styles cannot reach.
+   ========================================================================= */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1000;
+  padding: 0.6rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  min-height: 3.5rem;
+  padding: 0 1rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+}
+
+.app-brand {
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.app-repo {
+  overflow: hidden;
+  max-width: 16rem;
+  color: var(--ink);
+  font-weight: 700;
+  text-overflow: ellipsis;
+}
+
+.stat__value {
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.app-views {
+  margin-inline: auto;
+}
+
+.app-views[hidden] {
+  display: none;
+}
+
+.app-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.app-views:not([hidden]) + .app-actions {
+  margin-left: 0;
+}
+
+.app,
+.app-header {
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+.app-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: background-color 0.15s ease;
+}
+
+.app-icon-btn:hover {
+  background: var(--rp-overlay);
+}
+
+.app-icon-btn svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.app-header .g-btn {
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  font-size: 0.875rem;
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
+/* ---------- Main ---------- */
+.app-main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.import-container {
+  height: 100%;
+  overflow-y: auto;
+  background:
+    radial-gradient(ellipse 34rem 36rem at 78% 34%, var(--spot), transparent 70%),
+    linear-gradient(180deg, var(--wall-lo), var(--wall-hi) 30%, var(--wall-end));
+  transition: background-color 0.6s ease;
+}
+
+.app-switch {
+  width: 1.45rem;
+  height: 2.05rem;
+}
+
+.app-switch::before {
+  width: 0.58rem;
+  height: 1.1rem;
+}
+
+/* After hours, the working surfaces go dark too; fields in the panel follow. */
+html[data-lights="off"] .app .g-field {
+  --ink: #f1f0ec;
+  --ink-3: #9a9d98;
+  border-color: var(--line-2);
+  background: var(--raised);
+  color: var(--ink);
+}
+
+html[data-lights="off"] .desk__form .g-field {
+  border-color: var(--ink);
+}
+
+.graph-container {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  width: 20rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+
+.graph-main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background: var(--art-base, #0c0f0d);
+}
+
+body[data-view-mode="poster"] .sidebar,
+body[data-view-mode="poster"] .sidebar-overlay,
+body[data-view-mode="poster"] .timeline-scrubber,
+body[data-view-mode="poster"] .graph-canvas,
+body[data-view-mode="poster"] .controls-bar {
+  display: none !important;
+}
+
+body[data-view-mode="calendar"] .graph-canvas,
+body[data-view-mode="calendar"] .timeline-scrubber,
+body[data-view-mode="calendar"] .controls-bar {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 24, 26, 0.4);
+  z-index: 150;
+}
+
+/* ---------- Front desk ---------- */
+.desk {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 22rem);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+  width: min(72rem, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: clamp(2rem, 7vh, 5rem) 0 3rem;
+}
+
+.desk h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
+  text-wrap: balance;
+}
+
+.desk__form {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+.desk__form .g-field,
+.desk__form .g-btn {
+  min-height: 3.4rem;
+  font-size: 1.1rem;
+}
+
+.desk__form .g-btn {
+  padding: 0 1.5rem;
+}
+
+.desk__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.desk__chips button {
+  min-height: 2rem;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--ink);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s var(--ease-out);
+}
+
+.desk__chips button:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-1px);
+}
+
+.desk__chips button:disabled,
+.desk__alts button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.desk__alts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.6rem;
+}
+
+.desk__alts button {
+  padding: 0.85rem 1rem;
+  background: rgba(var(--rp-surface-rgb), 0.7);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.desk__alts button:hover:not(:disabled) {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.desk__alts b {
+  display: block;
+  font-size: 1rem;
+}
+
+.desk__alts span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.desk__more {
+  margin-top: 1.2rem;
+  font-size: 0.9rem;
+}
+
+.desk__more summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--ink-2);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  list-style: none;
+}
+
+.desk__more summary::-webkit-details-marker {
+  display: none;
+}
+
+.desk__more summary:hover {
+  color: var(--ink);
+}
+
+.desk__more-body {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 34rem;
+  margin-top: 0.8rem;
+  padding: 1rem;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.desk__more-body label {
+  font-weight: 600;
+}
+
+.desk__more-body p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.desk__more-body code {
+  padding: 0.1rem 0.3rem;
+  background: var(--rp-overlay);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.desk__moment-row {
+  display: grid;
+  grid-template-columns: minmax(9.5rem, 1fr) 2fr;
+  gap: 0.6rem;
+}
+
+.desk__moment-row label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.desk__moment summary {
+  color: var(--ink);
+}
+
+.app-moment {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--dot);
+}
+
+.desk__token {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.desk__remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400 !important;
+}
+
+.desk__remember input {
+  accent-color: var(--ink);
+}
+
+.desk__zip {
+  justify-self: start;
+  margin-top: 0.5rem;
+}
+
+.desk__error {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  max-width: 38rem;
+  margin: 1.2rem 0 0;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--dot);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.desk__error .g-dot {
+  transform: translateY(0.05rem);
+}
+
+.desk__meter {
+  margin: 1.6rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--ink-2);
+}
+
+.desk__meter b {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.desk__frame {
+  view-transition-name: your-frame;
+}
+
+.desk__mat {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.desk--dragging .desk__mat {
+  box-shadow: inset 0 0 0 3px var(--dot);
+}
+
+.desk__mat em {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--ink-3);
+  text-align: center;
+  transition: opacity 0.3s ease;
+}
+
+.desk__mat.is-busy em {
+  opacity: 0;
+}
+
+/* Commits landing in the frame as they are found. */
+.desk__mat i {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: -0.25rem;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: land 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.desk__mat i.is-big {
+  width: 0.8rem;
+  height: 0.8rem;
+  margin: -0.4rem;
+  background: var(--dot);
+}
+
+@keyframes land {
+  from {
+    transform: scale(0);
+  }
+}
+
+.desk__label {
+  margin-top: 1.3rem;
+}
+
+.desk__label span {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 860px) {
+  .desk {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .desk__wall {
+    max-width: 14rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    gap: 0.6rem;
+    padding: 0 0.75rem;
+  }
+
+  .app-stats,
+  #btn-help {
+    display: none;
+  }
+
+  body[data-view-mode="inspect"] .mobile-menu-btn {
+    display: grid;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    top: 3.5rem;
+    bottom: 0;
+    z-index: 200;
+    width: min(20rem, 86vw);
+    transition: left 0.3s var(--ease-out);
+    box-shadow: var(--shadow-pop);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+}
+
+@media (max-width: 560px) {
+  .desk__form {
+    flex-direction: column;
+  }
+
+  .desk__moment-row {
+    grid-template-columns: 1fr;
+  }
+
+  .desk__alts {
+    grid-template-columns: 1fr;
+  }
+
+  .app-brand {
+    display: none;
+  }
+}

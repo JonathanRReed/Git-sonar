@@ -1,0 +1,260 @@
+/* =========================================================================
+   History and Calendar views.
+   These components carry their own <style> blocks; rules here are prefixed
+   with .app so the gallery look wins without rewriting each block.
+   ========================================================================= */
+
+/* ---------- Sidebar ---------- */
+.app .sidebar__header {
+  padding: 0.9rem 0.9rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.app .sidebar__header h2 {
+  margin: 0 0 0.6rem;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.app .search-input {
+  min-height: 2.4rem;
+  border: 1px solid var(--line-2);
+  border-radius: 0.45rem;
+  background: var(--raised);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+}
+
+.app .search-input:focus {
+  border-color: var(--ink);
+}
+
+.app .search-kbd {
+  border-radius: 5px;
+  background: var(--raised);
+  font-family: var(--font-sans);
+}
+
+/* Contributors never crowd out the commit list. */
+.app .author-stats {
+  flex: none;
+  max-height: 42%;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- History toolbar ---------- */
+.app .controls-bar {
+  top: 0.75rem;
+  left: 0.75rem;
+  gap: 0.4rem;
+  max-width: calc(100% - 5rem);
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: rgba(var(--rp-surface-rgb), 0.97);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: none;
+}
+
+.app .controls-bar label {
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.app .controls-bar select {
+  min-height: 2rem;
+  border: 1px solid var(--line-2);
+  border-radius: 0.4rem;
+  background: var(--raised);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+}
+
+.app .control-btn {
+  min-height: 2.25rem;
+  border: 1px solid var(--line-2);
+  border-radius: 0.5rem;
+  background: var(--raised);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.app .control-btn:hover {
+  background: var(--rp-overlay);
+  border-color: var(--ink);
+  color: var(--ink);
+  transform: none;
+}
+
+.app .control-btn--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.app .control-btn--active:hover {
+  background: var(--ink);
+  opacity: 0.86;
+  color: var(--paper);
+}
+
+.app .layout-selector,
+.app .theme-selector,
+.app .background-selector,
+.app .dpi-selector,
+.app .size-selector {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.export-drawer {
+  position: relative;
+}
+
+.export-drawer > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.7rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.export-drawer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.export-drawer > summary svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.export-drawer[open] > summary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.export-drawer__body {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 0.8rem;
+  width: 17rem;
+  padding: 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--raised);
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--line);
+}
+
+.app .export-drawer__body .size-selector {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.app .export-drawer__body .bleed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.app .export-drawer__body input[type="checkbox"] {
+  accent-color: var(--ink);
+}
+
+.export-drawer__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.export-drawer__actions .control-btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ---------- Calendar ---------- */
+.app .calendar-view {
+  top: 0;
+  gap: 1.2rem;
+  padding: clamp(1.2rem, 3vw, 2.5rem);
+  background: var(--paper);
+}
+
+.app .calendar-header h2 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-stretch: 75%;
+  letter-spacing: -0.02em;
+}
+
+.app .calendar-header p {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--ink-2);
+}
+
+.app .calendar-stats {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.app .calendar-grid {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: var(--shadow-label);
+  backdrop-filter: none;
+}
+
+.app .calendar-cell,
+.app .legend-scale span {
+  border: 0;
+  border-radius: 2px;
+}
+
+.app .calendar-months,
+.app .calendar-legend {
+  color: var(--ink-2);
+  font-size: 0.78rem;
+}
+
+.app .author-stats__title {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------- Help and guide dialogs ---------- */
+.app .help-header h2,
+.app .help-header h2 span {
+  background: none;
+  color: var(--ink);
+  -webkit-text-fill-color: currentColor;
+  font-weight: 800;
+}

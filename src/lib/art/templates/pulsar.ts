@@ -154,6 +154,16 @@ function build(ctx: TemplateContext): Scene {
         font: fontStack(MONO_FONT), size: scale(-3.4), weight: 500,
         color: withAlpha(ink, 0.55), align: 'middle', spacing: width * 0.004,
     }));
+    // A tagline (for example the moment being captured) gets its own line
+    // above the caption, shrunk if needed so it never runs off the sheet.
+    if (options.subtitle) {
+        const tagline = options.subtitle.toUpperCase();
+        const tagSize = Math.min(scale(-2.6), (width * 0.84) / (tagline.length * 0.78));
+        texts.push(text(tagline, width / 2, height - height * 0.1, {
+            font: fontStack(MONO_FONT), size: tagSize, weight: 500,
+            color: withAlpha(ink, 0.82), align: 'middle', spacing: tagSize * 0.16,
+        }));
+    }
 
     if (options.showWatermark) {
         texts.push(text('GITSONAR.COM', width / 2, height - height * 0.045, {

@@ -360,3 +360,46 @@ export function buildRepoGraph(
         metrics,
     };
 }
+
+/**
+ * The repo as it stood at an earlier moment: every commit authored on or
+ * before `untilMs`, with the default branch pointing at the newest of them on
+ * the main line. Used for sources that cannot be asked for a dated history
+ * (folders, zips, Bitbucket).
+ */
+export function snapshotGraphAt(graph: RepoGraph, untilMs: number): RepoGraph {
+    const commits = new Map<string, CommitNode>();
+    for (const [id, commit] of graph.commits) {
+        if (commit.authoredAt <= untilMs) commits.set(id, commit);
+    }
+    if (commits.size === 0) {
+        throw new Error('No commits on or before that date. Pick a later day.');
+    }
+    // A parent can carry a later author date than its child (rebases, clock
+    // skew); cut those links so nothing points outside the snapshot.
+    for (const [id, commit] of commits) {
+        if (commit.parents.some((p) => !commits.has(p))) {
+            commits.set(id, { ...commit, parents: commit.parents.filter((p) => commits.has(p)) });
+        }
+    }
+
+    // Walk back from today's head along first parents to the snapshot's head.
+    let head: string | undefined = graph.defaultHead;
+    const seen = new Set<string>();
+    while (head && !commits.has(head) && !seen.has(head)) {
+        seen.add(head);
+        head = graph.commits.get(head)?.parents[0];
+    }
+    if (!head || !commits.has(head)) {
+        head = [...commits.values()].reduce((a, b) => (b.authoredAt > a.authoredAt ? b : a)).id;
+    }
+
+    let defaultBranch = 'main';
+    const refs = new Map<string, string>();
+    for (const [name, sha] of graph.heads) {
+        if (sha === graph.defaultHead) defaultBranch = name;
+        else if (commits.has(sha)) refs.set(name, sha);
+    }
+    refs.set(defaultBranch, head);
+    return buildRepoGraph(commits, refs, defaultBranch);
+}

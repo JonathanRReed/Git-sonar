@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { useGraphStore, type LayoutMode, type ViewMode } from '@lib/store/graph-store';
-import type { ThemeId } from '@lib/themes';
+import { formatMomentDate, makeMoment, useGraphStore, type LayoutMode, type ViewMode } from '@lib/store/graph-store';
+import { THEME_IDS, type ThemeId } from '@lib/themes';
+import { repoDisplayName } from '@lib/utils/repo-name';
 
 const DEFAULT_MAX_COMMITS = 1000;
-const THEME_IDS: ThemeId[] = ['night', 'dawn', 'github', 'nord', 'dracula'];
 const LAYOUT_MODES: LayoutMode[] = ['vertical', 'horizontal', 'radial'];
 const VIEW_MODES: ViewMode[] = ['inspect', 'poster', 'calendar'];
 
@@ -23,16 +23,8 @@ function appendStat(statsEl: HTMLElement, value: string, label: string) {
     labelSpan.className = 'stat__label';
     labelSpan.textContent = label;
 
-    stat.append(valueSpan, labelSpan);
+    stat.append(valueSpan, ' ', labelSpan);
     statsEl.append(stat);
-}
-
-function setStatsLoading(statsEl: HTMLElement) {
-    clearStats(statsEl);
-    const loading = document.createElement('div');
-    loading.className = 'loading-indicator';
-    loading.textContent = 'Loading...';
-    statsEl.append(loading);
 }
 
 function setSidebarOpen(open: boolean) {
@@ -59,9 +51,31 @@ function updateStats() {
 
     clearStats(statsEl);
     const metrics = state.graph.metrics;
-    appendStat(statsEl, metrics.commitCount.toLocaleString(), 'commits');
-    appendStat(statsEl, metrics.authorCount.toLocaleString(), 'authors');
-    appendStat(statsEl, metrics.mergeCount.toLocaleString(), 'merges');
+    const repo = document.createElement('span');
+    repo.className = 'app-repo';
+    repo.textContent = repoDisplayName(state.currentRepoPath, state.currentDemo, state.currentSourceName);
+    statsEl.append(repo);
+    const plural = (n: number, word: string) => (n === 1 ? word : `${word}s`);
+    appendStat(statsEl, metrics.commitCount.toLocaleString(), plural(metrics.commitCount, 'commit'));
+    appendStat(statsEl, metrics.authorCount.toLocaleString(), plural(metrics.authorCount, 'author'));
+    appendStat(statsEl, metrics.mergeCount.toLocaleString(), plural(metrics.mergeCount, 'merge'));
+    if (state.moment) {
+        const moment = document.createElement('span');
+        moment.className = 'app-moment';
+        moment.textContent = `as of ${formatMomentDate(state.moment)}`;
+        statsEl.append(moment);
+    }
+}
+
+/** Keep the header's Poster / History / Calendar switch in step with the store. */
+function updateViewSwitch() {
+    const state = useGraphStore.getState();
+    const viewsEl = document.getElementById('app-views');
+    if (!viewsEl) return;
+    viewsEl.hidden = !state.graph || state.isLoading;
+    for (const button of viewsEl.querySelectorAll<HTMLButtonElement>('button[data-view]')) {
+        button.setAttribute('aria-pressed', String(button.dataset.view === state.viewMode));
+    }
 }
 
 function updateView() {
@@ -72,11 +86,12 @@ function updateView() {
     const statsEl = document.getElementById('app-stats');
 
     document.body.dataset.viewMode = state.viewMode;
+    updateViewSwitch();
 
     if (state.isLoading) {
         if (importEl) importEl.style.display = 'flex';
         if (graphEl) graphEl.style.display = 'none';
-        if (statsEl) setStatsLoading(statsEl);
+        if (statsEl) clearStats(statsEl);
         return;
     }
 
@@ -118,19 +133,22 @@ async function handleQueryImport() {
         state.setViewMode(viewParam as ViewMode);
     }
 
+    // An earlier moment to capture: ?until=2024-03-03&moment=Reached+1,000+stars
+    const moment = makeMoment(params.get('until'), params.get('moment'));
+    if (moment) state.setMoment(moment);
+
     // Deep-link a demo dataset (used by the landing gallery's "remix" links).
     const demoParam = params.get('demo');
     if (demoParam && !repoPath) {
         state.setLoading(true);
         state.setError(null);
+        state.setImportStatus({ name: repoDisplayName(null, demoParam), found: 0 });
         try {
-            let graph;
-            if (demoParam === 'showcase') {
-                const { buildShowcaseGraph } = await import('@lib/demo-data/showcase');
-                graph = buildShowcaseGraph();
-            } else {
-                const { loadDemoDataset } = await import('@lib/demo-data');
-                graph = await loadDemoDataset(demoParam);
+            const { loadDemoDataset } = await import('@lib/demo-data');
+            let graph = await loadDemoDataset(demoParam);
+            if (moment) {
+                const { snapshotGraphAt } = await import('@lib/git/graph');
+                graph = snapshotGraphAt(graph, moment.untilMs);
             }
             state.setGraph(graph);
             state.setCurrentDemo(demoParam);
@@ -145,16 +163,28 @@ async function handleQueryImport() {
     const provider = githubRepo ? 'github' : gitlabRepo ? 'gitlab' : 'bitbucket';
     const commitParam = params.get('commit');
 
+    const name = repoDisplayName(repoPath, null);
     state.setLoading(true);
     state.setError(null);
+    state.setImportStatus({ name, found: 0 });
 
     try {
         const imports = await import('@lib/git/import-git');
+        const options = {
+            maxCommits: DEFAULT_MAX_COMMITS,
+            authToken: state.authToken ?? undefined,
+            until: moment?.untilMs,
+            onProgress: (found: number) => useGraphStore.getState().setImportStatus({ name, found }),
+        };
         const graph = provider === 'gitlab'
-            ? await imports.parseGitLabRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS })
+            ? await imports.parseGitLabRepo(repoPath, options)
             : provider === 'bitbucket'
-                ? await imports.parseBitbucketRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS })
-                : await imports.parseGitHubRepo(repoPath, { maxCommits: DEFAULT_MAX_COMMITS });
+                ? await imports.parseBitbucketRepo(repoPath, options).then(async (full) => {
+                    if (!moment) return full;
+                    const { snapshotGraphAt } = await import('@lib/git/graph');
+                    return snapshotGraphAt(full, moment.untilMs);
+                })
+                : await imports.parseGitHubRepo(repoPath, options);
 
         state.setGraph(graph);
         state.setRepoPath(repoPath, provider, graph.commits.size >= DEFAULT_MAX_COMMITS);
@@ -179,7 +209,11 @@ export function AppShellController() {
             if (
                 state.graph !== prevState.graph ||
                 state.isLoading !== prevState.isLoading ||
-                state.viewMode !== prevState.viewMode
+                state.viewMode !== prevState.viewMode ||
+                state.currentRepoPath !== prevState.currentRepoPath ||
+                state.currentDemo !== prevState.currentDemo ||
+                state.currentSourceName !== prevState.currentSourceName ||
+                state.moment !== prevState.moment
             ) {
                 updateView();
             }
@@ -192,12 +226,19 @@ export function AppShellController() {
             setSidebarOpen(!isOpen);
         };
         const handleSidebarOverlay = () => setSidebarOpen(false);
+        const handleViewSwitch = (event: Event) => {
+            const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-view]');
+            const view = button?.dataset.view as ViewMode | undefined;
+            if (view && VIEW_MODES.includes(view)) useGraphStore.getState().setViewMode(view);
+        };
 
         const btnNew = document.getElementById('btn-new');
         const btnHelp = document.getElementById('btn-help');
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const viewsEl = document.getElementById('app-views');
 
+        viewsEl?.addEventListener('click', handleViewSwitch);
         btnNew?.addEventListener('click', handleNewImport);
         btnHelp?.addEventListener('click', handleHelp);
         mobileMenuToggle?.addEventListener('click', handleMobileMenu);
@@ -211,6 +252,7 @@ export function AppShellController() {
 
         return () => {
             unsubscribe();
+            viewsEl?.removeEventListener('click', handleViewSwitch);
             btnNew?.removeEventListener('click', handleNewImport);
             btnHelp?.removeEventListener('click', handleHelp);
             mobileMenuToggle?.removeEventListener('click', handleMobileMenu);
