@@ -216,7 +216,7 @@ body[data-view-mode="calendar"] .controls-bar {
   align-items: start;
   width: min(72rem, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(2rem, 7vh, 5rem) 0 3rem;
+  padding: clamp(2rem, 11vh, 7rem) 0 3rem;
 }
 
 .desk h1 {
@@ -291,10 +291,10 @@ body[data-view-mode="calendar"] .controls-bar {
   flex-direction: column;
   justify-content: flex-start;
   padding: 0.85rem 1rem;
-  background: rgba(var(--rp-surface-rgb), 0.7);
+  background: var(--surface);
   color: var(--ink);
   text-align: left;
-  box-shadow: inset 0 0 0 1px var(--line-2);
+  box-shadow: inset 0 0 0 1px var(--line-2), var(--shadow-label);
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 

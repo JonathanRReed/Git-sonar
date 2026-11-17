@@ -155,7 +155,7 @@ const papers = [
 									<a class="yours__alt" href="/app?demo=showcase">or start with the sample repo</a>
 								</form>
 							</div>
-							<div class="g-label">
+							<div class="g-label yours__label">
 								<b>Untitled</b>
 								<i>Yours</i>
 								Waiting for a repo
@@ -198,7 +198,7 @@ const papers = [
 				</div>
 			</section>
 
-			<section class="how" id="how" aria-labelledby="how-title">
+			<section class="how g-wall" id="how" aria-labelledby="how-title">
 				<div class="section-head">
 					<h2 id="how-title">How a repo gets hung.</h2>
 				</div>
@@ -238,6 +238,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					</p>
 				</div>
 				<div class="elevation">
+					<p class="elevation__centre" aria-hidden="true"><span>Centre line, 57 in above the floor</span></p>
 					<ul class="elevation__row">
 						{papers.map((paper) => (
 							<li class="sheet" style={`--w:${paper.w};--h:${paper.h}`}>
@@ -250,7 +251,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					</ul>
 					<div class="elevation__bench" aria-hidden="true"><i></i><i></i></div>
 				</div>
-				<p class="elevation__scale">Drawn to one scale: each sheet hung at 57 in on centre, over a 5 ft gallery bench.</p>
+				<p class="elevation__scale">Drawn to one scale, with a 5 ft gallery bench for size.</p>
 				<p class="sizes__formats">PNG for screens. SVG for the README. PDF for the print shop.</p>
 			</section>
 
@@ -365,17 +366,25 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				color: var(--ink-2);
 			}
 
-			/* Hung on one top line, each with its label a fixed drop below its frame. */
+			/* One hang line: every frame sits on the same bottom edge, with its
+			   label the same drop below, so the three labels read as one row. */
 			.hero__pieces {
 				display: grid;
 				grid-template-columns: 30fr 28fr 34fr;
-				gap: clamp(0.9rem, 2vw, 1.8rem);
-				align-items: start;
+				grid-template-rows: auto auto;
+				gap: 1.4rem clamp(0.9rem, 2vw, 1.8rem);
 			}
 
 			.piece {
 				position: relative;
+				display: grid;
+				grid-row: span 2;
+				grid-template-rows: subgrid;
 				margin: 0;
+			}
+
+			.piece > .g-frame {
+				align-self: end;
 			}
 
 			/* A spotlight on the plaster behind each piece. */
@@ -384,7 +393,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				position: absolute;
 				inset: -18% -22% -6%;
 				z-index: 0;
-				background: radial-gradient(ellipse at 50% 38%, var(--spot), transparent 68%);
+				background: radial-gradient(ellipse closest-side at 50% 45%, var(--spot), transparent);
 				pointer-events: none;
 				/* The picture lights come on one by one, with a starter's flicker. */
 				animation: lights-on 1.1s steps(1, end) both;
@@ -435,8 +444,8 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.piece .g-label {
+				align-self: start;
 				max-width: none;
-				margin-top: 1.4rem;
 			}
 
 			.yours {
@@ -509,7 +518,7 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			/* ---------- The collection: a salon hang ---------- */
 			/* The same wall as the hero: no seam where the two sections meet. */
 			.collection {
-				padding: clamp(4rem, 9vw, 8rem) 0 clamp(3rem, 7vw, 6rem);
+				padding: clamp(3rem, 6vw, 5rem) 0 clamp(3rem, 7vw, 6rem);
 				background: linear-gradient(180deg, var(--wall-end), var(--wall-hi) 18%, var(--wall-end));
 			}
 
@@ -525,8 +534,13 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 				break-inside: avoid;
 			}
 
+			/* A salon hang: pieces step down the wall, each with the same small label. */
+			.salon__piece:nth-child(3n + 2) {
+				padding-top: clamp(0rem, 3vw, 2.4rem);
+			}
+
 			.salon__label {
-				max-width: none;
+				max-width: 13.5rem;
 			}
 
 			.salon__piece figcaption {
@@ -559,16 +573,15 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 
 			/* ---------- How it works ---------- */
 			.how {
-				padding: clamp(4rem, 9vw, 8rem) 0;
-				background: var(--paper);
-				color: var(--ink);
-				transition: background-color 0.6s ease, color 0.6s ease;
+				padding: clamp(3.5rem, 8vw, 7rem) 0 clamp(4rem, 9vw, 8rem);
+				background: linear-gradient(180deg, var(--wall-end), var(--wall-hi) 30%, var(--wall-end));
 			}
 
+			/* The three steps are printed on wall labels, like everything else here. */
 			.steps {
 				display: grid;
 				grid-template-columns: repeat(3, minmax(0, 1fr));
-				gap: clamp(1.5rem, 4vw, 4rem);
+				gap: clamp(1rem, 2.5vw, 2.5rem);
 				width: min(80rem, calc(100% - 2.5rem));
 				margin: 0 auto;
 				padding: 0;
@@ -576,32 +589,35 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			}
 
 			.steps li {
-				padding-top: 1.2rem;
-				border-top: 2px solid var(--ink);
+				--ink: #16181a;
+				--ink-2: #43494c;
+				padding: clamp(1.2rem, 2.2vw, 1.9rem);
+				background: var(--card);
+				color: var(--ink);
+				box-shadow: var(--shadow-label);
 			}
 
 			.steps__n {
 				display: block;
-				font-size: clamp(3.4rem, 6vw, 5.4rem);
+				font-size: clamp(2.6rem, 4vw, 3.6rem);
 				font-weight: 800;
 				font-stretch: 75%;
 				line-height: 0.9;
-				color: var(--dot);
 			}
 
 			.steps h3 {
-				margin: 1rem 0 0;
-				font-size: clamp(1.35rem, 2vw, 1.75rem);
+				margin: 0.9rem 0 0;
+				font-size: clamp(1.3rem, 1.9vw, 1.65rem);
 				font-weight: 700;
 				letter-spacing: -0.01em;
 				line-height: 1.1;
 			}
 
 			.steps p {
-				max-width: 24rem;
-				margin: 0.7rem 0 0;
+				max-width: 26rem;
+				margin: 0.6rem 0 0;
 				font-family: var(--font-serif);
-				font-size: 1.16rem;
+				font-size: 1.12rem;
 				line-height: 1.5;
 				color: var(--ink-2);
 			}
@@ -650,13 +666,35 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 			/* A gallery elevation at one scale (--u is one inch): sheets on a shared
 			   centre line 57 in above the floor line, a 60 x 18 in bench beneath. */
 			.elevation {
-				--u: min(0.36rem, calc((100vw - 2.5rem) / 84));
+				--u: min(0.4rem, calc((100vw - 2.5rem) / 84));
+				position: relative;
 				width: min(80rem, calc(100% - 2.5rem));
 				margin: 0 auto;
 				border-bottom: 2px solid var(--ink);
 			}
 
+			/* The hang line every sheet is centred on, drawn as on an elevation. */
+			.elevation__centre {
+				position: absolute;
+				top: calc(var(--u) * 18);
+				left: 0;
+				right: 0;
+				margin: 0;
+				border-top: 1px dashed var(--ink-3);
+			}
+
+			.elevation__centre span {
+				position: absolute;
+				left: 0;
+				bottom: 0.35rem;
+				font-family: var(--font-serif);
+				font-size: 0.85rem;
+				font-style: italic;
+				color: var(--ink-2);
+			}
+
 			.elevation__row {
+				position: relative;
 				display: flex;
 				justify-content: space-around;
 				align-items: center;
@@ -827,10 +865,12 @@ Everything below is drawn to one scale, bench included. Every export is vector-s
 					font-size: 0.86rem;
 				}
 
-				.salon__label small,
-				.sheet p span {
+				.sheet p span,
+				.elevation__centre span,
+				.yours__label {
 					display: none;
 				}
+
 
 				.steps,
 				.private__inner {

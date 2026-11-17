@@ -682,8 +682,15 @@ export function PosterStudio() {
                             onClick={() => applyTemplate(t)}
                             title={t.description}
                         >
-                            <span className="ps-thumb__art" style={{ aspectRatio: String(t.defaultAspect) }}>
-                                {thumbs[t.id] && <img src={thumbs[t.id]} alt="" />}
+                            <span className="ps-thumb__cell">
+                                <span
+                                    className="ps-thumb__art"
+                                    style={t.defaultAspect >= 0.75
+                                        ? { aspectRatio: String(t.defaultAspect), width: '100%' }
+                                        : { aspectRatio: String(t.defaultAspect), height: '100%' }}
+                                >
+                                    {thumbs[t.id] && <img src={thumbs[t.id]} alt="" />}
+                                </span>
                             </span>
                             <span className="ps-thumb__name">{t.name}</span>
                         </button>
