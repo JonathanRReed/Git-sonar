@@ -101,7 +101,9 @@ function build(ctx: TemplateContext): Scene {
 
 function defaultTagline(signals: { authorCount: number; timeSpanMs: number }): string {
     const years = signals.timeSpanMs / (1000 * 60 * 60 * 24 * 365);
-    if (years >= 1) return `A ${years.toFixed(0)}-year story in ${signals.authorCount} hands`;
+    if (years >= 1) {
+        return `${years.toFixed(0)} years, ${signals.authorCount} ${signals.authorCount === 1 ? 'contributor' : 'contributors'}`;
+    }
     return `Built by ${signals.authorCount}`;
 }
 
@@ -123,7 +125,7 @@ export const movieOneSheetTemplate: PosterTemplate = {
     id: 'movie-one-sheet',
     name: 'Movie poster',
     group: 'cinematic',
-    description: 'Key-art graph, cinematic title, and an auto-generated billing block of contributors & stats.',
+    description: 'Movie poster layout with your commit graph, big title, and a credits block built from contributors and stats.',
     defaultAspect: 24 / 36,
     recommendedLayout: 'vertical',
     fonts: [TITLE_FONT, SUB_FONT, BILLING_FONT],

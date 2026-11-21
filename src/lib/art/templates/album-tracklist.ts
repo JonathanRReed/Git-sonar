@@ -139,7 +139,7 @@ function build(ctx: TemplateContext): Scene {
         ? `${tracks.length} OF ${signals.commitCount} TRACKS`
         : `${signals.commitCount} TRACKS`;
     const spanLabel = signals.firstYear
-        ? `${signals.firstYear} – ${signals.lastYear} · ${trackLabel}`
+        ? `${signals.firstYear} - ${signals.lastYear} · ${trackLabel}`
         : trackLabel;
     texts.push(text(spanLabel, margin, footerY, {
         font: fontStack(MONO_FONT), size: width * 0.013, weight: 400,
@@ -197,7 +197,7 @@ export const albumTracklistTemplate: PosterTemplate = {
     id: 'album-tracklist',
     name: 'Album',
     group: 'music',
-    description: 'Square record sleeve: a radial commit-graph cover mark over a numbered, mono-set tracklist.',
+    description: 'Square album cover with a radial commit graph and a numbered tracklist of commits.',
     defaultAspect: 1,
     recommendedLayout: 'radial',
     fonts: [ARTIST_FONT, ALBUM_FONT, MONO_FONT],

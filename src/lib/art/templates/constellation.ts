@@ -184,7 +184,7 @@ function build(ctx: TemplateContext): Scene {
     const caption: string[] = [`${signals.commitCount} STARS`];
     if (signals.authorCount > 0) caption.push(`${signals.authorCount} HANDS`);
     if (signals.timeSpanMs > 0) {
-        caption.push(`${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase());
+        caption.push(`${formatDate(signals.firstCommitMs)} TO ${formatDate(signals.lastCommitMs)}`.toUpperCase());
     }
     texts.push(text(caption.join('   ·   '), width / 2, height - margin, {
         font: fontStack(MONO_FONT), size: scale(-3), weight: 500, color: withAlpha(palette.fgMuted, 0.85), align: 'middle', spacing: width * 0.003,
@@ -221,9 +221,9 @@ function defaultTagline(signals: { commitCount: number; timeSpanMs: number }): s
     const years = signals.timeSpanMs / (1000 * 60 * 60 * 24 * 365);
     if (years >= 1) {
         const y = Math.round(years);
-        return `A constellation charted over ${y} year${y === 1 ? '' : 's'}`;
+        return `Mapped over ${y} year${y === 1 ? '' : 's'}`;
     }
-    return 'A map of every commit';
+    return 'Every commit, mapped out';
 }
 
 function text(
@@ -244,7 +244,7 @@ export const constellationTemplate: PosterTemplate = {
     id: 'constellation',
     name: 'Constellation',
     group: 'generative',
-    description: 'A night-sky star-map of commits with faint constellation links — flatters small and medium repos.',
+    description: 'Commits plotted as stars with faint constellation lines. Works nicely for small and medium repos.',
     defaultAspect: 16 / 20,
     recommendedLayout: 'vertical',
     fonts: [TITLE_FONT, SUB_FONT, MONO_FONT],

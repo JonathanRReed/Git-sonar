@@ -53,10 +53,10 @@ async function loadBranchingDemo(page) {
 test.describe('Git Sonar app', () => {
     test('loads the landing page', async ({ page }) => {
         await page.goto('/');
-        await expect(page.getByRole('heading', { name: /Every repo deserves a retrospective/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Turn your Git repo into a poster/ })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Open the studio' }).first()).toBeVisible();
         // The call to action is the empty frame with the repo box inside it.
-        await expect(page.getByRole('button', { name: 'Make my poster' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Make poster' })).toBeVisible();
     });
 
     test('every page opts in to the frame transition inline', async ({ page }) => {
@@ -73,16 +73,16 @@ test.describe('Git Sonar app', () => {
     test('the empty frame sends a pasted repo to the studio', async ({ page }) => {
         await page.route('https://api.github.com/**', (route) => route.abort());
         await page.goto('/');
-        await page.getByLabel('Paste a repo link to see it hung.').fill('https://github.com/sveltejs/svelte');
-        await page.getByRole('button', { name: 'Make my poster' }).click();
+        await page.getByLabel('Paste a GitHub, GitLab, or Bitbucket link.').fill('https://github.com/sveltejs/svelte');
+        await page.getByRole('button', { name: 'Make poster' }).click();
         await expect(page).toHaveURL(/\/app\?github=sveltejs%2Fsvelte$/);
     });
 
     test('a pasted branch page is reduced to its repo', async ({ page }) => {
         await page.route('https://api.github.com/**', (route) => route.abort());
         await page.goto('/');
-        await page.getByLabel('Paste a repo link to see it hung.').fill('https://github.com/sveltejs/svelte/tree/main');
-        await page.getByRole('button', { name: 'Make my poster' }).click();
+        await page.getByLabel('Paste a GitHub, GitLab, or Bitbucket link.').fill('https://github.com/sveltejs/svelte/tree/main');
+        await page.getByRole('button', { name: 'Make poster' }).click();
         await expect(page).toHaveURL(/\/app\?github=sveltejs%2Fsvelte$/);
     });
 
@@ -101,21 +101,21 @@ test.describe('Git Sonar app', () => {
 
     test('loads the about page', async ({ page }) => {
         await page.goto('/about');
-        await expect(page.getByRole('heading', { name: /Jonathan Reed builds Git Sonar/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Hi, I'm Jonathan Reed/ })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Make a poster' })).toBeVisible();
     });
 
     test('shows the front desk on the app page', async ({ page }) => {
         await loadApp(page);
-        await expect(page.getByRole('heading', { name: 'Which repo are we hanging?' })).toBeVisible();
-        await expect(page.getByPlaceholder('Paste a GitHub, GitLab or Bitbucket link')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Pick a repo to start.' })).toBeVisible();
+        await expect(page.getByPlaceholder('Paste a GitHub, GitLab, or Bitbucket link')).toBeVisible();
         await expect(page.getByRole('button', { name: 'Make poster' })).toBeVisible();
     });
 
     test('front desk fits a phone without clipping the heading', async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });
         await loadApp(page);
-        await expect(page.getByRole('heading', { name: 'Which repo are we hanging?' })).toBeInViewport();
+        await expect(page.getByRole('heading', { name: 'Pick a repo to start.' })).toBeInViewport();
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(overflow).toBeLessThanOrEqual(0);
     });
@@ -247,7 +247,7 @@ test.describe('Git Sonar app', () => {
 
     test('the collection hangs all fourteen styles', async ({ page }) => {
         await page.goto('/');
-        await expect(page.getByRole('heading', { name: 'One repo, hung fourteen ways.' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'One repo, fourteen styles.' })).toBeVisible();
         await expect(page.locator('.salon__piece')).toHaveCount(14);
     });
 

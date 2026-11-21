@@ -268,7 +268,7 @@ export const transitMapTemplate: PosterTemplate = {
     id: 'transit-map',
     name: 'Transit map',
     group: 'data',
-    description: 'A metro network: branches are lines, commits are stations, merges are interchanges.',
+    description: 'Branches as lines, commits as stations, and merges as interchanges.',
     defaultAspect: 18 / 24,
     fonts: [TITLE_FONT, MONO_FONT],
     build,

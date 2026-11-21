@@ -21,15 +21,15 @@ const structuredData = JSON.stringify({
 const notes = [
 	{
 		title: "Why I made it",
-		text: `I think of ${BRAND.name} as a love letter to code. If you wrote something you're proud of & it has a Git repo, this is a way to actually display it. It's free & I'm not trying to make money from it.`,
+		text: `I really just made ${BRAND.name} as a love letter to code. When you spend months on a project you're proud of, it usually just sits in a repo where nobody sees it. This gives you a real thing you can hang up. It's free & I'm not trying to make money off it.`,
 	},
 	{
 		title: "How it works",
-		text: "It reads the commits, branches & authors from a folder, a zip or a repo link, then draws them as a poster. All of that happens in your browser.",
+		text: "Point it at a local folder, a .git zip, or a public repo link. It reads your commits, branches, and authors right in your browser & draws them into a poster without sending anything to a server.",
 	},
 	{
 		title: "What you get",
-		text: "A PNG for screens, an SVG for a README, a PDF at real print size, or a link that reopens the same poster.",
+		text: "Export a PNG for posting online, an animated SVG for a README, or a PDF sized for a print shop. There's also a shareable link option if you want to reopen the exact same poster later.",
 	},
 ];
 ---
@@ -38,7 +38,7 @@ const notes = [
 	<head>
 		<SiteHead
 			title={`About ${BRAND.name} and ${BRAND.author}`}
-			description={`${BRAND.author} builds ${BRAND.name}, a browser tool that turns a commit history into a poster you can print and frame.`}
+			description={`${BRAND.author} built ${BRAND.name}, a browser tool that turns a Git commit history into a poster you can print and frame.`}
 			path="/about"
 		/>
 		<script is:inline type="application/ld+json" set:html={structuredData}></script>
@@ -49,8 +49,8 @@ const notes = [
 				<SiteNav current="about" />
 				<div class="about__grid">
 					<div class="about__text">
-						<h1 id="about-title">Jonathan Reed builds Git Sonar.</h1>
-						<p>{BRAND.description}</p>
+						<h1 id="about-title">Hi, I'm Jonathan Reed.</h1>
+						<p>I built {BRAND.name} to turn a Git repo's commit history into a poster you can print and frame. It runs entirely in your browser, so your code never gets uploaded.</p>
 					</div>
 
 					<figure class="about__portrait">
@@ -62,7 +62,7 @@ const notes = [
 						<figcaption class="g-label">
 							<b>Jonathan Reed</b>
 							<i>Software developer</i>
-							Maker of {BRAND.name}
+							Built {BRAND.name}
 						</figcaption>
 					</figure>
 				</div>

@@ -33,7 +33,7 @@ function a11y(cfg: PosterConfig, repoName?: string): { title: string; desc: stri
     const name = cfg.title || repoName || 'repository';
     const tpl = getTemplateOrDefault(cfg.template).name;
     return {
-        title: `${name} — ${tpl} poster`,
+        title: `${name}: ${tpl} poster`,
         desc: cfg.subtitle
             ? `${tpl} poster generated from the ${name} commit history. ${cfg.subtitle}`
             : `${tpl} poster generated from the ${name} commit history by Git Sonar.`,

@@ -160,7 +160,7 @@ function build(ctx: TemplateContext): Scene {
 
     // ---- Caption: date range + headline stats, bottom-center -----------------
     const range = signals.timeSpanMs > 0
-        ? `${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase()
+        ? `${formatDate(signals.firstCommitMs)} TO ${formatDate(signals.lastCommitMs)}`.toUpperCase()
         : (signals.firstYear ? `${signals.firstYear}` : '');
     if (range) {
         texts.push(text(range, cx, height - margin, {
@@ -234,7 +234,7 @@ export const radialYearTemplate: PosterTemplate = {
     id: 'radial-year',
     name: 'Year in code',
     group: 'generative',
-    description: 'A radial spiral of commits — one concentric ring per year, dotted around a record-label title.',
+    description: 'One ring per year spiraling out around the title.',
     defaultAspect: 1,
     recommendedLayout: 'radial',
     fonts: [TITLE_FONT, LABEL_FONT],

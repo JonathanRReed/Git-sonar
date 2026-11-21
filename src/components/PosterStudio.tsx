@@ -618,7 +618,7 @@ export function PosterStudio() {
                 const name = `${slug}-${poster.template}`;
                 if (kind === 'svg') {
                     await downloadPosterSVG(graph, poster, repoName, `${name}.svg`);
-                    flash('SVG downloaded, with fonts built in.');
+                    flash('SVG downloaded with embedded fonts.');
                 } else if (kind === 'png') {
                     const info = await downloadPosterPNG(graph, poster, repoName, `${name}.png`);
                     flash(info.clamped ? `PNG downloaded at ${info.width} × ${info.height}. Use PDF or SVG for full print size.` : 'PNG downloaded.');
@@ -627,14 +627,14 @@ export function PosterStudio() {
                     flash(r === 'copied' ? 'Image copied. Paste it anywhere.' : 'Clipboard unavailable, so the PNG was downloaded.');
                 } else if (kind === 'pdf') {
                     await downloadPosterPDF(graph, poster, repoName, `${name}.pdf`);
-                    flash('PDF downloaded at true print size, with fonts built in.');
+                    flash('PDF downloaded at print size with embedded fonts.');
                 } else if (kind === 'embed') {
                     const file = `${name}.animated.svg`;
                     await downloadPosterAnimatedSVG(graph, poster, repoName, file);
                     const md = `![${repoName}, drawn by Git Sonar](./${file})`;
                     try {
                         await navigator.clipboard?.writeText(md);
-                        flash('Animated SVG downloaded & the README line copied. Commit the SVG next to your README.');
+                        flash('Animated SVG downloaded & Markdown snippet copied. Commit the SVG next to your README.');
                     } catch {
                         flash(`Animated SVG downloaded. Add this to your README: ${md}`);
                     }
@@ -646,7 +646,7 @@ export function PosterStudio() {
                     window.history.replaceState(null, '', url);
                     try {
                         await navigator.clipboard?.writeText(url);
-                        flash(reproducible ? 'Link copied. It reopens this exact poster.' : 'Link copied. It restores these settings; open the same repo to see the same poster.');
+                        flash(reproducible ? 'Link copied. It reopens this exact poster.' : 'Link copied. It saves these settings, so open the same repo to get this poster back.');
                     } catch {
                         flash('The link is in the address bar. Copy it from there.');
                     }
@@ -726,7 +726,7 @@ export function PosterStudio() {
 
             <nav className="ps-rail" aria-label="Poster style">
                 <p className="ps-h">
-                    Style <span className="ps-rail__count">{TEMPLATE_LIST.length} to swipe through</span>
+                    Style <span className="ps-rail__count">{TEMPLATE_LIST.length} total</span>
                 </p>
                 <div className="ps-thumbs">
                     {TEMPLATE_LIST.map((t) => (
@@ -767,7 +767,7 @@ export function PosterStudio() {
                                 <span>{fmtIn(inches.h)}</span>
                             </div>
                             <div className="ps-dim ps-dim--h ps-dim--centre" style={{ top: centreY, height: wall.floorY - centreY, left: midX - Math.max(half.w, benchHalf) - 30 }}>
-                                <span>{WALL.centre} in to centre</span>
+                                <span>{WALL.centre} in to center</span>
                             </div>
                             <div className="ps-dim ps-dim--leader" style={{ top: centreY, left: midX - Math.max(half.w, benchHalf) - 21, width: Math.max(0, Math.max(half.w, benchHalf) - half.w + 13) }} />
                         </>
@@ -829,7 +829,7 @@ export function PosterStudio() {
                         <input type="checkbox" tabIndex={onWall ? 0 : -1} checked={mat} disabled={!framed} onChange={(e) => setMat(e.target.checked)} /> Mat
                     </label>
                 </div>
-                <p className="ps-wallnote" aria-hidden={!onWall}>{sizeLabel}, hung at gallery height</p>
+                <p className="ps-wallnote" aria-hidden={!onWall}>{sizeLabel}, shown to scale</p>
 
                 <div className="ps-tray">
                     {playing >= 0 && <div className="ps-playhead" style={{ width: `${playing * 100}%` }} />}
@@ -845,7 +845,7 @@ export function PosterStudio() {
                         <b>Shuffle</b>
                         <span>Same history, new roll. <kbd className="g-kbd">S</kbd></span>
                     </p>
-                    <button type="button" className="ps-listen" onClick={listen} disabled={!graph} aria-pressed={playing >= 0} title="Hear the history: one note per week, higher when it was busier">
+                    <button type="button" className="ps-listen" onClick={listen} disabled={!graph} aria-pressed={playing >= 0} title="Play your commit history as audio, one note per week">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             {playing >= 0
                                 ? <path d="M7 6v12M17 6v12" />
@@ -892,15 +892,15 @@ export function PosterStudio() {
                         </button>
                         <button type="button" data-export="pdf" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('pdf')}>
                             <b>A print shop</b><i>PDF</i>
-                            <span>True size, with the fonts built in.</span>
+                            <span>Real print size with embedded fonts.</span>
                         </button>
                         <button type="button" data-export="embed" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('embed')}>
                             <b>A README</b><i>Animated SVG</i>
-                            <span>Downloads the file & copies the Markdown line.</span>
+                            <span>Downloads the file &amp; copies the Markdown snippet.</span>
                         </button>
                         <button type="button" data-export="svg" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('svg')}>
                             <b>A designer</b><i>SVG</i>
-                            <span>Editable vector, with the fonts built in.</span>
+                            <span>Editable vector with embedded fonts.</span>
                         </button>
                         <button type="button" data-export="copy" tabIndex={popOpen ? 0 : -1} onClick={() => onExport('copy')}>
                             <b>A quick paste</b><i>Clipboard</i>
@@ -928,20 +928,20 @@ export function PosterStudio() {
                 </div>
 
                 <section className="ps-section">
-                    <h3 className="ps-h">Words</h3>
+                    <h3 className="ps-h">Text</h3>
                     <label className="ps-field">
                         <span>Title</span>
                         <input className="g-field" value={cfg.title} placeholder={repoName} onChange={(e) => change({ title: e.target.value })} />
                     </label>
                     <label className="ps-field">
                         <span>Tagline</span>
-                        <input className="g-field" value={cfg.subtitle} placeholder={momentTagline || 'Leave empty & one gets written'} onChange={(e) => change({ subtitle: e.target.value })} />
+                        <input className="g-field" value={cfg.subtitle} placeholder={momentTagline || 'Leave blank to auto-fill'} onChange={(e) => change({ subtitle: e.target.value })} />
                     </label>
                 </section>
 
                 <section className="ps-section">
-                    <h3 className="ps-h">Colour</h3>
-                    <div className="ps-swatches" role="group" aria-label="Colour theme">
+                    <h3 className="ps-h">Color</h3>
+                    <div className="ps-swatches" role="group" aria-label="Color theme">
                         {THEME_LIST.map((t) => (
                             <button
                                 key={t.id}
@@ -963,10 +963,10 @@ export function PosterStudio() {
 
                 {showMarks && (
                     <section className="ps-section">
-                        <h3 className="ps-h">What the marks mean</h3>
+                        <h3 className="ps-h">What the shapes show</h3>
                         {showCtl('hue') && (
                             <div className="ps-choice">
-                                <span id="ps-hue">Colour shows</span>
+                                <span id="ps-hue">Color shows</span>
                                 <div className="g-seg" role="group" aria-labelledby="ps-hue">
                                     {HUES.map((h) => (
                                         <button key={h.id} type="button" aria-pressed={enc.hue === h.id} disabled={h.id === 'churn' && !hasLineCounts} onClick={() => changeEncoding({ hue: h.id })}>{h.label}</button>
@@ -985,7 +985,7 @@ export function PosterStudio() {
                             </div>
                         )}
                         {!hasLineCounts && (
-                            <p className="ps-note">This repo was read without line counts, so "Lines changed" is not available.</p>
+                            <p className="ps-note">This repo doesn't have line counts, so "Lines changed" is disabled.</p>
                         )}
                     </section>
                 )}
@@ -1023,7 +1023,7 @@ export function PosterStudio() {
                 <section className="ps-section">
                     <h3 className="ps-h">Paper</h3>
                     <div className="ps-choice">
-                        <span id="ps-orient">Shape</span>
+                        <span id="ps-orient">Orientation</span>
                         <div className="g-seg" role="group" aria-labelledby="ps-orient">
                             {(['portrait', 'landscape'] as Orientation[]).map((o) => (
                                 <button key={o} type="button" aria-pressed={cfg.orientation === o} onClick={() => change({ orientation: o })}>
@@ -1047,7 +1047,7 @@ export function PosterStudio() {
                     <div className="ps-checks">
                         <label><input type="checkbox" checked={cfg.showWatermark} onChange={(e) => change({ showWatermark: e.target.checked })} /> Git Sonar credit line</label>
                         <label><input type="checkbox" checked={cfg.showSignature} onChange={(e) => change({ showSignature: e.target.checked })} /> Date line</label>
-                        <label><input type="checkbox" checked={cfg.printSafe} onChange={(e) => change({ printSafe: e.target.checked })} /> Print-safe colours</label>
+                        <label><input type="checkbox" checked={cfg.printSafe} onChange={(e) => change({ printSafe: e.target.checked })} /> Print-safe colors</label>
                     </div>
                 </section>
 

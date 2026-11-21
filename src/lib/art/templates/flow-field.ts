@@ -159,8 +159,8 @@ function build(ctx: TemplateContext): Scene {
 
     // Dates, bottom-right on the tagline's baseline so the title has its own line.
     const credit = signals.timeSpanMs > 0
-        ? `${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase()
-        : 'GENERATIVE FLOW FIELD';
+        ? `${formatDate(signals.firstCommitMs)} TO ${formatDate(signals.lastCommitMs)}`.toUpperCase()
+        : 'FLOW FIELD';
     texts.push(text(credit, right, bottom + scale(-1.2) + scale(-1.6), {
         font: fontStack(CREDIT_FONT), size: scale(-2.8), weight: 400,
         color: palette.fgMuted, align: 'end', spacing: width * 0.003,
@@ -214,7 +214,7 @@ export const flowFieldTemplate: PosterTemplate = {
     id: 'flow-field',
     name: 'Flow field',
     group: 'generative',
-    description: 'Fidenza-style noise field traced by hundreds of curved commit ribbons, colored by author and weighted by churn.',
+    description: 'Curved commit lines flowing across a field, colored by author and weighted by lines changed.',
     defaultAspect: 24 / 36,
     recommendedLayout: 'vertical',
     fonts: [TITLE_FONT, CREDIT_FONT],

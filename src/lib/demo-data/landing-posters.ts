@@ -25,20 +25,20 @@ interface Spec {
 // Ordered and themed so the wall alternates dark sheets, paper and colour
 // instead of bunching the dark ones together.
 const SPECS: Spec[] = [
-    { id: 'growth-rings', template: 'growth-rings', themeId: 'paper', label: 'Growth rings', medium: 'One ring for every week' },
-    { id: 'pulsar', template: 'pulsar', themeId: 'night', label: 'Pulsar', medium: 'How often commits landed, as ridgelines' },
+    { id: 'growth-rings', template: 'growth-rings', themeId: 'paper', label: 'Growth rings', medium: 'One ring per week' },
+    { id: 'pulsar', template: 'pulsar', themeId: 'night', label: 'Pulsar', medium: 'Commit activity stacked as ridgelines' },
     { id: 'transit-map', template: 'transit-map', themeId: 'riso', label: 'Transit map', medium: 'Branches as lines, merges as interchanges' },
-    { id: 'flow-field', template: 'flow-field', themeId: 'dawn', label: 'Flow field', medium: 'Lines coloured by author' },
-    { id: 'receipt', template: 'receipt', themeId: 'blueprint', label: 'Receipt', medium: 'Every author, itemised' },
-    { id: 'core-sample', template: 'core-sample', themeId: 'paper', label: 'Core sample', medium: 'A layer for every month' },
-    { id: 'punch-card', template: 'punch-card', themeId: 'night', label: 'Punch card', medium: 'Commits by weekday and hour' },
-    { id: 'weave', template: 'weave', themeId: 'paper', label: 'Weave', medium: 'A row per week, dyed by author' },
+    { id: 'flow-field', template: 'flow-field', themeId: 'dawn', label: 'Flow field', medium: 'Curved lines colored by author' },
+    { id: 'receipt', template: 'receipt', themeId: 'blueprint', label: 'Receipt', medium: 'Every author, itemized' },
+    { id: 'core-sample', template: 'core-sample', themeId: 'paper', label: 'Core sample', medium: 'One layer per month' },
+    { id: 'punch-card', template: 'punch-card', themeId: 'night', label: 'Punch card', medium: 'Commits by day and hour' },
+    { id: 'weave', template: 'weave', themeId: 'paper', label: 'Weave', medium: 'One row per week, colored by author' },
     { id: 'radial', template: 'radial-year', themeId: 'dawn', label: 'Year in code', medium: 'A year of commits in a spiral' },
     { id: 'album', template: 'album-tracklist', themeId: 'github', label: 'Album', medium: 'Top commits as a tracklist' },
-    { id: 'movie', template: 'movie-one-sheet', themeId: 'night', label: 'Movie one-sheet', medium: 'Commit graph with a credits block' },
-    { id: 'festival', template: 'festival', themeId: 'riso', label: 'Festival lineup', medium: 'Authors as the lineup' },
-    { id: 'constellation', template: 'constellation', themeId: 'night', label: 'Constellation', medium: 'Every commit a star' },
-    { id: 'swiss', template: 'swiss', themeId: 'paper', label: 'Swiss grid', medium: 'The numbers, set on a grid' },
+    { id: 'movie', template: 'movie-one-sheet', themeId: 'night', label: 'Movie poster', medium: 'Commit graph with a credits block' },
+    { id: 'festival', template: 'festival', themeId: 'riso', label: 'Festival lineup', medium: 'Contributors ranked by commit count' },
+    { id: 'constellation', template: 'constellation', themeId: 'night', label: 'Constellation', medium: 'Every commit plotted as a star' },
+    { id: 'swiss', template: 'swiss', themeId: 'paper', label: 'Swiss grid', medium: 'Repo stats laid out on a grid' },
 ];
 
 function cfgFor(spec: Spec): PosterConfig {
@@ -100,7 +100,7 @@ export function renderLandingPosters(): { id: string; label: string; svg: string
         id: s.id,
         label: s.label,
         svg: sceneToSVG(renderPoster(graph, cfgFor(s), 'project-atlas').scene, {
-            title: `Project Atlas — ${s.label} poster`,
+            title: `Project Atlas: ${s.label} poster`,
         }),
     }));
 }

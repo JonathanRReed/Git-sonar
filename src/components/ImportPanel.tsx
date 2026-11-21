@@ -300,12 +300,12 @@ export function ImportPanel() {
   const dotCount = !isLoading ? 0 : found > 0 ? Math.min(MAX_DOTS, Math.ceil(found / 12)) : Math.min(MAX_DOTS, pulse);
   const dots = useMemo(() => Array.from({ length: MAX_DOTS }, (_, i) => dotPosition(i)), []);
 
-  const labelTitle = isLoading ? importStatus?.name ?? 'Reading' : 'Untitled';
+  const labelTitle = isLoading ? importStatus?.name ?? 'Reading' : 'Your repo';
   const labelLine = !isLoading
-    ? moment ? `Waiting for a repo, as of ${formatMomentDate(moment)}` : 'Waiting for a repo'
+    ? moment ? `Ready for a repo, as of ${formatMomentDate(moment)}` : 'Paste a link or open a folder'
     : found > 0
       ? `${found.toLocaleString()} commits found`
-      : 'Reading the history';
+      : 'Reading commits';
 
   return (
     <div
@@ -315,7 +315,7 @@ export function ImportPanel() {
       onDragLeave={handleDragLeave}
     >
       <div className="desk__ask">
-        <h1>Which repo are we hanging?</h1>
+        <h1>Pick a repo to start.</h1>
 
         <label className="desk__field-label" htmlFor="repository-url">Repo link</label>
         <form className="desk__form" onSubmit={handleSubmit}>
@@ -330,12 +330,12 @@ export function ImportPanel() {
             spellCheck={false}
             value={repoUrl}
             onChange={(e) => setRepoUrl(e.target.value)}
-            placeholder="Paste a GitHub, GitLab or Bitbucket link"
+            placeholder="Paste a GitHub, GitLab, or Bitbucket link"
             disabled={isLoading}
             aria-label="Repository URL"
           />
           <button type="submit" className="g-btn g-btn--red" disabled={isLoading} aria-busy={isLoading}>
-            {isLoading ? 'Hanging' : 'Make poster'}
+            {isLoading ? 'Loading...' : 'Make poster'}
           </button>
         </form>
 
@@ -351,20 +351,20 @@ export function ImportPanel() {
         <div className="desk__alts">
           <button type="button" onClick={openFolder} disabled={isLoading}>
             <b>Open a folder on this computer</b>
-            <span>No zipping, and it works offline.</span>
+            <span>No zipping needed &amp; works offline.</span>
           </button>
           <button type="button" onClick={loadSample} disabled={isLoading}>
             <b>Use the sample repo</b>
-            <span>Project Atlas, 147 commits by 8 people.</span>
+            <span>Project Atlas, 147 commits from 8 people.</span>
           </button>
         </div>
 
         <div className="desk__extras">
         <details className="desk__more desk__moment">
-          <summary>{moment ? `Capturing ${formatMomentDate(moment)}` : 'Capture an earlier moment'}</summary>
+          <summary>{moment ? `Cutoff: ${formatMomentDate(moment)}` : 'Use an earlier date'}</summary>
           <div className="desk__more-body">
             <p>
-              Get the repo as it stood on a day that mattered, like a launch, a release, or the day it hit 1,000 stars.
+              Cut off the history at a specific day, like launch day, a big release, or when the repo hit 1,000 stars.
             </p>
             <div className="desk__moment-row">
               <label>
@@ -395,7 +395,7 @@ export function ImportPanel() {
                 />
               </label>
             </div>
-            <p>This site can't look up the day a repo hit a star count, so you'll need to enter it. Leave the day empty to use the repo as it is now.</p>
+            <p>Git Sonar can't look up when a repo hit a certain star count, so you'll need to type the date in yourself. Leave it blank to use the latest commits.</p>
           </div>
         </details>
 
@@ -473,7 +473,7 @@ export function ImportPanel() {
       <div className="desk__wall" aria-live="polite">
         <div className="g-frame g-frame--oak desk__frame">
           <div className={`g-mat desk__mat ${isLoading ? 'is-busy' : ''}`}>
-            <em>{isDragging ? 'Drop the zip here' : 'Empty, for now'}</em>
+            <em>{isDragging ? 'Drop the zip here' : 'No repo loaded yet'}</em>
             {dots.slice(0, dotCount).map((d, i) => (
               <i key={i} className={d.big ? 'is-big' : undefined} style={{ left: d.left, top: d.top }} />
             ))}

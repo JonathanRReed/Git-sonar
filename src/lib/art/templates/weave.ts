@@ -106,7 +106,7 @@ export const weaveTemplate: PosterTemplate = {
     id: 'weave',
     name: 'Weave',
     group: 'generative',
-    description: 'Cloth woven from the history: a row per week, dyed by whoever led it.',
+    description: 'One woven row per week, colored by who committed the most.',
     defaultAspect: 18 / 24,
     fonts: [TITLE_FONT, MONO_FONT],
     build,

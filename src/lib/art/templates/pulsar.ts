@@ -148,7 +148,7 @@ function build(ctx: TemplateContext): Scene {
 
     // Footer caption — repo + span, very small, the only "data" on the page.
     const spanLabel = signals.timeSpanMs > 0
-        ? `${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase()
+        ? `${formatDate(signals.firstCommitMs)} TO ${formatDate(signals.lastCommitMs)}`.toUpperCase()
         : `${signals.commitCount} COMMITS`;
     const repoLabel = (options.repoName || 'repository').toString().toUpperCase();
     texts.push(text(`${repoLabel}  ·  ${spanLabel}`, width / 2, height - height * 0.07, {
@@ -209,7 +209,7 @@ export const pulsarTemplate: PosterTemplate = {
     id: 'pulsar',
     name: 'Pulsar',
     group: 'generative',
-    description: 'Stacked ridgeline joyplot (Unknown Pleasures) of commit cadence on a deep black field.',
+    description: 'Stacked ridgelines showing commit activity on a black background.',
     defaultAspect: 24 / 30,
     recommendedLayout: 'vertical',
     fonts: [TITLE_FONT, MONO_FONT],

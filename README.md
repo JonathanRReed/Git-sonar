@@ -2,16 +2,13 @@
 
 ![Git Sonar logo](public/favicon.svg)
 
-Git Sonar turns the history of a Git repo into a poster you can print and frame. I made it as a love letter to code. If you built something you're proud of and it has a repo, this is a way to display it. It's free and it runs in the browser, so repository data is never uploaded to an app server.
+Git Sonar turns a Git repo's commit history into a poster you can print and frame. I built it as a love letter to code. When you spend months on a project you're proud of, it usually just sits in a repo where nobody sees it, so this gives you something real to hang up. It's free and runs completely in your browser, so your code never gets uploaded to a server.
 
-The site is built like a gallery. Posters hang in frames on a wall with labels, the call to action is an empty frame, and the light switch in the navigation turns the lights off.
+The site is styled like a gallery wall. Posters hang in frames with small labels, the hero lets you paste your own repo right into an empty frame, and the light switch in the nav dims the room.
 
 ## Run locally
 
-Use Node.js 24.22.1 (pinned in `.nvmrc`) and Bun 1.4.4 (pinned in
-`package.json`). This project supports Node.js >=24.22.1 <25 to match the
-pinned LTS runtime and its tooling dependencies. Both CI jobs read these same
-version files.
+Use Node.js 24.22.1 (pinned in `.nvmrc`) and Bun 1.4.4 (pinned in `package.json`). This project supports Node.js >=24.22.1 <25 to match the pinned LTS runtime and its tooling dependencies. Both CI jobs read these same version files.
 
 ```bash
 git clone https://github.com/JonathanRReed/Git-sonar.git
@@ -25,20 +22,20 @@ Open `http://localhost:4321`.
 
 ## Import history
 
-The app opens on one question, "Which repo are we hanging?", with four ways in:
+The studio opens with four ways to load a repo:
 
-- **Paste a link** to a GitHub, GitLab, or Bitbucket repository, or click one of the suggested public repos. An optional token supports private repositories and higher rate limits, and lets GitHub imports include lines added and removed (GitLab imports always include them).
-- **Open a folder on this computer.** Pick the project folder; only `.git` is read, nothing is zipped, and it works offline.
+- **Paste a link** to a GitHub, GitLab, or Bitbucket repository, or pick one of the suggested public repos. You can add an optional access token to load private repos and raise rate limits. On GitHub, a token also unlocks line addition and deletion counts (GitLab includes those automatically).
+- **Open a local folder** on your computer. Pick the project folder and Git Sonar reads only `.git`. No zipping needed, and it works offline.
 - **Drop a `.git` zip** anywhere on the page: `cd your-repo && zip -r repo-git.zip .git`
 - **Use the sample repo**, Project Atlas.
 
-While a repository loads, its commits land in the empty frame and the wall label counts them.
+You can also set a cutoff date if you want a poster from launch day or an older release. While commits load, they fill the empty frame and the label counts them live.
 
 ## Explore the graph
 
-Switch from Poster to History in the header. Drag to pan, scroll or pinch to zoom, and click a commit to select it. Double-click or press Enter for details. Search by message, author, or SHA. The timeline scrubber and calendar navigate by date; the camera and document controls export PNG and SVG.
+Switch from Poster to History in the header to inspect the commit graph. Drag to pan, scroll or pinch to zoom, and click a commit to select it. Double-click or press Enter to open details, or search by message, author, or SHA. The timeline scrubber and calendar let you jump by date, and the export drawer saves PNG, SVG, or printable PDF views of the graph.
 
-Branches occupy separate lanes. Spatial indexing, viewport culling, level-of-detail rendering, batched edges, debounced search, and incremental loading reduce work for large histories. Live announcements and focus management support screen readers.
+Each branch gets its own lane. To keep large repos fast, the canvas uses spatial indexing, viewport culling, batched edges, and incremental loading, along with debounced search and screen-reader announcements.
 
 | Key | Action |
 | --- | --- |
@@ -54,32 +51,32 @@ Branches occupy separate lanes. Spatial indexing, viewport culling, level-of-det
 
 ## Make a poster
 
-The studio opens as soon as a repository loads. Pick a style from the rail (each thumbnail is drawn from your own history), then set the words, colours, and what the marks mean. The dice shuffle the composition and keep earlier rolls in a tray; the same roll and settings always reproduce the same design. Undo and redo work, as do `S` (shuffle), `W` (wall), and the arrow keys (styles).
+The studio opens as soon as your repo loads. Pick a style from the left rail, where every thumbnail is rendered from your own repo, then change the title, tagline, colors, and what the shapes show. The dice button shuffles the layout and keeps earlier rolls in the bottom tray so you can click back through them. Using the same roll and settings always reproduces the exact same poster. Undo and redo work, along with `S` to shuffle, `W` to toggle the wall preview, and the arrow keys to step through styles.
 
 | Style | Draws |
 | --- | --- |
-| Pulsar | Commit cadence as stacked ridgelines |
-| Flow field | Authors as seeded currents |
-| Growth rings | One ring per week, thick where the work was heavy |
-| Transit map | Branches as lines, commits as stations, merges as interchanges |
-| Core sample | One layer per month, coloured by who led it |
-| Weave | A row per week, dyed by its lead author |
-| Punch card | Commits by weekday and hour, with the busiest slot named |
-| Receipt | The history itemised by author, with a barcode from the head commit |
-| Year in code | A radial year-ring spiral |
-| Album | Cover art and commits as tracks |
-| Movie poster | Commit graph and a generated billing block |
-| Constellation | Each month as its own constellation |
-| Festival | Contributors arranged as a festival bill |
-| Swiss grid | A typographic data print |
+| Pulsar | Commit activity stacked as ridgelines |
+| Flow field | Curved commit lines colored by author and weighted by lines changed |
+| Growth rings | One ring per week, thicker when more commits landed |
+| Transit map | Branches as lines, commits as stations, and merges as interchanges |
+| Core sample | One layer per month, colored by whoever committed the most |
+| Weave | One woven row per week, colored by the top author |
+| Punch card | Commits by weekday and hour, with the busiest slot called out |
+| Receipt | Itemized contributor breakdown with a barcode from the latest commit |
+| Year in code | One ring per year spiraling out around the title |
+| Album | Album cover with a radial commit graph and numbered tracklist |
+| Movie poster | Commit graph with a big title and generated credits block |
+| Constellation | Commits plotted as stars grouped by month |
+| Festival | Contributors arranged like a festival lineup |
+| Swiss grid | Clean grid poster with the repo stats up front |
 
-Colour themes are Night, Dawn, Gallery Paper, Riso, Blueprint, GitHub, Nord, and Dracula, each with full, two-tone, one-ink, and vivid palettes (OKLCH).
+Color themes include Git Sonar Night, Rosé Pine Dawn, Gallery Paper, Riso, Blueprint, Acid Test, Blacklight, Thermal, Phosphor, Sherbet, Gold Leaf, GitHub Dark, Nord, and Dracula. Each supports full, two-tone, one-ink, and vivid OKLCH palettes.
 
-**On a wall** hangs the poster in a gallery elevation drawn to scale: centred 57 inches above the floor, over a five-foot bench, with dimension lines and a choice of frame and mat. **Listen** plays the history as sound, one note per week.
+**On a wall** previews the poster to scale, centered 57 inches above the floor over a 5 ft bench, with dimension lines plus frame and mat controls. **Listen** plays your commit history as sound, one note per week.
 
-Download asks what the poster is for: a screen (PNG), a print shop (PDF), a README (animated SVG plus the Markdown line), a designer (SVG), the clipboard, or a link. PDF supports A4 through A1, 18×24, and 24×36 print dimensions in sRGB, with an optional print-safe palette. Outputs embed fonts; SVG uses base64 `@font-face`, while PDF registers font faces. The build fetches TTF files into `public/fonts/`.
+The Download menu lets you pick by use case: PNG for screens, PDF for a print shop, animated SVG with a Markdown snippet for a README, editable SVG, clipboard copy, or a shareable link. PDF exports support A4 through A1, 18×24, and 24×36 print sizes in sRGB with an optional print-safe palette. Fonts are embedded automatically. SVG uses base64 `@font-face` and PDF registers the font faces directly from TTF files fetched into `public/fonts/` during build.
 
-Copy link encodes settings in `#p=…`. Public-repository and demo links can reproduce the poster for another visitor. Private or local-import links restore settings only; the recipient still needs the repository data.
+Copy link packs your settings into `#p=…`. Public repo and sample links reopen the exact same poster for anyone. Private or local repo links only restore the settings, so the other person still needs the repo data locally.
 
 ## Develop
 
@@ -91,12 +88,9 @@ bun run build
 bun run preview
 ```
 
-`bun run check` includes lint, guarded tool typechecking, unit tests, coverage,
-a production build, and Playwright browser tests. Install browser dependencies
-first with `bunx playwright install --with-deps`. TypeScript stays on version 6
-because the current typescript-eslint release requires its API.
+`bun run check` runs lint, guarded tool typechecking, unit tests, coverage, a production build, and Playwright browser tests. Install the Playwright browsers first with `bunx playwright install --with-deps`. TypeScript stays on version 6 because the current `typescript-eslint` release depends on its API.
 
-The app uses Astro, React, Canvas 2D, Tailwind CSS, Zustand, fflate, and culori. resvg and sharp rasterize posters at build time. Theme credits include [Rosé Pine](https://rosepinetheme.com/).
+Built with Astro, React, Canvas 2D, Tailwind CSS, Zustand, fflate, and culori. Build-time poster thumbnails use resvg and sharp. Theme credits include [Rosé Pine](https://rosepinetheme.com/).
 
 | Path | Contents |
 | --- | --- |
@@ -109,7 +103,7 @@ The app uses Astro, React, Canvas 2D, Tailwind CSS, Zustand, fflate, and culori.
 | `src/pages/index.astro`, `src/pages/app.astro` | Landing page and app |
 | `src/styles/`, `public/`, `tests/` | Styles, assets, and Vitest tests |
 
-Contributions should follow the existing TypeScript conventions, document public APIs, and test new behavior. Run lint before opening a pull request.
+Contributions should match the existing TypeScript style, document public APIs, and add tests for new behavior. Run lint before opening a pull request.
 
 ## License
 

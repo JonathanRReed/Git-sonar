@@ -108,8 +108,8 @@ function build(ctx: TemplateContext): Scene {
 
     // Date range as the festival dates (graceful when span is zero/unknown).
     const dates = signals.timeSpanMs > 0
-        ? `${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase()
-        : (options.subtitle || 'A REPOSITORY IN CONCERT').toUpperCase();
+        ? `${formatDate(signals.firstCommitMs)} TO ${formatDate(signals.lastCommitMs)}`.toUpperCase()
+        : (options.subtitle || 'LIVE LINEUP').toUpperCase();
     texts.push(text(dates, width / 2, margin + nameSize * 1.5, {
         font: fontStack(META_FONT), size: scale(-1.8), weight: 600,
         color: palette.accent, align: 'middle', spacing: width * 0.01,
@@ -240,7 +240,7 @@ export const festivalTemplate: PosterTemplate = {
     id: 'festival',
     name: 'Festival',
     group: 'cinematic',
-    description: 'Contributors as a tiered festival bill — headliner top, supporting acts cascading down.',
+    description: 'Contributors arranged like a festival lineup, with the top author on top.',
     defaultAspect: 24 / 36,
     recommendedLayout: 'vertical',
     fonts: [TITLE_FONT, NAME_FONT, META_FONT],

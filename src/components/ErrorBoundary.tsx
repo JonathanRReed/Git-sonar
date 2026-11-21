@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             <span className="error-boundary__icon"><AlertTriangle size={32} /></span>
                             <h2 className="error-boundary__title">Something went wrong</h2>
                             <p className="error-boundary__message">
-                                An unexpected error interrupted this view. Try again, or reload the page if the problem continues.
+                                Something broke in this view. Try again, or reload the page if it keeps happening.
                             </p>
                             {this.state.error && (
                                 <details className="error-boundary__details">

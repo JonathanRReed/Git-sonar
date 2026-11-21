@@ -136,7 +136,7 @@ export const coreSampleTemplate: PosterTemplate = {
     id: 'core-sample',
     name: 'Core sample',
     group: 'data',
-    description: 'A drilled column of strata: one layer per month, coloured by who led it.',
+    description: 'One layer per month, colored by whoever had the most commits that month.',
     defaultAspect: 24 / 36,
     fonts: [TITLE_FONT, MONO_FONT],
     build,

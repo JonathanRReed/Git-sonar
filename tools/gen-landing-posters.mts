@@ -138,7 +138,7 @@ async function main() {
   <rect y="582" width="1200" height="48" fill="url(#floor)"/>
 
   <text font-family="${OG_DISPLAY}" font-weight="800" font-size="104" letter-spacing="-2" fill="#16181a">
-    <tspan x="64" y="190">Every repo</tspan><tspan x="64" y="286">deserves a</tspan><tspan x="64" y="382">retrospective.</tspan>
+    <tspan x="64" y="190">Turn your</tspan><tspan x="64" y="286">Git repo into</tspan><tspan x="64" y="382">a poster.</tspan>
   </text>
   <text x="66" y="452" font-family="Newsreader" font-size="31" fill="#16181a">Turn a commit history into a poster</text>
   <text x="66" y="492" font-family="Newsreader" font-size="31" fill="#16181a">you can print and frame.</text>
@@ -156,7 +156,7 @@ async function main() {
   <g>
     <rect x="648" y="440" width="170" height="64" fill="#fbfbf8"/>
     <text x="660" y="465" font-family="${OG_DISPLAY}" font-weight="800" font-size="17" fill="#16181a">Project Atlas</text>
-    <text x="660" y="488" font-family="Newsreader" font-size="16" fill="#16181a">147 commits on paper</text>
+    <text x="660" y="488" font-family="Newsreader" font-size="16" fill="#16181a">147 commits</text>
     <circle cx="818" cy="440" r="8" fill="#d92b25"/>
   </g>
 </svg>`;

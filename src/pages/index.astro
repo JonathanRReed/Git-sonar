@@ -37,24 +37,24 @@ const posterById = (id: string) => LANDING_POSTERS.find((p) => p.id === id);
 const steps = [
 	{
 		title: "Bring a repo",
-		text: "Paste a link, open a folder, or drop a .git zip. You can also pick an earlier day & get the repo as it stood then.",
+		text: "Paste a repo link, open a local folder, or drop in a .git zip. You can also set a cutoff date if you want a poster from launch day or an older release.",
 	},
 	{
 		title: "Pick a style",
-		text: "Then change the colours, the words & what the marks stand for. The dice give you a new layout of the same history.",
+		text: "Change the colors, edit the title, and pick what the shapes show. Hit the dice to shuffle the layout without changing your commit data.",
 	},
 	{
 		title: "Download it",
-		text: "PNG for screens, SVG for a README, or a PDF at real print size with the fonts built in. Print it, frame it or post it.",
+		text: "Export a PNG for posting online, an animated SVG for a README, or a full-size PDF with the fonts embedded so a print shop can run it straight off the file.",
 	},
 ];
 
 // Paper sizes drawn to scale against each other and a 5 ft bench (1 in = 0.4rem).
 const papers = [
 	{ name: "A4", w: 8.27, h: 11.69, note: "Desk size", poster: posterById("swiss") },
-	{ name: "A3", w: 11.69, h: 16.54, note: "Hallway size", poster: posterById("growth-rings") },
-	{ name: "18 × 24 in", w: 18, h: 24, note: "The classic poster", poster: posterById("transit-map") },
-	{ name: "24 × 36 in", w: 24, h: 36, note: "One-sheet size", poster: posterById("core-sample") },
+	{ name: "A3", w: 11.69, h: 16.54, note: "Medium print", poster: posterById("growth-rings") },
+	{ name: "18 × 24 in", w: 18, h: 24, note: "Standard poster", poster: posterById("transit-map") },
+	{ name: "24 × 36 in", w: 24, h: 36, note: "Large poster", poster: posterById("core-sample") },
 ];
 ---
 
@@ -73,7 +73,7 @@ const papers = [
 				"name": "Git Sonar",
 				"applicationCategory": "DeveloperApplication",
 				"operatingSystem": "Web Browser",
-				"description": "Git Sonar turns a commit history into a poster you can print and frame. It runs in your browser, so your code is never uploaded.",
+				"description": "Git Sonar turns a Git commit history into a poster you can print and frame. Everything runs in your browser, so your code is never uploaded.",
 				"offers": {
 					"@type": "Offer",
 					"price": "0",
@@ -97,17 +97,17 @@ const papers = [
 					{
 						"@type": "Question",
 						"name": "Does Git Sonar work on private or work repositories?",
-						"acceptedAnswer": { "@type": "Answer", "text": "Yes. Open the project folder or drop a .git ZIP and it is read entirely in your browser, fully offline. Repository links are fetched directly from your provider. Either way your code never touches a Git Sonar server." }
+						"acceptedAnswer": { "@type": "Answer", "text": "Yes. Open a local project folder or drop in a .git zip and your browser reads it directly, even offline. Public repo links are fetched straight from GitHub, GitLab, or Bitbucket by your browser. There's no backend server, so your code never gets uploaded." }
 					},
 					{
 						"@type": "Question",
 						"name": "Is Git Sonar free?",
-						"acceptedAnswer": { "@type": "Answer", "text": "Yes. Generate and download high-resolution PNG, vector SVG, and print-dimensioned PDF posters for free, right in the browser." }
+						"acceptedAnswer": { "@type": "Answer", "text": "Yes. You can make and download PNGs, vector SVGs, and print-sized PDFs right in your browser without an account." }
 					},
 					{
 						"@type": "Question",
-						"name": "What can I turn my Git history into?",
-						"acceptedAnswer": { "@type": "Answer", "text": "Fourteen poster styles, including growth rings, a transit map of your branches, a core sample, a woven cloth, a punch card of when you work, an itemised receipt, a pulsar ridgeline plot, a flow field, a movie one-sheet and an album cover with a commit tracklist." }
+						"name": "What styles can I turn my Git history into?",
+						"acceptedAnswer": { "@type": "Answer", "text": "Git Sonar has 14 poster styles, including growth rings, a branch transit map, a core sample, a woven pattern, a commit punch card, an itemized receipt, a pulsar ridgeline plot, a flow field, a movie poster, and an album cover with a tracklist." }
 					}
 				]
 			}
@@ -121,13 +121,13 @@ const papers = [
 
 				<div class="hero__grid">
 					<div class="hero__text">
-						<h1 id="hero-title">Every repo deserves a retrospective.</h1>
+						<h1 id="hero-title">Turn your Git repo into a poster.</h1>
 						<p class="hero__lede">
-							If you built something you're proud of and it lives in a Git repo, this turns its history into a poster you can print &amp; frame.
-							It runs in your browser, so your code never gets uploaded.
+							{BRAND.name} reads your commit history and turns it into a poster you can print &amp; frame.
+							It all runs right in your browser, so your code never leaves your computer.
 						</p>
 						<a class="ticket" href="/app">
-							<span class="ticket__main"><b>Admit one</b><i>and one repo</i></span>
+							<span class="ticket__main"><b>Start a poster</b><i>bring any repo</i></span>
 							<span class="ticket__stub" aria-label="Price: free">Free</span>
 						</a>
 					</div>
@@ -146,7 +146,7 @@ const papers = [
 									<small>No. {String(LANDING_POSTERS.indexOf(p) + 1).padStart(2, "0")}</small>
 									<b>{p.label}</b>
 									<i>Project Atlas</i>
-									{i === 0 ? `${facts.commits} commits on paper` : `${facts.authors} authors, ${facts.merges} merges`}
+									{i === 0 ? `${facts.commits} commits` : `${facts.authors} authors, ${facts.merges} merges`}
 								</figcaption>
 							</figure>
 						))}
@@ -154,17 +154,17 @@ const papers = [
 						<div class="piece piece--yours">
 							<div class="g-frame g-frame--oak yours">
 								<form class="g-mat yours__mat" id="yours-form" action="/app" method="get">
-									<h2>This frame is yours.</h2>
-									<label for="yours-repo">Paste a repo link to see it hung.</label>
+									<h2>Try your own repo.</h2>
+									<label for="yours-repo">Paste a GitHub, GitLab, or Bitbucket link.</label>
 									<input class="g-field" id="yours-repo" name="github" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="you/your-repo" />
-									<button class="g-btn g-btn--red" type="submit">Make my poster</button>
-									<a class="yours__alt yours__alt--inside" href="/app?demo=showcase">or start with the sample repo</a>
+									<button class="g-btn g-btn--red" type="submit">Make poster</button>
+									<a class="yours__alt yours__alt--inside" href="/app?demo=showcase">or load the sample repo</a>
 								</form>
 							</div>
 							<div class="g-label yours__label">
-								<b>Untitled</b>
-								<i>Yours, once you paste a repo</i>
-								<a class="yours__alt" href="/app?demo=showcase">or start with the sample repo</a>
+								<b>Your repo</b>
+								<i>Public links work right away</i>
+								<a class="yours__alt" href="/app?demo=showcase">or load the sample repo</a>
 							</div>
 						</div>
 					</div>
@@ -174,10 +174,10 @@ const papers = [
 
 			<section class="collection g-wall" id="collection" aria-labelledby="collection-title">
 				<div class="section-head">
-					<h2 id="collection-title">One repo, hung {styleWord} ways.</h2>
+					<h2 id="collection-title">One repo, {styleWord} styles.</h2>
 					<p>
-						Every poster here came from the same sample history, Project Atlas: {facts.commits} commits by {facts.authors} people.
-						Click any of them to open it in the studio &amp; change it.
+						Every poster below was made from the same sample repo, Project Atlas, with {facts.commits} commits from {facts.authors} people.
+						Click any of them to open it in the studio &amp; change whatever you want.
 					</p>
 				</div>
 
@@ -206,7 +206,7 @@ const papers = [
 
 			<section class="how g-wall" id="how" aria-labelledby="how-title">
 				<div class="section-head">
-					<h2 id="how-title">How it works.</h2>
+					<h2 id="how-title">How it works</h2>
 				</div>
 				<ol class="steps">
 					{steps.map((step, i) => (
@@ -226,27 +226,27 @@ const papers = [
 					<div>
 						<h2 id="private-title">Your code stays on your computer.</h2>
 						<p>
-							There's no {BRAND.name} server to send it to. A folder or a zip is read on your own machine &amp; works offline.
-							A repo link is fetched by your browser, straight from GitHub, GitLab or Bitbucket.
+							There's no {BRAND.name} server at all. Local folders and .git zips are read right on your computer &amp; work offline.
+							Repo links are fetched directly by your browser from GitHub, GitLab, or Bitbucket.
 						</p>
 					</div>
 					<div class="private__plaque">
 						<h3>Free</h3>
-						<p>No account, no sign-up, nothing to pay later.</p>
+						<p>No account needed, and there's no paywall hiding behind the download button.</p>
 					</div>
 				</div>
 			</section>
 
 			<section class="sizes g-wall" aria-labelledby="sizes-title">
 				<div class="section-head">
-					<h2 id="sizes-title">It prints at any size.</h2>
+					<h2 id="sizes-title">Prints sharp at any size.</h2>
 					<p>
-Everything below is drawn to one scale, bench included. The exports are vector, so the same poster stays sharp as a phone wallpaper or a 24 × 36 print.
+						All four sizes below are drawn to scale above a 5 ft bench. The PDF and SVG exports are vector files, so the lines stay sharp whether it's on your phone or printed at 24 × 36 inches.
 					</p>
 				</div>
 				<div class="elevation">
 					<p class="elevation__centre" aria-hidden="true"></p>
-					<p class="elevation__height" aria-hidden="true"><span>57 in to centre</span></p>
+					<p class="elevation__height" aria-hidden="true"><span>57 in to center</span></p>
 					<ul class="elevation__row">
 						{papers.map((paper) => (
 							<li class="sheet" style={`--w:${paper.w};--h:${paper.h}`}>
@@ -259,7 +259,7 @@ Everything below is drawn to one scale, bench included. The exports are vector, 
 					</ul>
 					<div class="elevation__bench" aria-hidden="true"><i></i><i></i></div>
 				</div>
-				<p class="elevation__scale">A 5 ft gallery bench, drawn to the same scale</p>
+				<p class="elevation__scale">A 5 ft bench, drawn to the same scale</p>
 			</section>
 
 			<section class="closing g-wall" aria-labelledby="closing-title">

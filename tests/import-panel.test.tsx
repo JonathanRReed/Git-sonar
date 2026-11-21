@@ -95,7 +95,7 @@ describe('ImportPanel', () => {
     it('asks one question and offers the ways in', () => {
         render(<ImportPanel />);
 
-        expect(screen.getByRole('heading', { name: 'Which repo are we hanging?' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Pick a repo to start.' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Make poster' })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Open a folder on this computer/ })).toBeTruthy();
     });

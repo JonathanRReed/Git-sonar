@@ -34,7 +34,7 @@ const SHORTCUT_CATEGORIES = [
             { keys: ['+', '-'], action: 'Zoom in/out' },
             { keys: ['0'], action: 'Reset zoom' },
             { keys: ['?'], action: 'Toggle this help' },
-            { keys: ['T'], action: 'Teaching mode' },
+            { keys: ['T'], action: 'Quick guide' },
         ],
     },
 ];
@@ -519,8 +519,8 @@ export function ControlsOverlay() {
                         type="button"
                         className={`control-btn control-btn--labeled ${showTeaching ? 'control-btn--active' : ''}`}
                         onClick={toggleTeaching}
-                        aria-label="Teaching mode"
-                        title="Teaching mode (T)"
+                        aria-label="Quick guide"
+                        title="Quick guide (T)"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M12 2l9 4-9 4-9-4 9-4" />
@@ -672,12 +672,12 @@ export function ControlsOverlay() {
                     panelClassName="help-panel teaching-panel"
                 >
                         <div className="help-header">
-                            <h2 id="teaching-title">Teaching Mode</h2>
+                            <h2 id="teaching-title">Quick Guide</h2>
                             <button
                                 type="button"
                                 className="help-close"
                                 onClick={toggleTeaching}
-                                aria-label="Close teaching mode"
+                                aria-label="Close quick guide"
                             >
                                 ✕
                             </button>
@@ -687,16 +687,16 @@ export function ControlsOverlay() {
                                 <h3>For Developers</h3>
                                 <ul>
                                     <li>Use search to jump by author, SHA, or message</li>
-                                    <li>Arrow keys navigate commits; Enter opens details</li>
-                                    <li>Load all commits for full-history posters</li>
+                                    <li>Use arrow keys to move between commits and Enter to open details</li>
+                                    <li>Load more commits if you want the full history on your poster</li>
                                 </ul>
                             </div>
                             <div>
-                                <h3>For Artists</h3>
+                                <h3>For Prints</h3>
                                 <ul>
-                                    <li>Switch to Poster mode for clean exports</li>
-                                    <li>Try theme + background combos for contrast</li>
-                                    <li>Export SVG/PDF for print-ready output</li>
+                                    <li>Switch to Poster view for print exports</li>
+                                    <li>Try different theme and background combos for better contrast</li>
+                                    <li>Export SVG or PDF when you want crisp prints</li>
                                 </ul>
                             </div>
                         </div>

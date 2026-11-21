@@ -128,7 +128,7 @@ export const growthRingsTemplate: PosterTemplate = {
     id: 'growth-rings',
     name: 'Growth rings',
     group: 'generative',
-    description: 'A tree cross-section: one ring per week, thick where the work was heavy.',
+    description: 'Tree rings for your repo: one ring per week, thicker when more commits landed.',
     defaultAspect: 18 / 24,
     fonts: [TITLE_FONT, MONO_FONT],
     build,

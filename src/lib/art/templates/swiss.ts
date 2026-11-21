@@ -80,7 +80,7 @@ function build(ctx: TemplateContext): Scene {
 
     // Date range footer
     if (signals.timeSpanMs > 0) {
-        texts.push(text(`${formatDate(signals.firstCommitMs)} — ${formatDate(signals.lastCommitMs)}`.toUpperCase(), width - margin, height - margin, {
+        texts.push(text(`${formatDate(signals.firstCommitMs)} TO ${formatDate(signals.lastCommitMs)}`.toUpperCase(), width - margin, height - margin, {
             font: fontStack(MONO_FONT), size: scale(-3), weight: 500, color: palette.fgMuted, align: 'end', spacing: width * 0.002,
         }));
     }
@@ -119,7 +119,7 @@ export const swissTemplate: PosterTemplate = {
     id: 'swiss',
     name: 'Swiss grid',
     group: 'data',
-    description: 'Strict-grid minimalist typographic print foregrounding the repo stats.',
+    description: 'Clean grid poster with the repo stats up front.',
     defaultAspect: 18 / 24,
     recommendedLayout: 'vertical',
     fonts: [TITLE_FONT, BODY_FONT, MONO_FONT],

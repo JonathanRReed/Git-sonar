@@ -107,7 +107,7 @@ function build(ctx: TemplateContext): Scene {
         texts.push(text(`Busiest slot: ${DAY_NAMES[peakDay]} at ${String(peakHour).padStart(2, '0')}:00`, margin, footY, {
             font: fontStack(TITLE_FONT), size: width * 0.034, weight: 500, color: palette.fg,
         }));
-        texts.push(text(`${plural(peak, 'COMMIT')} LANDED THERE. ${share}% OF ALL COMMITS HAPPEN AT THE WEEKEND.`, margin, footY + width * 0.034, {
+        texts.push(text(`${plural(peak, 'COMMIT')} LANDED THERE. ${share}% OF ALL COMMITS HAPPENED ON THE WEEKEND.`, margin, footY + width * 0.034, {
             font: fontStack(MONO_FONT), size: width * 0.014, weight: 500, color: palette.fgMuted, spacing: width * 0.0016,
         }));
     }
@@ -133,7 +133,7 @@ export const punchCardTemplate: PosterTemplate = {
     id: 'punch-card',
     name: 'Punch card',
     group: 'data',
-    description: 'When the work happens: a punched slot for every weekday and hour with commits.',
+    description: 'A punched slot for every weekday and hour with commits.',
     defaultAspect: 24 / 36,
     fonts: [TITLE_FONT, MONO_FONT],
     build,

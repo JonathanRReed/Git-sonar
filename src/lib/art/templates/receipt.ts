@@ -37,7 +37,7 @@ function build(ctx: TemplateContext): Scene {
     const rows: Row[] = [];
     const title = titleOf(ctx).toUpperCase();
     rows.push({ kind: 'center', text: title.length > 18 ? `${title.slice(0, 17)}…` : title, bold: true, big: true });
-    rows.push({ kind: 'center', text: (options.subtitle || 'COMMIT HISTORY, ITEMISED').toUpperCase().slice(0, COLS) });
+    rows.push({ kind: 'center', text: (options.subtitle || 'COMMIT HISTORY, ITEMIZED').toUpperCase().slice(0, COLS) });
     if (signals.timeSpanMs > 0) {
         rows.push({ kind: 'center', text: `${shortDate(signals.firstCommitMs)} TO ${shortDate(signals.lastCommitMs)}` });
     }
@@ -163,7 +163,7 @@ export const receiptTemplate: PosterTemplate = {
     id: 'receipt',
     name: 'Receipt',
     group: 'data',
-    description: 'The repo, itemised: who did the work and what it came to, with a barcode from the head commit.',
+    description: 'An itemized receipt of who worked on the repo, with a barcode from the latest commit.',
     defaultAspect: 24 / 36,
     fonts: [MONO_FONT],
     build,
